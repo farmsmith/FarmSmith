@@ -1,0 +1,312 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   FarmSmith Foods — Design Tokens
+   Brand: deep forest green / warm cream / turmeric gold
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* Brand palette */
+  --color-primary:        #1F3A2E;
+  --color-primary-dark:   #172D23;
+  --color-primary-light:  #24402F;
+  --color-accent:         #D9A441;
+  --color-accent-hover:   #C49036;
+  --color-background:     #F4EFE4;
+  --color-card:           #FBFAF6;
+  --color-surface:        #EDE8DC;
+  --color-foreground:     #1F3A2E;
+  --color-muted:          #6B7A6B;
+  --color-muted-bg:       #E8E3D9;
+  --color-border:         #D4CCBB;
+  --color-error:          #C0392B;
+  --color-error-bg:       #FDF0EE;
+
+  /* Typography */
+  --font-heading:  "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body:     "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Spacing scale */
+  --spacing-section: 5rem;
+  --max-width:       1200px;
+
+  /* Transitions */
+  --transition-base:  150ms ease;
+  --transition-slow:  300ms ease;
+
+  /* Shadows */
+  --shadow-card:   0 2px 12px rgba(31, 58, 46, 0.08);
+  --shadow-raised: 0 8px 32px rgba(31, 58, 46, 0.14);
+  --shadow-float:  0 20px 60px rgba(31, 58, 46, 0.18);
+
+  /* Border radius */
+  --radius-sm:  0.375rem;
+  --radius-md:  0.625rem;
+  --radius-lg:  1rem;
+  --radius-xl:  1.5rem;
+  --radius-full: 9999px;
+}
+
+/* ─── Tailwind v4 theme registration ─── */
+@theme inline {
+  --color-background:    var(--color-background);
+  --color-foreground:    var(--color-foreground);
+  --color-primary:       var(--color-primary);
+  --color-accent:        var(--color-accent);
+  --color-card:          var(--color-card);
+  --color-border:        var(--color-border);
+  --color-muted:         var(--color-muted);
+  --color-error:         var(--color-error);
+  --font-sans:           var(--font-body);
+  --font-serif:          var(--font-heading);
+}
+
+/* ─── Reset & base ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+main {
+  padding-top: 4.25rem;
+}
+
+/* ─── Typography helpers ─── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-primary);
+}
+
+h1 { font-size: clamp(2.25rem, 5vw, 3.75rem); }
+h2 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
+
+p { margin-bottom: 0; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
+
+/* ─── Focus rings (accessibility) ─── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Utility classes ─── */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .container { padding-inline: 2rem; }
+}
+
+@media (min-width: 1024px) {
+  .container { padding-inline: 3rem; }
+}
+
+/* Eyebrow label pattern */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* Italic accent for headings */
+em.brand-italic {
+  font-style: italic;
+  color: var(--color-accent);
+}
+
+/* Section spacing */
+.section {
+  padding-block: var(--spacing-section);
+}
+
+/* ─── Animations ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(1.5rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes drawerSlideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Mobile responsive line break utilities */
+.mobile-br {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .mobile-br {
+    display: block;
+  }
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-muted-bg) 25%, var(--color-surface) 50%, var(--color-muted-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Hide scrollbar visually while preserving full scroll functionality ─── */
+html, body {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ─── Cart drawer overlay ─── */
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 58, 46, 0.4);
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 100vw);
+  background: var(--color-card);
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-float);
+  animation: drawerSlideIn 0.3s ease;
+}
+
+/* ─── Toast notifications ─── */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ─── Google Translate Clean Overrides ─── */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+#goog-gt-tt,
+.goog-te-spinner-pos,
+iframe.goog-te-banner-frame,
+.goog-te-gadget,
+.VIpgJd-yDsffb-l4e28-hb543 {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+body {
+  top: 0px !important;
+  left: 0px !important;
+  right: 0px !important;
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.skiptranslate {
+  display: none !important;
+}
+
+#google_translate_element {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
