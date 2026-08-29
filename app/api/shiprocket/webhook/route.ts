@@ -6,7 +6,10 @@ export async function POST(request: Request) {
   const headers = withSecurityHeaders();
 
   // Shiprocket sends token header for webhook verification if configured
-  const webhookHeaderToken = request.headers.get("x-shiprocket-token");
+  const webhookHeaderToken =
+    request.headers.get("x-shiprocket-token") ||
+    request.headers.get("x-api-key") ||
+    request.headers.get("authorization");
   const expectedToken = process.env.SHIPROCKET_WEBHOOK_TOKEN;
 
   if (expectedToken && webhookHeaderToken !== expectedToken) {
