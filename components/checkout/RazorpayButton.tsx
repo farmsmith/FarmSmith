@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/Button";
 import type { CheckoutResponse } from "@/types/payment";
 import type { CartItem } from "@/lib/cart/types";
 
-// Type for Razorpay options — declared locally to avoid external type dep
 interface RazorpayOptions {
   key: string;
   amount: number;
@@ -21,7 +20,10 @@ interface RazorpayOptions {
 
 declare global {
   interface Window {
-    Razorpay: new (options: RazorpayOptions) => { open(): void };
+    Razorpay: new (options: RazorpayOptions) => {
+      open(): void;
+      on?(event: string, handler: (response: any) => void): void;
+    };
   }
 }
 
@@ -65,6 +67,7 @@ export default function RazorpayButton({
       const loaded = await loadRazorpayScript();
       if (!loaded) {
         setError("Could not load payment gateway. Check your connection and try again.");
+        setLoading(false);
         return;
       }
 
@@ -83,11 +86,32 @@ export default function RazorpayButton({
         theme: {
           color: "#1F3A2E",
         },
-        handler: () => {
-          // Razorpay handler fires on payment completion.
-          // The webhook has already (or will) confirm the payment server-side.
-          // We redirect to the order page using the data we already have.
-          onSuccess(checkoutData.orderNumber, checkoutData.trackingToken);
+        handler: async (response) => {
+          try {
+            setLoading(true);
+            // Verify payment signature on backend
+            const verifyRes = await fetch("/api/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyRes.ok && verifyData.success) {
+              onSuccess(checkoutData.orderNumber, checkoutData.trackingToken);
+            } else {
+              setError(verifyData.error || "Payment verification failed. Please contact support.");
+              setLoading(false);
+            }
+          } catch {
+            setError("Network error while verifying payment. Please contact support.");
+            setLoading(false);
+          }
         },
         modal: {
           ondismiss: () => {
@@ -98,6 +122,15 @@ export default function RazorpayButton({
       };
 
       const rzp = new window.Razorpay(options);
+
+      if (typeof rzp.on === "function") {
+        rzp.on("payment.failed", (response: any) => {
+          console.error("Razorpay Payment Failed:", response.error);
+          setError(`Payment Failed: ${response.error?.description || "Transaction was declined."}`);
+          setLoading(false);
+        });
+      }
+
       rzp.open();
     } catch {
       setError("Something went wrong opening the payment window. Please try again.");

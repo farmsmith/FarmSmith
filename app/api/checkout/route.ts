@@ -216,21 +216,32 @@ export async function POST(request: Request) {
     );
   }
 
-  let razorpayOrder;
-  const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_mock_key";
+  const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
   const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
 
-  if (process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID && razorpayKeySecret) {
-    try {
-      razorpayOrder = await createRazorpayOrder(totalAmount, orderNumber, String(orderId));
-    } catch (error) {
-      console.error("Failed to create Razorpay order", error);
-      // Fallback mock order for dev/testing if test keys fail
-      razorpayOrder = { id: `order_mock_${Date.now()}` };
-    }
-  } else {
-    // Development fallback order ID when Razorpay keys are not yet configured in .env.local
-    razorpayOrder = { id: `order_mock_${Date.now()}` };
+  if (!razorpayKeyId || !razorpayKeySecret) {
+    await supabase.rpc("rollback_pending_order", { p_order_id: orderId });
+    return NextResponse.json(
+      { error: "Razorpay credentials (NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET) are missing in .env.local" },
+      { status: 500, headers }
+    );
+  }
+
+  let razorpayOrder;
+  try {
+    razorpayOrder = await createRazorpayOrder(totalAmount, orderNumber, String(orderId));
+  } catch (error: any) {
+    const errorDetails =
+      error?.error?.description ||
+      error?.description ||
+      error?.message ||
+      (typeof error === "object" ? JSON.stringify(error) : String(error));
+    console.error("Failed to create Razorpay order:", { errorDetails, keyId: razorpayKeyId });
+    await supabase.rpc("rollback_pending_order", { p_order_id: orderId });
+    return NextResponse.json(
+      { error: `Razorpay order creation failed: ${errorDetails}` },
+      { status: 500, headers }
+    );
   }
 
   const { error: updateError } = await supabase

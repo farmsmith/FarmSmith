@@ -1,12 +1,8 @@
 import "server-only";
 import Razorpay from "razorpay";
 
-let instance: Razorpay | null = null;
-
 export function getRazorpayClient(): Razorpay {
-  if (instance) return instance;
-
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
@@ -15,8 +11,7 @@ export function getRazorpayClient(): Razorpay {
     );
   }
 
-  instance = new Razorpay({ key_id: keyId, key_secret: keySecret });
-  return instance;
+  return new Razorpay({ key_id: keyId, key_secret: keySecret });
 }
 
 /** Creates a Razorpay order and includes the internal order UUID in notes so
