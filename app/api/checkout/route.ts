@@ -29,8 +29,10 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = checkoutSchema.safeParse(body);
   if (!parsed.success) {
+    const issueMessages = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+    console.error("Checkout body validation failed:", issueMessages, "Received body:", body);
     return NextResponse.json(
-      { error: "Invalid request", details: parsed.error.flatten() },
+      { error: `Invalid request: ${issueMessages}`, details: parsed.error.flatten() },
       { status: 400, headers }
     );
   }
