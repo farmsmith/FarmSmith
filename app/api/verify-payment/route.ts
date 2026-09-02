@@ -55,10 +55,9 @@ export async function POST(request: Request) {
         .from("orders")
         .update({
           status: "paid",
-          paid_at: new Date().toISOString(),
-          payment_method: "online",
           razorpay_order_id: razorpay_order_id,
           razorpay_payment_id: razorpay_payment_id,
+          updated_at: new Date().toISOString(),
         })
         .eq("razorpay_order_id", razorpay_order_id)
         .select("id, order_number, status, razorpay_payment_id");
@@ -73,10 +72,9 @@ export async function POST(request: Request) {
 
         let fallbackQuery = supabase.from("orders").update({
           status: "paid",
-          paid_at: new Date().toISOString(),
-          payment_method: "online",
           razorpay_order_id: razorpay_order_id,
           razorpay_payment_id: razorpay_payment_id,
+          updated_at: new Date().toISOString(),
         });
 
         if (tracking_token) {
