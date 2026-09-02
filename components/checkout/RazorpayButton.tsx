@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import type { CheckoutResponse } from "@/types/payment";
 import type { CartItem } from "@/lib/cart/types";
@@ -58,8 +58,9 @@ export default function RazorpayButton({
 }: RazorpayButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const autoOpened = useRef(false);
 
-  const handlePay = async () => {
+  const handlePay = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -138,7 +139,14 @@ export default function RazorpayButton({
       setError("Something went wrong opening the payment window. Please try again.");
       setLoading(false);
     }
-  };
+  }, [checkoutData, customerEmail, customerName, customerPhone, onSuccess, onDismiss]);
+
+  useEffect(() => {
+    if (!autoOpened.current) {
+      autoOpened.current = true;
+      void handlePay();
+    }
+  }, [handlePay]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>

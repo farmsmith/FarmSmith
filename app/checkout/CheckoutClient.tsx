@@ -351,7 +351,7 @@ export default function CheckoutClient() {
     }
   };
 
-  const createCheckoutOrder = async () => {
+  const createCheckoutOrder = async (): Promise<CheckoutResponse | null> => {
     setCheckoutLoading(true);
     setCheckoutError(null);
     try {
@@ -380,12 +380,14 @@ export default function CheckoutClient() {
       const responseData = (await res.json()) as CheckoutResponse & { error?: string };
       if (!res.ok) {
         setCheckoutError(responseData.error ?? "Checkout order creation failed.");
-        return;
+        return null;
       }
 
       setCheckoutResponse(responseData);
+      return responseData;
     } catch {
       setCheckoutError("Network error. Please try again.");
+      return null;
     } finally {
       setCheckoutLoading(false);
     }
@@ -1234,31 +1236,49 @@ export default function CheckoutClient() {
                   </div>
                 )}
 
-                {paymentMethod === "online" && checkoutResponse ? (
-                  <RazorpayButton
-                    checkoutData={checkoutResponse}
-                    customerName={customer.name}
-                    customerEmail={customer.email}
-                    customerPhone={customer.phone}
-                    cartItems={items}
-                    onSuccess={handlePaymentSuccess}
-                    onDismiss={() => setCheckoutResponse(null)}
-                  />
+                {paymentMethod === "online" ? (
+                  checkoutResponse ? (
+                    <RazorpayButton
+                      checkoutData={checkoutResponse}
+                      customerName={customer.name}
+                      customerEmail={customer.email}
+                      customerPhone={customer.phone}
+                      cartItems={items}
+                      onSuccess={handlePaymentSuccess}
+                      onDismiss={() => setCheckoutResponse(null)}
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="accent"
+                      size="lg"
+                      loading={checkoutLoading}
+                      style={{ width: "100%", padding: "1rem", fontSize: "1rem" }}
+                      onClick={async () => {
+                        await createCheckoutOrder();
+                      }}
+                    >
+                      Proceed to Online Payment — {formatPrice(calculatedTotal)}
+                    </Button>
+                  )
                 ) : (
                   <Button
                     type="button"
                     variant="primary"
                     size="lg"
-                    style={{ width: "100%", padding: "1rem" }}
-                    onClick={() => {
-                      if (checkoutResponse) {
-                        handlePaymentSuccess(checkoutResponse.orderNumber, checkoutResponse.trackingToken);
-                      } else {
-                        createCheckoutOrder();
+                    loading={checkoutLoading}
+                    style={{ width: "100%", padding: "1rem", fontSize: "1rem" }}
+                    onClick={async () => {
+                      let resp = checkoutResponse;
+                      if (!resp) {
+                        resp = await createCheckoutOrder();
+                      }
+                      if (resp) {
+                        handlePaymentSuccess(resp.orderNumber, resp.trackingToken);
                       }
                     }}
                   >
-                    Place Order — {formatPrice(calculatedTotal)}
+                    Place Order (COD) — {formatPrice(calculatedTotal)}
                   </Button>
                 )}
               </div>
