@@ -53,6 +53,7 @@ export async function POST(request: Request) {
           status: "paid",
           paid_at: new Date().toISOString(),
           payment_method: "online",
+          razorpay_payment_id: razorpay_payment_id,
         })
         .eq("razorpay_order_id", razorpay_order_id);
     } catch (dbError) {
