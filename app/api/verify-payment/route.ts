@@ -17,6 +17,8 @@ export async function POST(request: Request) {
     const razorpay_order_id = body.razorpay_order_id || body.razorpayOrderId;
     const razorpay_payment_id = body.razorpay_payment_id || body.razorpayPaymentId;
     const razorpay_signature = body.razorpay_signature || body.razorpaySignature;
+    const order_number = body.order_number || body.orderNumber;
+    const tracking_token = body.tracking_token || body.trackingToken;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json(
@@ -44,21 +46,57 @@ export async function POST(request: Request) {
       );
     }
 
-    // Mark order as paid in database if applicable
+    // Mark order as paid in database with razorpay_payment_id
     try {
       const supabase = createAdminSupabaseClient();
-      await supabase
+      
+      // Primary update by razorpay_order_id
+      let { data: updatedOrders, error: updateError } = await supabase
         .from("orders")
         .update({
           status: "paid",
           paid_at: new Date().toISOString(),
           payment_method: "online",
+          razorpay_order_id: razorpay_order_id,
           razorpay_payment_id: razorpay_payment_id,
         })
-        .eq("razorpay_order_id", razorpay_order_id);
+        .eq("razorpay_order_id", razorpay_order_id)
+        .select("id, order_number, status, razorpay_payment_id");
+
+      // Fallback: If 0 rows updated, search by tracking_token or order_number
+      if ((!updatedOrders || updatedOrders.length === 0) && (tracking_token || order_number)) {
+        console.warn("No order matched by razorpay_order_id. Trying fallback by tracking_token / order_number...", {
+          razorpay_order_id,
+          order_number,
+          tracking_token,
+        });
+
+        let fallbackQuery = supabase.from("orders").update({
+          status: "paid",
+          paid_at: new Date().toISOString(),
+          payment_method: "online",
+          razorpay_order_id: razorpay_order_id,
+          razorpay_payment_id: razorpay_payment_id,
+        });
+
+        if (tracking_token) {
+          fallbackQuery = fallbackQuery.eq("tracking_token", tracking_token);
+        } else if (order_number) {
+          fallbackQuery = fallbackQuery.eq("order_number", order_number);
+        }
+
+        const fallbackRes = await fallbackQuery.select("id, order_number, status, razorpay_payment_id");
+        updatedOrders = fallbackRes.data;
+        updateError = fallbackRes.error;
+      }
+
+      if (updateError) {
+        console.error("Database update error on payment verification:", updateError);
+      } else {
+        console.log("Supabase payment verification DB update successful:", updatedOrders);
+      }
     } catch (dbError) {
-      console.error("Database update error on payment verification:", dbError);
-      // Signature is valid even if DB record is not found or updated
+      console.error("Database exception on payment verification:", dbError);
     }
 
     return NextResponse.json(
