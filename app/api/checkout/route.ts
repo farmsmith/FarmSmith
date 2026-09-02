@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   const headers = withSecurityHeaders();
 
   const ip = getClientIp(request);
-  const rl = rateLimit(`checkout:${ip}`, 5, 60_000);
+  const rl = await rateLimit(`checkout:${ip}`, 10, 60_000);
   if (!rl.success) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment and try again." },
@@ -78,13 +78,7 @@ export async function POST(request: Request) {
     if (errorBySlug) {
       console.error("Failed to load products by slug", errorBySlug);
     } else if (bySlug) {
-      // Map non-UUID product IDs in cart items to the database product UUID
       bySlug.forEach((p) => {
-        items.forEach((item) => {
-          if (item.productId === p.slug) {
-            item.productId = p.id;
-          }
-        });
         if (!products.some((existing) => existing.id === p.id)) {
           products.push(p);
         }
@@ -92,43 +86,20 @@ export async function POST(request: Request) {
     }
   }
 
-  // Fallback for stale/inactive product IDs saved in browser localStorage before DB re-seeds
-  const hasInactiveOrMissing = items.some((item) => {
-    const p = products?.find((prod) => prod.id === item.productId);
-    return !p || !p.is_active;
+  // Create a clean server-side mapped representation of cart items without mutating original request data
+  const resolvedItems = items.map((item) => {
+    const matchedProduct = products.find(
+      (p) => p.id === item.productId || p.slug === item.productId
+    );
+    return {
+      ...item,
+      productId: matchedProduct ? matchedProduct.id : item.productId,
+    };
   });
-
-  if (hasInactiveOrMissing) {
-    const { data: allActive } = await supabase
-      .from("products")
-      .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
-      .eq("is_active", true);
-
-    if (allActive && allActive.length > 0) {
-      const fallbackProduct = allActive.find((p) => p.slug === "kandhamal-turmeric-powder") || allActive[0];
-
-      items.forEach((item) => {
-        const p = products?.find((prod) => prod.id === item.productId);
-        if (!p || !p.is_active) {
-          item.productId = fallbackProduct.id;
-        }
-      });
-
-      const updatedProductIds = Array.from(new Set(items.map((i) => i.productId)));
-      const { data: refetched } = await supabase
-        .from("products")
-        .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
-        .in("id", updatedProductIds);
-
-      if (refetched && refetched.length > 0) {
-        products = refetched;
-      }
-    }
-  }
 
   if (!products || products.length === 0) {
     return NextResponse.json(
-      { error: "One or more products in your cart are no longer available. Please re-add to cart." },
+      { error: "One or more items in your cart are invalid or no longer available. Please refresh your cart." },
       { status: 400, headers }
     );
   }
@@ -145,11 +116,11 @@ export async function POST(request: Request) {
     }
   }
 
-  for (const item of items) {
+  for (const item of resolvedItems) {
     const product = productMap.get(item.productId);
     if (!product || !product.is_active) {
       return NextResponse.json(
-        { error: `Product ${item.productId} is not available` },
+        { error: "One or more items in your cart are invalid or no longer available. Please refresh your cart." },
         { status: 400, headers }
       );
     }
@@ -161,7 +132,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const orderItems = items.map((item) => {
+  const orderItems = resolvedItems.map((item) => {
     const product = productMap.get(item.productId)!;
     const unitPrice = Number(product.price);
     const subtotal = money(unitPrice * item.quantity);
@@ -269,7 +240,7 @@ export async function POST(request: Request) {
     console.error("Failed to create Razorpay order:", { errorDetails, keyId: razorpayKeyId });
     await supabase.rpc("rollback_pending_order", { p_order_id: orderId });
     return NextResponse.json(
-      { error: `Razorpay order creation failed: ${errorDetails}` },
+      { error: "Payment gateway initiation failed. Please try again later." },
       { status: 500, headers }
     );
   }

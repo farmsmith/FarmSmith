@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const headers = withSecurityHeaders();
 
   const ip = getClientIp(request);
-  const rl = rateLimit(`shiprocket-serviceability:${ip}`, 15, 60_000);
+  const rl = await rateLimit(`shiprocket-serviceability:${ip}`, 15, 60_000);
   if (!rl.success) {
     return NextResponse.json(
       { error: "Too many requests. Please try again in a moment." },

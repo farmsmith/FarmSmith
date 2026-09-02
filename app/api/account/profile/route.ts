@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getAuthenticatedUser } from "@/lib/auth";
+import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { withSecurityHeaders } from "@/lib/security/headers";
 
 const profileSchema = z.object({
@@ -11,6 +12,10 @@ const profileSchema = z.object({
 
 export async function GET(request: Request) {
   const headers = withSecurityHeaders();
+  const ip = getClientIp(request);
+  const rl = await rateLimit(`profile-get:${ip}`, 30, 60_000);
+  if (!rl.success) return NextResponse.json({ error: "Too many requests." }, { status: 429, headers });
+
   const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401, headers });
 
@@ -41,6 +46,10 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   const headers = withSecurityHeaders();
+  const ip = getClientIp(request);
+  const rl = await rateLimit(`profile-patch:${ip}`, 10, 60_000);
+  if (!rl.success) return NextResponse.json({ error: "Too many requests." }, { status: 429, headers });
+
   const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ error: "Authentication required" }, { status: 401, headers });
 
@@ -74,3 +83,4 @@ export async function PATCH(request: Request) {
     { status: 200, headers }
   );
 }
+

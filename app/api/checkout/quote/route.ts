@@ -24,7 +24,7 @@ function money(value: number): number {
 export async function POST(request: Request) {
   const headers = withSecurityHeaders();
   const ip = getClientIp(request);
-  const rl = rateLimit(`checkout-quote:${ip}`, 20, 60_000);
+  const rl = await rateLimit(`checkout-quote:${ip}`, 20, 60_000);
   if (!rl.success) return NextResponse.json({ error: "Too many requests." }, { status: 429, headers });
 
   const body = await request.json().catch(() => null);
@@ -48,48 +48,25 @@ export async function POST(request: Request) {
       .select("id, name, price, currency, gst_rate, is_active, stock_quantity")
       .in("id", productIds);
 
-    if (error) {
-      return NextResponse.json({ error: "Failed to load products" }, { status: 500, headers });
-    }
-
-    const hasInactiveOrMissing = items.some((item) => {
-      const p = products?.find((prod) => prod.id === item.productId);
-      return !p || !p.is_active;
-    });
-
-    if (hasInactiveOrMissing) {
-      const { data: allActive } = await supabase
-        .from("products")
-        .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
-        .eq("is_active", true);
-
-      if (allActive && allActive.length > 0) {
-        const fallbackProduct = allActive.find((p) => p.slug === "kandhamal-turmeric-powder") || allActive[0];
-
-        items.forEach((item) => {
-          const p = products?.find((prod) => prod.id === item.productId);
-          if (!p || !p.is_active) {
-            item.productId = fallbackProduct.id;
-          }
-        });
-
-        productIds = items.map((i) => i.productId);
-        const { data: refetched } = await supabase
-          .from("products")
-          .select("id, name, price, currency, gst_rate, is_active, stock_quantity")
-          .in("id", productIds);
-
-        if (refetched && refetched.length > 0) {
-          products = refetched;
-        }
-      }
-    }
-
-    if (!products || products.length === 0) {
-      return NextResponse.json({ error: "One or more products are unavailable." }, { status: 400, headers });
+    if (error || !products || products.length === 0) {
+      return NextResponse.json(
+        { error: "One or more items in your cart are invalid or no longer available. Please refresh your cart." },
+        { status: 400, headers }
+      );
     }
 
     const map = new Map(products.map((product) => [product.id, product]));
+
+    for (const item of items) {
+      const product = map.get(item.productId);
+      if (!product || !product.is_active) {
+        return NextResponse.json(
+          { error: "One or more items in your cart are invalid or no longer available. Please refresh your cart." },
+          { status: 400, headers }
+        );
+      }
+    }
+
     const orderItems = items.map((item) => {
       const product = map.get(item.productId)!;
       if (!product.is_active) throw new Error(`UNAVAILABLE:${product.name}`);

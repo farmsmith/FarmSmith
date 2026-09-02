@@ -17,6 +17,7 @@ export const securityHeaders: Record<string, string> = {
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+  "Cache-Control": "no-store, no-cache, must-revalidate, private",
 };
 
 export function withSecurityHeaders(headers: HeadersInit = {}): Headers {

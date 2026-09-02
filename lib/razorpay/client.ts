@@ -33,3 +33,9 @@ export async function createRazorpayOrder(
     },
   });
 }
+
+/** Fetches payment status directly from Razorpay API for server-side verification. */
+export async function fetchRazorpayPayment(paymentId: string) {
+  const razorpay = getRazorpayClient();
+  return razorpay.payments.fetch(paymentId);
+}

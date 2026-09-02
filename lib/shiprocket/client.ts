@@ -36,6 +36,7 @@ export async function getShiprocketToken(): Promise<string> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
+    signal: AbortSignal.timeout(8000),
   });
 
   if (!response.ok) {
@@ -71,6 +72,7 @@ export async function createShiprocketOrder(
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(8000),
   });
 
   const data = await response.json();
@@ -107,6 +109,7 @@ export async function checkShiprocketServiceability(
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      signal: AbortSignal.timeout(8000),
     }
   );
 
@@ -145,6 +148,7 @@ export async function getShiprocketOrderTracking(
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      signal: AbortSignal.timeout(8000),
     }
   );
 

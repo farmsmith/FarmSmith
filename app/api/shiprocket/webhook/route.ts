@@ -10,9 +10,18 @@ export async function POST(request: Request) {
     request.headers.get("x-shiprocket-token") ||
     request.headers.get("x-api-key") ||
     request.headers.get("authorization");
-  const expectedToken = process.env.SHIPROCKET_WEBHOOK_TOKEN;
+  const expectedToken = process.env.SHIPROCKET_WEBHOOK_SECRET || process.env.SHIPROCKET_WEBHOOK_TOKEN;
 
-  if (expectedToken && webhookHeaderToken !== expectedToken) {
+  // Fail closed: require webhook secret to be set and matched
+  if (!expectedToken) {
+    console.error("SHIPROCKET_WEBHOOK_SECRET is not configured on the server.");
+    return NextResponse.json(
+      { error: "Webhook endpoint not configured" },
+      { status: 500, headers }
+    );
+  }
+
+  if (!webhookHeaderToken || webhookHeaderToken !== expectedToken) {
     return NextResponse.json({ error: "Unauthorized webhook request" }, { status: 401, headers });
   }
 
@@ -23,9 +32,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400, headers });
   }
 
-  const orderId = body?.order_id || body?.custom_order_id;
+  const rawOrderId = body?.order_id || body?.custom_order_id;
+  const orderId = typeof rawOrderId === "string" || typeof rawOrderId === "number" ? String(rawOrderId).trim() : null;
   const currentStatus = String(body?.current_status || body?.status || "").toUpperCase();
-  const awbCode = body?.awb_code || body?.awb;
+  const rawAwb = body?.awb_code || body?.awb;
+  const awbCode = typeof rawAwb === "string" || typeof rawAwb === "number" ? String(rawAwb).trim() : null;
 
   if (!orderId && !awbCode) {
     return NextResponse.json({ received: true }, { status: 200, headers });
@@ -33,15 +44,25 @@ export async function POST(request: Request) {
 
   const supabase = createAdminSupabaseClient();
 
-  // Find order in Supabase DB
-  let query = supabase.from("orders").select("id, status, order_number").limit(1);
+  // Find order safely in Supabase DB without string interpolation in PostgREST filters
+  let orders: any[] | null = null;
+  let findError: any = null;
+
   if (orderId) {
-    query = query.or(`order_number.eq.${orderId},shiprocket_order_id.eq.${orderId}`);
+    const resByNum = await supabase.from("orders").select("id, status, order_number").eq("order_number", orderId).limit(1);
+    if (resByNum.data && resByNum.data.length > 0) {
+      orders = resByNum.data;
+    } else {
+      const resByShipId = await supabase.from("orders").select("id, status, order_number").eq("shiprocket_order_id", orderId).limit(1);
+      orders = resByShipId.data;
+      findError = resByShipId.error;
+    }
   } else if (awbCode) {
-    query = query.eq("awb_code", awbCode);
+    const resByAwb = await supabase.from("orders").select("id, status, order_number").eq("awb_code", awbCode).limit(1);
+    orders = resByAwb.data;
+    findError = resByAwb.error;
   }
 
-  const { data: orders, error: findError } = await query;
 
   if (findError || !orders || orders.length === 0) {
     console.warn("Shiprocket Webhook: Order not found in database", { orderId, awbCode });

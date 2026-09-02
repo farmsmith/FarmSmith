@@ -8,24 +8,17 @@ import AddToCartButton from "@/components/product/AddToCartButton";
 import QuantitySelector from "@/components/product/QuantitySelector";
 import ProductDetailCompareTrigger from "@/components/product/ProductDetailCompareTrigger";
 import type { Product } from "@/types/product";
+import { getProductBySlug } from "@/lib/data/products";
+
+export const revalidate = 60; // Incremental Static Regeneration every 60 seconds
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-async function getProduct(slug: string): Promise<Product | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/products/${slug}`, {
-    cache: "no-store",
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Failed to load product");
-  return res.json();
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
   return {
     title: product.name,
@@ -47,7 +40,7 @@ function buildProductFacts(product: Product) {
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) notFound();
 

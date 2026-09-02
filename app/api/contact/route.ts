@@ -1,15 +1,28 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
+import { withSecurityHeaders } from "@/lib/security/headers";
 
 const contactSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  subject: z.string().optional(),
-  message: z.string().min(1, "Message is required"),
+  name: z.string().trim().min(1, "Name is required").max(100),
+  email: z.string().trim().email("Invalid email address").max(255),
+  subject: z.string().trim().max(200).optional(),
+  message: z.string().trim().min(1, "Message is required").max(2000),
 });
 
 export async function POST(req: Request) {
+  const headers = withSecurityHeaders();
+
+  const ip = getClientIp(req);
+  const rl = await rateLimit(`contact:${ip}`, 5, 60_000);
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Too many contact inquiries submitted. Please try again in a minute." },
+      { status: 429, headers }
+    );
+  }
+
   try {
     const body = await req.json();
     const parsed = contactSchema.safeParse(body);
@@ -17,13 +30,13 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid form data", details: parsed.error.format() },
-        { status: 400 }
+        { status: 400, headers }
       );
     }
 
     const { name, email, subject, message } = parsed.data;
 
-    // 1. Save to Supabase DB (Option A)
+    // 1. Save to Supabase DB
     const supabase = createAdminSupabaseClient();
     const { data: dbData, error: dbError } = await supabase
       .from("contact_inquiries")
@@ -41,11 +54,11 @@ export async function POST(req: Request) {
       console.error("Failed to save contact inquiry to DB:", dbError);
       return NextResponse.json(
         { error: "Failed to save inquiry to database" },
-        { status: 500 }
+        { status: 500, headers }
       );
     }
 
-    // 2. Send email notification via Resend API (Option B) if key configured
+    // 2. Send email notification via Resend API if key configured
     const resendApiKey = process.env.RESEND_API_KEY;
     const recipientEmail = process.env.CONTACT_EMAIL || "farmsmith6@gmail.com";
 
@@ -78,20 +91,22 @@ export async function POST(req: Request) {
       } catch (emailErr) {
         console.error("Failed to forward contact email:", emailErr);
       }
-    } else {
-      console.log("Resend API key not set. Skipping email dispatch. Saved to DB ID:", dbData.id);
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Your message has been received! Our team will get back to you soon.",
-      inquiryId: dbData.id,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Your message has been received! Our team will get back to you soon.",
+        inquiryId: dbData.id,
+      },
+      { status: 200, headers }
+    );
   } catch (error) {
     console.error("Error handling contact submit:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500, headers }
     );
   }
 }
+

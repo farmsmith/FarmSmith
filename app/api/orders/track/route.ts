@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const headers = withSecurityHeaders();
 
   const ip = getClientIp(request);
-  const rl = rateLimit(`track:${ip}`, 10, 60_000);
+  const rl = await rateLimit(`track:${ip}`, 10, 60_000);
   if (!rl.success) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment and try again." },

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/product/ProductCard";
 import type { Product } from "@/types/product";
+import { getActiveProducts } from "@/lib/data/products";
 import TrustTicker from "@/components/home/TrustTicker";
 import PurityShowcase from "@/components/home/PurityShowcase";
 import CustomerReviewsSection from "@/components/home/CustomerReviewsSection";
@@ -10,25 +11,16 @@ import NewsletterSection from "@/components/home/NewsletterSection";
 import FaqSection from "@/components/home/FaqSection";
 import { ShieldCheck, Award, Sparkles, ArrowRight } from "lucide-react";
 
+export const revalidate = 60; // Incremental Static Regeneration every 60 seconds
+
 export const metadata: Metadata = {
   title: "FarmSmith Foods — Organic Food Crafted with a Mother's Care",
   description:
     "GI-tagged, batch-tested turmeric and organic foods made with complete transparency. Know exactly where your food came from and what happened to it.",
 };
 
-async function getProducts(): Promise<Product[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  try {
-    const res = await fetch(`${baseUrl}/api/products`, { cache: "no-store" });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
-
 export default async function HomePage() {
-  const products = await getProducts();
+  const products = await getActiveProducts();
   
   // Prioritize the flagship GI-Tagged Kandhamal Turmeric Powder product
   const featuredProduct =
