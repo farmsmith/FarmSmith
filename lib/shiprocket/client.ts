@@ -6,6 +6,8 @@ import type {
   ShiprocketServiceabilityQuery,
   ShiprocketCourierOption,
   ShiprocketTrackingData,
+  ShiprocketSearchOrderItem,
+  ShiprocketOrderSearchResponse,
 } from "./types";
 
 const SHIPROCKET_BASE_URL = "https://apiv2.shiprocket.in/v1/external";
@@ -78,13 +80,50 @@ export async function createShiprocketOrder(
   const data = await response.json();
 
   if (!response.ok || data.status_code === 0) {
-    console.error("Shiprocket order creation error:", data);
-    throw new Error(
-      data.message || `Shiprocket Order Creation Failed with status ${response.status}`
-    );
+    const errMsg = data?.message || data?.errors || `Shiprocket Order Creation Failed with status ${response.status}`;
+    const errObj = new Error(typeof errMsg === "string" ? errMsg : JSON.stringify(errMsg));
+    (errObj as any).statusCode = response.status;
+    (errObj as any).responseData = data;
+    throw errObj;
   }
 
   return data as ShiprocketCreateOrderResponse;
+}
+
+/**
+ * Searches Shiprocket for an existing order by channel_order_id (e.g., "FS-2026-0F06D2").
+ * Used for pre-flight reconciliation and recovery after crash or duplicate error response.
+ */
+export async function getShiprocketOrderByChannelId(
+  channelOrderId: string
+): Promise<ShiprocketSearchOrderItem | null> {
+  const token = await getShiprocketToken();
+
+  const response = await fetch(
+    `${SHIPROCKET_BASE_URL}/orders?channel_order_id=${encodeURIComponent(channelOrderId)}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      signal: AbortSignal.timeout(8000),
+    }
+  );
+
+  if (!response.ok) {
+    console.error("Shiprocket order lookup failed:", response.statusText);
+    return null;
+  }
+
+  const data: ShiprocketOrderSearchResponse = await response.json();
+  if (Array.isArray(data?.data) && data.data.length > 0) {
+    const match = data.data.find(
+      (item) => String(item.channel_order_id) === String(channelOrderId)
+    );
+    return match || data.data[0];
+  }
+
+  return null;
 }
 
 /**

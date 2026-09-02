@@ -189,19 +189,25 @@ export default function OrderConfirmationClient() {
               <div
                 style={{
                   display: "inline-flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  gap: "0.5rem",
+                  gap: "0.375rem",
                   background: "rgba(22, 101, 52, 0.08)",
                   border: "1px solid rgba(22, 101, 52, 0.2)",
-                  padding: "0.5rem 1rem",
+                  padding: "0.75rem 1.25rem",
                   borderRadius: "var(--radius-md)",
                   fontSize: "0.875rem",
                   color: "var(--color-primary)",
                   fontWeight: 500,
-                  marginTop: "0.25rem",
+                  marginTop: "0.5rem",
                 }}
               >
-                <span>🚚 <strong>Tracking ID:</strong> <code>{order.tracking_token}</code></span>
+                <span>🔑 <strong>Tracking Access Key:</strong> <code>{order.tracking_token}</code></span>
+                {order.awb_code && (
+                  <span style={{ fontSize: "0.8125rem", color: "var(--color-accent)" }}>
+                    📦 <strong>Carrier:</strong> {order.courier_name || "Shiprocket Express"} &bull; <strong>AWB:</strong> <code>{order.awb_code}</code>
+                  </span>
+                )}
               </div>
             )}
           </div>

@@ -3,6 +3,7 @@ import { verifyPaymentSignature } from "@/lib/razorpay/verify";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { withSecurityHeaders } from "@/lib/security/headers";
+import { processOrderFulfillment } from "@/lib/shipping/fulfillment";
 
 export async function POST(request: Request) {
   const headers = withSecurityHeaders();
@@ -133,8 +134,13 @@ export async function POST(request: Request) {
         );
       }
 
-      // Idempotency check: if order is already paid, return success without mutating
+      // Idempotency check: if order is already paid, trigger fulfillment catch & return success
       if (order.status === "paid" || order.status === "processing" || order.status === "shipped" || order.status === "delivered") {
+        // Asynchronously ensure fulfillment without blocking response
+        processOrderFulfillment(order.id).catch((err) => {
+          console.error("Background fulfillment error on verified order:", err);
+        });
+
         return NextResponse.json(
           {
             success: true,
@@ -166,6 +172,9 @@ export async function POST(request: Request) {
             { status: 500, headers }
           );
         }
+
+        // Trigger Shiprocket fulfillment and await completion (safely handles errors internally)
+        await processOrderFulfillment(order.id);
       } else if (order.status === "cancelled") {
         // Late payment after order expiration
         await supabase

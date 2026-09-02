@@ -8,6 +8,8 @@ export type OrderStatus =
   | "refunded"
   | "payment_captured_after_expiry";
 
+export type FulfillmentStatus = "pending" | "creating" | "created" | "failed";
+
 export interface ShippingAddress {
   line1: string;
   line2?: string;
@@ -37,6 +39,12 @@ export interface Order {
   status: OrderStatus;
   razorpay_order_id: string | null;
   razorpay_payment_id: string | null;
+  shiprocket_order_id?: string | null;
+  shiprocket_shipment_id?: string | null;
+  awb_code?: string | null;
+  courier_name?: string | null;
+  fulfillment_status?: FulfillmentStatus;
+  shiprocket_error?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -69,4 +77,6 @@ export interface PublicOrderStatus {
   tax_amount: number;
   total_amount: number;
   currency: string;
+  awb_code?: string | null;
+  courier_name?: string | null;
 }

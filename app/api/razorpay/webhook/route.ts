@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { verifyWebhookSignature } from "@/lib/razorpay/verify";
 import { withSecurityHeaders } from "@/lib/security/headers";
+import { processOrderFulfillment } from "@/lib/shipping/fulfillment";
 
 export async function POST(request: Request) {
   const headers = withSecurityHeaders();
@@ -69,6 +70,12 @@ export async function POST(request: Request) {
         console.error("Failed to mark order paid", error);
         return NextResponse.json({ error: "Temporary webhook failure" }, { status: 500, headers });
       }
+
+      // Trigger Shiprocket fulfillment and await completion (safely handles errors internally)
+      await processOrderFulfillment(order.id);
+    } else if (order.status === "paid" || order.status === "processing") {
+      // Order already marked paid (e.g. by verify-payment route), ensure fulfillment is complete
+      await processOrderFulfillment(order.id);
     } else if (order.status === "cancelled") {
       // A stale-order worker may have released stock just before Razorpay
       // captured the payment. Never silently discard a valid payment. Mark it

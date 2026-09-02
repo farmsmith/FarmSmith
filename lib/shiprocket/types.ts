@@ -53,10 +53,28 @@ export interface ShiprocketCreateOrderResponse {
   shipment_id: number;
   status: string;
   status_code: number;
-  onboarding_completed_now: number;
+  onboarding_completed_now?: number;
   awb_code?: string;
   courier_company_id?: string;
   courier_name?: string;
+  message?: string;
+}
+
+export interface ShiprocketSearchOrderItem {
+  id: number;
+  channel_order_id: string;
+  shipments?: Array<{
+    id: number;
+    awb_code?: string | null;
+    courier_name?: string | null;
+    status?: string | null;
+  }>;
+  status: string;
+  status_code: number;
+}
+
+export interface ShiprocketOrderSearchResponse {
+  data: ShiprocketSearchOrderItem[];
 }
 
 export interface ShiprocketServiceabilityQuery {
