@@ -49,19 +49,47 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminSupabaseClient();
-  let productIds = items.map((item) => item.productId);
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
-  let { data: products, error: productsError } = await supabase
-    .from("products")
-    .select("id, name, price, currency, gst_rate, is_active, stock_quantity")
-    .in("id", productIds);
+  const validUuids = Array.from(new Set(items.map((item) => item.productId).filter((id) => uuidRegex.test(id))));
+  const nonUuidIds = Array.from(new Set(items.map((item) => item.productId).filter((id) => !uuidRegex.test(id))));
 
-  if (productsError) {
-    console.error("Failed to load products", productsError);
-    return NextResponse.json(
-      { error: `Failed to load products: ${productsError.message || "Database connection error"}` },
-      { status: 500, headers }
-    );
+  let products: any[] = [];
+
+  if (validUuids.length > 0) {
+    const { data: byId, error: errorById } = await supabase
+      .from("products")
+      .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
+      .in("id", validUuids);
+
+    if (errorById) {
+      console.error("Failed to load products by ID", errorById);
+    } else if (byId) {
+      products.push(...byId);
+    }
+  }
+
+  if (nonUuidIds.length > 0) {
+    const { data: bySlug, error: errorBySlug } = await supabase
+      .from("products")
+      .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
+      .in("slug", nonUuidIds);
+
+    if (errorBySlug) {
+      console.error("Failed to load products by slug", errorBySlug);
+    } else if (bySlug) {
+      // Map non-UUID product IDs in cart items to the database product UUID
+      bySlug.forEach((p) => {
+        items.forEach((item) => {
+          if (item.productId === p.slug) {
+            item.productId = p.id;
+          }
+        });
+        if (!products.some((existing) => existing.id === p.id)) {
+          products.push(p);
+        }
+      });
+    }
   }
 
   // Fallback for stale/inactive product IDs saved in browser localStorage before DB re-seeds
@@ -86,11 +114,11 @@ export async function POST(request: Request) {
         }
       });
 
-      productIds = items.map((i) => i.productId);
+      const updatedProductIds = Array.from(new Set(items.map((i) => i.productId)));
       const { data: refetched } = await supabase
         .from("products")
-        .select("id, name, price, currency, gst_rate, is_active, stock_quantity")
-        .in("id", productIds);
+        .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
+        .in("id", updatedProductIds);
 
       if (refetched && refetched.length > 0) {
         products = refetched;
