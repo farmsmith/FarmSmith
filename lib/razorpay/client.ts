@@ -2,12 +2,12 @@ import "server-only";
 import Razorpay from "razorpay";
 
 export function getRazorpayClient(): Razorpay {
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
     throw new Error(
-      "Missing NEXT_PUBLIC_RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET env vars."
+      "Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET env vars."
     );
   }
 
