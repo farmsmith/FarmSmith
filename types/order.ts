@@ -55,6 +55,7 @@ export interface OrderItem {
 
 export interface PublicOrderStatus {
   order_number: string;
+  tracking_token?: string;
   status: OrderStatus;
   created_at: string;
   items: Array<{

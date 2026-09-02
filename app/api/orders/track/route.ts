@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   const { data: order, error } = await supabase
     .from("orders")
-    .select("id, order_number, status, created_at, total_amount, subtotal_amount, shipping_amount, tax_amount, currency")
+    .select("id, order_number, tracking_token, status, created_at, total_amount, subtotal_amount, shipping_amount, tax_amount, currency")
     .eq("order_number", parsed.data.orderNumber)
     .eq("tracking_token", parsed.data.trackingToken)
     .maybeSingle();
@@ -57,6 +57,7 @@ export async function POST(request: Request) {
 
   const response: PublicOrderStatus = {
     order_number: order.order_number,
+    tracking_token: order.tracking_token,
     status: order.status,
     created_at: order.created_at,
     subtotal_amount,

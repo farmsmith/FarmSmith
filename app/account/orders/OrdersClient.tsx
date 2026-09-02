@@ -148,18 +148,41 @@ export default function OrdersClient() {
                   </span>
                 </div>
               </div>
-              <div style={{ marginTop: "0.875rem" }}>
-                <Link
-                  href={`/account/orders/${order.order_number}`}
-                  style={{
-                    fontSize: "0.8125rem",
-                    color: "var(--color-accent)",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
-                >
-                  View Details →
-                </Link>
+              <div style={{ marginTop: "0.875rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
+                <div>
+                  {order.tracking_token && (
+                    <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", marginRight: "1rem" }}>
+                      Tracking ID: <code style={{ background: "rgba(0,0,0,0.05)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem", color: "var(--color-primary)" }}>{order.tracking_token.substring(0, 16)}...</code>
+                    </span>
+                  )}
+                  <Link
+                    href={`/account/orders/${order.order_number}`}
+                    style={{
+                      fontSize: "0.8125rem",
+                      color: "var(--color-accent)",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                    }}
+                  >
+                    View Details →
+                  </Link>
+                </div>
+                {order.tracking_token && (
+                  <Link
+                    href={`/order/${order.order_number}?token=${order.tracking_token}`}
+                    style={{
+                      fontSize: "0.8125rem",
+                      background: "var(--color-primary)",
+                      color: "#fff",
+                      padding: "0.35rem 0.75rem",
+                      borderRadius: "var(--radius-md)",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                    }}
+                  >
+                    Track Order 🚚
+                  </Link>
+                )}
               </div>
             </li>
           ))}

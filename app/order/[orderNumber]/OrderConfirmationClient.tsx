@@ -179,12 +179,31 @@ export default function OrderConfirmationClient() {
             >
               {isPaid ? "Thank you for your order!" : "Order received"}
             </h1>
-            <p style={{ color: "var(--color-muted)", fontSize: "0.9375rem" }}>
+            <p style={{ color: "var(--color-muted)", fontSize: "0.9375rem", marginBottom: "0.75rem" }}>
               Order{" "}
               <strong style={{ color: "var(--color-primary)" }}>
                 {order.order_number}
               </strong>
             </p>
+            {order.tracking_token && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  background: "rgba(22, 101, 52, 0.08)",
+                  border: "1px solid rgba(22, 101, 52, 0.2)",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "var(--radius-md)",
+                  fontSize: "0.875rem",
+                  color: "var(--color-primary)",
+                  fontWeight: 500,
+                  marginTop: "0.25rem",
+                }}
+              >
+                <span>🚚 <strong>Tracking ID:</strong> <code>{order.tracking_token}</code></span>
+              </div>
+            )}
           </div>
 
           <div
