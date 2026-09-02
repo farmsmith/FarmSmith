@@ -174,7 +174,13 @@ export async function POST(request: Request) {
         }
 
         // Trigger Shiprocket fulfillment and await completion (safely handles errors internally)
-        await processOrderFulfillment(order.id);
+        const fulfillmentRes = await processOrderFulfillment(order.id);
+        if (fulfillmentRes.status === "failed") {
+          console.warn(
+            `[VerifyPayment] Order ${order.id} payment verified, but background fulfillment returned failed:`,
+            fulfillmentRes.error
+          );
+        }
       } else if (order.status === "cancelled") {
         // Late payment after order expiration
         await supabase

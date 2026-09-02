@@ -80,8 +80,15 @@ export async function createShiprocketOrder(
   const data = await response.json();
 
   if (!response.ok || data.status_code === 0) {
-    const errMsg = data?.message || data?.errors || `Shiprocket Order Creation Failed with status ${response.status}`;
-    const errObj = new Error(typeof errMsg === "string" ? errMsg : JSON.stringify(errMsg));
+    let errorDetail = "";
+    if (data?.errors) {
+      errorDetail = typeof data.errors === "string" ? data.errors : JSON.stringify(data.errors);
+    } else if (data?.message) {
+      errorDetail = typeof data.message === "string" ? data.message : JSON.stringify(data.message);
+    } else {
+      errorDetail = `Shiprocket Order Creation Failed with status ${response.status}`;
+    }
+    const errObj = new Error(errorDetail);
     (errObj as any).statusCode = response.status;
     (errObj as any).responseData = data;
     throw errObj;
@@ -120,7 +127,7 @@ export async function getShiprocketOrderByChannelId(
     const match = data.data.find(
       (item) => String(item.channel_order_id) === String(channelOrderId)
     );
-    return match || data.data[0];
+    return match || null;
   }
 
   return null;

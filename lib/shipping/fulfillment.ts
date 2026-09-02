@@ -1,25 +1,11 @@
 import "server-only";
 
-import { createClient } from "@supabase/supabase-js";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import {
   createShiprocketOrder,
   getShiprocketOrderByChannelId,
 } from "@/lib/shiprocket/client";
 import type { CreateShiprocketOrderPayload, ShiprocketOrderItem } from "@/lib/shiprocket/types";
-
-// Private service-role client for background server fulfillment tasks
-function getServiceRoleSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!url || !serviceKey) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
-  }
-
-  return createClient(url, serviceKey, {
-    auth: { persistSession: false },
-  });
-}
 
 /**
  * Calculates package tier dimensions based on total gross weight in kg.
@@ -50,50 +36,57 @@ export interface FulfillmentResult {
  * Safe to be called concurrently from payment verification & webhooks.
  */
 export async function processOrderFulfillment(orderId: string): Promise<FulfillmentResult> {
-  const supabase = getServiceRoleSupabase();
-
-  // 1. First fetch order to check status & order_number
-  const { data: initialOrder, error: fetchErr } = await supabase
-    .from("orders")
-    .select("id, order_number, status, fulfillment_status, shiprocket_order_id")
-    .eq("id", orderId)
-    .single();
-
-  if (fetchErr || !initialOrder) {
-    console.error(`[Fulfillment] Order ${orderId} not found:`, fetchErr?.message);
-    return { status: "failed", error: "Order not found" };
+  let supabase;
+  try {
+    supabase = createAdminSupabaseClient();
+  } catch (initErr: any) {
+    const errorMsg = initErr?.message || String(initErr);
+    console.error(`[Fulfillment] Initialization failed for order ${orderId}:`, errorMsg);
+    return { status: "failed", error: errorMsg };
   }
-
-  // If already created or has shiprocket_order_id, exit cleanly
-  if (initialOrder.shiprocket_order_id) {
-    return {
-      status: "skipped",
-      shiprocket_order_id: initialOrder.shiprocket_order_id,
-    };
-  }
-
-  // 2. Claim atomic DB lock: transition from ('pending' | 'failed') to 'creating'
-  const { data: claimedRows, error: lockErr } = await supabase
-    .from("orders")
-    .update({
-      fulfillment_status: "creating",
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", orderId)
-    .eq("status", "paid")
-    .in("fulfillment_status", ["pending", "failed"])
-    .is("shiprocket_order_id", null)
-    .select("id, order_number");
-
-  if (lockErr || !claimedRows || claimedRows.length === 0) {
-    // Lock failed: another worker is already processing, or order is not paid
-    console.warn(`[Fulfillment] Lock skip for order ${orderId}`);
-    return { status: "skipped" };
-  }
-
-  const orderNumber = initialOrder.order_number;
 
   try {
+    // 1. First fetch order to check status & order_number
+    const { data: initialOrder, error: fetchErr } = await supabase
+      .from("orders")
+      .select("id, order_number, status, fulfillment_status, shiprocket_order_id")
+      .eq("id", orderId)
+      .single();
+
+    if (fetchErr || !initialOrder) {
+      console.error(`[Fulfillment] Order ${orderId} not found:`, fetchErr?.message);
+      return { status: "failed", error: fetchErr?.message || "Order not found" };
+    }
+
+    // If already created or has shiprocket_order_id, exit cleanly
+    if (initialOrder.shiprocket_order_id) {
+      return {
+        status: "skipped",
+        shiprocket_order_id: initialOrder.shiprocket_order_id,
+      };
+    }
+
+    // 2. Claim atomic DB lock: transition from ('pending' | 'failed') to 'creating'
+    const { data: claimedRows, error: lockErr } = await supabase
+      .from("orders")
+      .update({
+        fulfillment_status: "creating",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", orderId)
+      .eq("status", "paid")
+      .in("fulfillment_status", ["pending", "failed"])
+      .is("shiprocket_order_id", null)
+      .select("id, order_number");
+
+    if (lockErr || !claimedRows || claimedRows.length === 0) {
+      // Lock failed: another worker is already processing, or order is not paid
+      console.warn(`[Fulfillment] Lock skip for order ${orderId}`);
+      return { status: "skipped" };
+    }
+
+    const orderNumber = initialOrder.order_number;
+
     // 3. Pre-Flight External Check (Crash Recovery): Check if Shiprocket already holds this channel order
     const existingSROrder = await getShiprocketOrderByChannelId(orderNumber);
     if (existingSROrder && existingSROrder.id) {
@@ -192,11 +185,16 @@ export async function processOrderFulfillment(orderId: string): Promise<Fulfillm
 
     const shippingAddr = fullOrder.shipping_address || {};
 
+    const nameParts = (fullOrder.customer_name || "Customer Customer").trim().split(/\s+/);
+    const firstName = nameParts[0] || "Customer";
+    const lastName = nameParts.slice(1).join(" ") || "Customer";
+
     const payload: CreateShiprocketOrderPayload = {
       order_id: fullOrder.order_number,
       order_date: formattedDate,
-      pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
-      billing_customer_name: fullOrder.customer_name || "Customer",
+      pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "home",
+      billing_customer_name: firstName,
+      billing_last_name: lastName,
       billing_address: shippingAddr.line1 || "Main Street",
       billing_address_2: shippingAddr.line2 || "",
       billing_city: shippingAddr.city || "City",
@@ -260,8 +258,15 @@ export async function processOrderFulfillment(orderId: string): Promise<Fulfillm
     }
 
     // 6. Save Shiprocket Order details to Supabase
-    const srOrderId = String(res.order_id);
-    const srShipmentId = res.shipment_id ? String(res.shipment_id) : null;
+    const rawOrderId = res.order_id ?? (res as any).data?.order_id ?? (res as any).id;
+    const rawShipmentId = res.shipment_id ?? (res as any).data?.shipment_id;
+
+    if (!rawOrderId) {
+      throw new Error(`Shiprocket creation response missing order_id: ${JSON.stringify(res)}`);
+    }
+
+    const srOrderId = String(rawOrderId);
+    const srShipmentId = rawShipmentId ? String(rawShipmentId) : null;
     const awbCode = res.awb_code || null;
     const courierName = res.courier_name || null;
 
