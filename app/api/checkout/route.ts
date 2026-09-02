@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   if (productsError) {
     console.error("Failed to load products", productsError);
     return NextResponse.json(
-      { error: "Failed to load products" },
+      { error: `Failed to load products: ${productsError.message || "Database connection error"}` },
       { status: 500, headers }
     );
   }
