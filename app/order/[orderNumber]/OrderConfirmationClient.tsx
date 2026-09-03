@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, RefreshCw } from "lucide-react";
+import { CheckCircle, RefreshCw, Truck, ExternalLink } from "lucide-react";
 import OrderStatusTimeline from "@/components/order/OrderStatusTimeline";
 import { formatPrice } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
@@ -189,12 +189,11 @@ export default function OrderConfirmationClient() {
               <div
                 style={{
                   display: "inline-flex",
-                  flexDirection: "column",
                   alignItems: "center",
                   gap: "0.375rem",
                   background: "rgba(22, 101, 52, 0.08)",
                   border: "1px solid rgba(22, 101, 52, 0.2)",
-                  padding: "0.75rem 1.25rem",
+                  padding: "0.625rem 1.25rem",
                   borderRadius: "var(--radius-md)",
                   fontSize: "0.875rem",
                   color: "var(--color-primary)",
@@ -202,15 +201,104 @@ export default function OrderConfirmationClient() {
                   marginTop: "0.5rem",
                 }}
               >
-                <span>🔑 <strong>Tracking Access Key:</strong> <code>{order.tracking_token}</code></span>
-                {order.awb_code && (
-                  <span style={{ fontSize: "0.8125rem", color: "var(--color-accent)" }}>
-                    📦 <strong>Carrier:</strong> {order.courier_name || "Shiprocket Express"} &bull; <strong>AWB:</strong> <code>{order.awb_code}</code>
-                  </span>
-                )}
+                🔑 <strong>Tracking Access Key:</strong> <code>{order.tracking_token}</code>
               </div>
             )}
           </div>
+
+          {/* Shipment Details & External Tracking (only shown if awb_code exists and is non-empty) */}
+          {order.awb_code && order.awb_code.trim().length > 0 && (
+            <div
+              style={{
+                background: "var(--color-card)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-xl)",
+                padding: "1.5rem 2rem",
+                marginBottom: "2rem",
+                boxShadow: "var(--shadow-card)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "1.25rem",
+                }}
+              >
+                <div>
+                  <h2
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      fontSize: "1.125rem",
+                      color: "var(--color-primary)",
+                      marginBottom: "0.625rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <Truck size={20} style={{ color: "var(--color-accent)" }} aria-hidden="true" />
+                    Shipment Details
+                  </h2>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.375rem",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    {order.courier_name && order.courier_name.trim().length > 0 && (
+                      <p style={{ margin: 0, color: "var(--color-foreground)" }}>
+                        <span style={{ color: "var(--color-muted)" }}>Courier:</span>{" "}
+                        <strong>{order.courier_name}</strong>
+                      </p>
+                    )}
+                    <p style={{ margin: 0, color: "var(--color-foreground)" }}>
+                      <span style={{ color: "var(--color-muted)" }}>AWB:</span>{" "}
+                      <code
+                        style={{
+                          background: "rgba(0,0,0,0.05)",
+                          padding: "2px 8px",
+                          borderRadius: "var(--radius-sm)",
+                          fontFamily: "monospace",
+                          fontWeight: 600,
+                          color: "var(--color-primary)",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        {order.awb_code}
+                      </code>
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  href="https://www.shiprocket.in/shipment-tracking/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    background: "var(--color-primary)",
+                    color: "#ffffff",
+                    padding: "0.75rem 1.25rem",
+                    borderRadius: "var(--radius-md)",
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    textDecoration: "none",
+                    transition: "opacity 0.15s ease",
+                  }}
+                  id="shiprocket-external-tracking-link"
+                >
+                  Track Detailed Shipment ↗
+                </a>
+              </div>
+            </div>
+          )}
 
           <div
             style={{

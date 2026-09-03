@@ -152,7 +152,7 @@ export default function OrdersClient() {
                 <div>
                   {order.tracking_token && (
                     <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", marginRight: "1rem" }}>
-                      Tracking ID: <code style={{ background: "rgba(0,0,0,0.05)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem", color: "var(--color-primary)" }}>{order.tracking_token.substring(0, 16)}...</code>
+                      Tracking Key: <code style={{ background: "rgba(0,0,0,0.05)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem", color: "var(--color-primary)" }}>{order.tracking_token.substring(0, 16)}...</code>
                     </span>
                   )}
                   <Link

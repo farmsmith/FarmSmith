@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
+import { Truck, ExternalLink } from "lucide-react";
 import OrderStatusTimeline from "@/components/order/OrderStatusTimeline";
 import type { Order, OrderItem } from "@/types/order";
 
@@ -115,6 +116,89 @@ export default function AccountOrderDetailPage() {
           {statusLabel(order.status)}
         </Badge>
       </div>
+
+      {/* Shipment Details & External Tracking (only shown if awb_code exists and is non-empty) */}
+      {order.awb_code && order.awb_code.trim().length > 0 && (
+        <div
+          style={{
+            background: "var(--color-background)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-lg)",
+            padding: "1.25rem 1.5rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "1rem",
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  fontFamily: "var(--font-heading)",
+                  fontSize: "1rem",
+                  color: "var(--color-primary)",
+                  marginBottom: "0.5rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                }}
+              >
+                <Truck size={18} style={{ color: "var(--color-accent)" }} aria-hidden="true" />
+                Shipment Details
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", fontSize: "0.875rem" }}>
+                {order.courier_name && order.courier_name.trim().length > 0 && (
+                  <p style={{ margin: 0, color: "var(--color-foreground)" }}>
+                    <span style={{ color: "var(--color-muted)" }}>Courier:</span>{" "}
+                    <strong>{order.courier_name}</strong>
+                  </p>
+                )}
+                <p style={{ margin: 0, color: "var(--color-foreground)" }}>
+                  <span style={{ color: "var(--color-muted)" }}>AWB:</span>{" "}
+                  <code
+                    style={{
+                      background: "rgba(0,0,0,0.05)",
+                      padding: "2px 8px",
+                      borderRadius: "var(--radius-sm)",
+                      fontFamily: "monospace",
+                      fontWeight: 600,
+                      color: "var(--color-primary)",
+                    }}
+                  >
+                    {order.awb_code}
+                  </code>
+                </p>
+              </div>
+            </div>
+
+            <a
+              href="https://www.shiprocket.in/shipment-tracking/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                background: "var(--color-primary)",
+                color: "#ffffff",
+                padding: "0.625rem 1rem",
+                borderRadius: "var(--radius-md)",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                textDecoration: "none",
+              }}
+            >
+              Track Detailed Shipment ↗
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Timeline */}
       <div style={{ marginBottom: "2rem", paddingBottom: "2rem", borderBottom: "1px solid var(--color-border)" }}>

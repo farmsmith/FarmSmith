@@ -32,7 +32,7 @@ export async function GET(
 
   const { data: order, error } = await supabase
     .from("orders")
-    .select("id, order_number, tracking_token, status, customer_name, customer_email, customer_phone, shipping_address, subtotal_amount, taxable_amount, shipping_amount, tax_amount, cgst_amount, sgst_amount, igst_amount, total_amount, currency, created_at, updated_at")
+    .select("id, order_number, tracking_token, status, customer_name, customer_email, customer_phone, shipping_address, subtotal_amount, taxable_amount, shipping_amount, tax_amount, cgst_amount, sgst_amount, igst_amount, total_amount, currency, awb_code, courier_name, created_at, updated_at")
     .eq("order_number", orderNumber)
     .eq("customer_id", user.id)
     .maybeSingle();
