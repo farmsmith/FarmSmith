@@ -4,6 +4,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { withSecurityHeaders } from "@/lib/security/headers";
 import { processOrderFulfillment } from "@/lib/shipping/fulfillment";
+import { sendOrderConfirmationEmail } from "@/lib/email/order-confirmation";
 
 export async function POST(request: Request) {
   const headers = withSecurityHeaders();
@@ -181,6 +182,11 @@ export async function POST(request: Request) {
             fulfillmentRes.error
           );
         }
+
+        // Asynchronously send order confirmation email without blocking response
+        sendOrderConfirmationEmail(order.id).catch((emailErr) => {
+          console.error(`[VerifyPayment] Non-blocking order confirmation email failed for ${order.id}:`, emailErr);
+        });
       } else if (order.status === "cancelled") {
         // Late payment after order expiration
         await supabase

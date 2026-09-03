@@ -3,6 +3,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { verifyWebhookSignature } from "@/lib/razorpay/verify";
 import { withSecurityHeaders } from "@/lib/security/headers";
 import { processOrderFulfillment } from "@/lib/shipping/fulfillment";
+import { sendOrderConfirmationEmail } from "@/lib/email/order-confirmation";
 
 export async function POST(request: Request) {
   const headers = withSecurityHeaders();
@@ -73,6 +74,11 @@ export async function POST(request: Request) {
 
       // Trigger Shiprocket fulfillment and await completion (safely handles errors internally)
       await processOrderFulfillment(order.id);
+
+      // Asynchronously send order confirmation email
+      sendOrderConfirmationEmail(order.id).catch((emailErr) => {
+        console.error(`[RazorpayWebhook] Non-blocking order confirmation email failed for ${order.id}:`, emailErr);
+      });
     } else if (order.status === "paid" || order.status === "processing") {
       // Order already marked paid (e.g. by verify-payment route), ensure fulfillment is complete
       await processOrderFulfillment(order.id);
