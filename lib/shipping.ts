@@ -19,36 +19,10 @@ type ShippingRate = {
   is_active: boolean;
 };
 
-// Pincode prefixes for the 3 Free Shipping Districts in Odisha:
-// - Khordha / Bhubaneswar: 751, 752
-// - Cuttack: 753, 7540, 7542
-// - Jagatsinghpur: 7541, 7542
-const ODISHA_FREE_PINCODE_PREFIXES = ["751", "752", "753", "754"];
-const ODISHA_FREE_DISTRICT_NAMES = ["jagatsinghpur", "cuttack", "khordha", "khorda", "bhubaneswar"];
-
-/**
- * Checks if address qualifies for Free Shipping based on Pincode or District Name
- */
-export function isOdishaFreeDistrict(state: string, city: string = "", pincode: string = ""): boolean {
-  const normState = state.trim().toLowerCase();
-  const normCity = city.trim().toLowerCase();
-  const normPincode = pincode.trim();
-
-  // Must be in Odisha state or have Odisha pincode (starts with 75 or 76)
-  const isOdisha = normState === "odisha" || normPincode.startsWith("75") || normPincode.startsWith("76");
-  if (!isOdisha) return false;
-
-  // 1. Check Pincode Prefix (751xx, 752xx, 753xx, 754xx)
-  const matchesPincode = ODISHA_FREE_PINCODE_PREFIXES.some((prefix) => normPincode.startsWith(prefix));
-
-  // 2. Check City / District Name
-  const matchesCity = ODISHA_FREE_DISTRICT_NAMES.some((d) => normCity.includes(d));
-
-  return matchesPincode || matchesCity;
-}
-
 /**
  * Calculates shipping fee based on state, district/city, pincode, and subtotal.
+ * GLOBAL POLICY: Free delivery is completely eliminated.
+ * Every customer pays the applicable shipping fee (minimum ₹60 standard fee).
  */
 export async function calculateShipping(
   state: string,
@@ -60,6 +34,8 @@ export async function calculateShipping(
   const normalizedCity = (city || "").trim().toLowerCase();
   const normalizedPincode = pincode.trim();
 
+  const DEFAULT_SHIPPING_FEE = 60;
+
   try {
     const supabase = createAdminSupabaseClient();
     const { data } = await supabase
@@ -68,7 +44,12 @@ export async function calculateShipping(
       .eq("is_active", true);
 
     if (data && data.length > 0) {
+      // Filter matching rates and strictly exclude any free delivery / zero shipping amount rules
       const matches = (data as ShippingRate[]).filter((rate) => {
+        const rateAmount = Number(rate.shipping_amount);
+        if (isNaN(rateAmount) || rateAmount <= 0) return false;
+        if (rate.name && rate.name.toLowerCase().includes("free")) return false;
+
         const rateState = rate.state?.trim().toLowerCase() ?? null;
         const rateDistrict = rate.district?.trim().toLowerCase() ?? null;
         const ratePrefix = rate.pincode_prefix?.trim() ?? null;
@@ -83,34 +64,42 @@ export async function calculateShipping(
 
       if (matches.length > 0) {
         matches.sort((a, b) => {
+          // Specificity 1: Pincode prefix
           const aPrefix = a.pincode_prefix ? 1 : 0;
           const bPrefix = b.pincode_prefix ? 1 : 0;
           if (aPrefix !== bPrefix) return bPrefix - aPrefix;
 
+          // Specificity 2: District match
           const aDist = a.district ? 1 : 0;
           const bDist = b.district ? 1 : 0;
           if (aDist !== bDist) return bDist - aDist;
 
+          // Specificity 3: State match
+          const aState = a.state ? 1 : 0;
+          const bState = b.state ? 1 : 0;
+          if (aState !== bState) return bState - aState;
+
           return Number(a.shipping_amount) - Number(b.shipping_amount);
         });
+
         const selected = matches[0];
+        const calculatedAmount = Math.max(DEFAULT_SHIPPING_FEE, Number(selected.shipping_amount));
+
         return {
-          amount: Number(Number(selected.shipping_amount).toFixed(2)),
+          amount: Number(calculatedAmount.toFixed(2)),
           rateId: selected.id,
           rateName: selected.name,
         };
       }
     }
   } catch (err) {
-    console.warn("Using fallback shipping calculation:", err);
+    console.warn("Using default shipping calculation fallback:", err);
   }
 
-  // Fallback rule via dual Pincode + District check
-  const isFree = isOdishaFreeDistrict(state, city, pincode);
-
+  // Mandatory fallback rule: Standard shipping fee applies to all locations
   return {
-    amount: isFree ? 0 : 60,
+    amount: DEFAULT_SHIPPING_FEE,
     rateId: null,
-    rateName: isFree ? "Odisha Free District Shipping" : "Standard Shipping (₹60)",
+    rateName: "Standard Shipping (₹60)",
   };
 }

@@ -87,7 +87,7 @@ export default function OrderSummary({ items, quote, loading }: OrderSummaryProp
             <span className="skeleton" style={{ width: "60px", height: "1rem" }} />
           ) : quote ? (
             <span style={{ color: "var(--color-foreground)" }}>
-              {quote.shipping === 0 ? "Free" : formatPrice(quote.shipping, quote.currency)}
+              {formatPrice(quote.shipping, quote.currency)}
             </span>
           ) : (
             <span style={{ color: "var(--color-muted)", fontStyle: "italic" }}>Enter address</span>

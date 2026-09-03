@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   // Calculate items subtotal if missing
   const calculatedSubtotal = items.reduce((sum, item) => sum + (item.subtotal || item.unit_price * item.quantity), 0);
   const subtotal_amount = order.subtotal_amount ?? calculatedSubtotal;
-  const shipping_amount = order.shipping_amount ?? (subtotal_amount >= 499 || subtotal_amount === 0 ? 0 : 50);
+  const shipping_amount = order.shipping_amount ?? 60;
   const tax_amount = order.tax_amount ?? Math.round(subtotal_amount * 0.05); // 5% GST
   const total_amount = order.total_amount ?? (subtotal_amount + shipping_amount + tax_amount);
 

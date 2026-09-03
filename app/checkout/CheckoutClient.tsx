@@ -517,23 +517,15 @@ export default function CheckoutClient() {
     );
   }
 
-  const ODISHA_FREE_PINCODES = ["751", "752", "753", "754"];
-  const ODISHA_FREE_DISTRICTS = ["jagatsinghpur", "cuttack", "khordha", "khorda", "bhubaneswar"];
-
   const hasAddress = Boolean(
     shippingAddress.pincode.trim().length === 6 ||
     (shippingAddress.state.trim() && shippingAddress.city.trim())
   );
 
-  const pincodeMatch = ODISHA_FREE_PINCODES.some((prefix) => shippingAddress.pincode.trim().startsWith(prefix));
-  const cityMatch = ODISHA_FREE_DISTRICTS.some((d) => shippingAddress.city.trim().toLowerCase().includes(d));
-
-  const isFreeDistrict = pincodeMatch || cityMatch;
-
   const calculatedShipping = quote
     ? quote.shipping
     : hasAddress
-    ? (isFreeDistrict ? 0 : 60)
+    ? 60
     : null;
 
   const rawSubtotal = items.reduce((acc, item) => acc + (item.price ?? (item as any).unitPrice ?? 0) * item.quantity, 0);
@@ -1342,8 +1334,6 @@ export default function CheckoutClient() {
                   <span style={{ fontWeight: calculatedShipping === null ? 500 : 700 }}>
                     {calculatedShipping === null
                       ? "Calculated at next step"
-                      : calculatedShipping === 0
-                      ? "FREE"
                       : formatPrice(calculatedShipping)}
                   </span>
                 </div>

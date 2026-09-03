@@ -261,7 +261,7 @@ $$;
 
 revoke execute on function create_pending_order(jsonb, jsonb) from anon, authenticated;
 
--- Recommended starter shipping rules. Change amounts to FarmSmith's actual policy.
+-- Recommended starter shipping rules (Standard non-zero rates only).
 insert into shipping_rates (name, state, min_order_amount, shipping_amount, is_active)
 select 'Tamil Nadu Standard', 'Tamil Nadu', 0, 60, true
 where not exists (
@@ -269,19 +269,7 @@ where not exists (
 );
 
 insert into shipping_rates (name, state, min_order_amount, shipping_amount, is_active)
-select 'Tamil Nadu Free Shipping', 'Tamil Nadu', 999, 0, true
-where not exists (
-  select 1 from shipping_rates where name = 'Tamil Nadu Free Shipping'
-);
-
-insert into shipping_rates (name, state, min_order_amount, shipping_amount, is_active)
 select 'Other States Standard', null, 0, 100, true
 where not exists (
   select 1 from shipping_rates where name = 'Other States Standard'
-);
-
-insert into shipping_rates (name, state, min_order_amount, shipping_amount, is_active)
-select 'Other States Free Shipping', null, 999, 0, true
-where not exists (
-  select 1 from shipping_rates where name = 'Other States Free Shipping'
 );

@@ -13,7 +13,7 @@ export default function AnnouncementBar() {
         letterSpacing: "0.03em",
       }}
     >
-      🌿 Free shipping on orders above ₹999 · Use code <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>FARMSMITH10</span> for 10% off · GI-Tagged Pure Spices & Oils
+      🌿 Farm-Fresh Organic Spices & Oils · Use code <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>FARMSMITH10</span> for 10% off · Delivered Direct from Odisha Farms
     </div>
   );
 }
