@@ -1,6 +1,111 @@
 import { NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { withSecurityHeaders } from "@/lib/security/headers";
+import type { OrderStatus } from "@/types/order";
+
+/**
+ * Normalizes and maps Shiprocket shipment statuses to FarmSmith OrderStatus.
+ *
+ * Status Rules:
+ * - "CANCELLATION REQUESTED" is NOT a confirmed cancellation and returns null (preserves active order status).
+ * - Confirmed cancellations ("CANCELED", "CANCELLED", "RTO", "RETURN", etc.) map to "cancelled".
+ * - "DELIVERED", "FULFILLED", etc. map to "delivered".
+ * - "SHIPPED", "IN TRANSIT", "OUT FOR DELIVERY", "DISPATCHED", "PICKED UP", etc. map to "shipped".
+ * - "PROCESSING", "PACKING", "ORDER CREATED", etc. map to "processing".
+ */
+export function mapShiprocketStatusToOrderStatus(
+  rawStatusStr?: string | null,
+  statusCodeRaw?: number | string | null
+): OrderStatus | null {
+  const rawStatus = rawStatusStr ? String(rawStatusStr).trim().toUpperCase() : "";
+  const statusCode = statusCodeRaw !== null && statusCodeRaw !== undefined ? Number(statusCodeRaw) : null;
+
+  if (!rawStatus && statusCode === null) {
+    return null;
+  }
+
+  // 1. Explicitly check for CANCELLATION REQUESTED first.
+  // "CANCELLATION REQUESTED" is pending review in Shiprocket and NOT a confirmed cancellation.
+  // Return null to ensure the active FarmSmith order status is not overwritten.
+  if (
+    rawStatus === "CANCELLATION REQUESTED" ||
+    rawStatus.includes("CANCELLATION REQUEST") ||
+    rawStatus.includes("CANCEL REQUEST") ||
+    statusCode === 42
+  ) {
+    return null;
+  }
+
+  // 2. Confirmed Cancellations & Returns -> "cancelled"
+  if (
+    rawStatus === "CANCELED" ||
+    rawStatus === "CANCELLED" ||
+    rawStatus === "VOID" ||
+    rawStatus.includes("CANCELED BY") ||
+    rawStatus.includes("CANCELLED BY") ||
+    rawStatus.includes("CANCELLATION CONFIRMED") ||
+    rawStatus.startsWith("RTO") ||
+    rawStatus.includes(" RTO") ||
+    rawStatus.startsWith("RETURN") ||
+    rawStatus.includes(" RETURN") ||
+    statusCode === 8 ||  // Canceled
+    statusCode === 9 ||  // RTO In Transit
+    statusCode === 10 || // RTO Delivered
+    statusCode === 15 || // Return In Transit
+    statusCode === 16    // Return Delivered
+  ) {
+    return "cancelled";
+  }
+
+  // 3. Delivered -> "delivered"
+  if (
+    rawStatus.includes("DELIVERED") ||
+    rawStatus.includes("FULFILLED") ||
+    rawStatus.includes("COMPLETED") ||
+    statusCode === 7
+  ) {
+    return "delivered";
+  }
+
+  // 4. Shipped / In Transit / Out for Delivery -> "shipped"
+  if (
+    rawStatus.includes("IN TRANSIT") ||
+    rawStatus.includes("OUT FOR DELIVERY") ||
+    rawStatus.includes("DISPATCHED") ||
+    rawStatus.includes("SHIPPED") ||
+    rawStatus.includes("PICKED UP") ||
+    rawStatus.includes("PICKUP COMPLETED") ||
+    rawStatus.includes("PICKUP SCHEDULED") ||
+    rawStatus.includes("AWB ASSIGNED") ||
+    rawStatus.includes("LABEL GENERATED") ||
+    rawStatus.includes("MANIFEST GENERATED") ||
+    rawStatus.includes("HANDOVER TO COURIER") ||
+    rawStatus.includes("REACHED AT DESTINATION") ||
+    statusCode === 1 ||
+    statusCode === 2 ||
+    statusCode === 3 ||
+    statusCode === 4 ||
+    statusCode === 5 ||
+    statusCode === 6 ||
+    statusCode === 14
+  ) {
+    return "shipped";
+  }
+
+  // 5. Processing / Packing -> "processing"
+  if (
+    rawStatus.includes("PROCESSING") ||
+    rawStatus.includes("PACKING") ||
+    rawStatus.includes("NEW") ||
+    rawStatus.includes("ORDER CREATED") ||
+    rawStatus.includes("READY FOR SHIPMENT") ||
+    rawStatus.includes("PENDING PICKUP")
+  ) {
+    return "processing";
+  }
+
+  return null;
+}
 
 /**
  * Shared canonical handler for Shiprocket fulfillment webhooks.
@@ -18,7 +123,7 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
 
   // Fail closed: require webhook secret to be set and matched
   if (!expectedToken) {
-    console.error("SHIPROCKET_WEBHOOK_SECRET is not configured on the server.");
+    console.error("[Shiprocket Webhook] SHIPROCKET_WEBHOOK_SECRET is not configured on the server.");
     return NextResponse.json(
       { error: "Webhook endpoint not configured" },
       { status: 500, headers }
@@ -36,14 +141,24 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400, headers });
   }
 
-  const srOrderId = body?.order_id ? String(body.order_id).trim() : null;
-  const channelOrderId = body?.channel_order_id || body?.custom_order_id ? String(body.channel_order_id || body.custom_order_id).trim() : null;
-  const rawAwb = body?.awb_code || body?.awb;
-  const awbCode = rawAwb ? String(rawAwb).trim() : null;
-  const currentStatus = String(body?.current_status || body?.status || "").toUpperCase();
+  const srOrderId = body?.order_id
+    ? String(body.order_id).trim()
+    : body?.sr_order_id
+    ? String(body.sr_order_id).trim()
+    : null;
 
-  if (!srOrderId && !channelOrderId && !awbCode) {
-    return NextResponse.json({ received: true, note: "No order identifier present" }, { status: 200, headers });
+  const srShipmentId = body?.shipment_id ? String(body.shipment_id).trim() : null;
+
+  const channelOrderId =
+    body?.channel_order_id || body?.custom_order_id || body?.channel_order_number
+      ? String(body.channel_order_id || body.custom_order_id || body.channel_order_number).trim()
+      : null;
+
+  const rawAwb = body?.awb_code || body?.awb || body?.awb_number;
+  const awbCode = rawAwb ? String(rawAwb).trim() : null;
+
+  if (!srOrderId && !srShipmentId && !channelOrderId && !awbCode) {
+    return NextResponse.json({ received: true, note: "No order identifier present in webhook payload" }, { status: 200, headers });
   }
 
   const supabase = createAdminSupabaseClient();
@@ -54,7 +169,7 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
   if (srOrderId) {
     const { data: bySrId } = await supabase
       .from("orders")
-      .select("id, status, shiprocket_order_id, order_number")
+      .select("id, status, shiprocket_order_id, shiprocket_shipment_id, order_number, awb_code, courier_name")
       .eq("shiprocket_order_id", srOrderId)
       .limit(1);
 
@@ -63,12 +178,26 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
     }
   }
 
-  // 2. Fallback lookup by channel_order_id if shiprocket_order_id match was not found
-  if (!order && channelOrderId) {
+  // 2. Lookup by shiprocket_shipment_id
+  if (!order && srShipmentId) {
+    const { data: byShipmentId } = await supabase
+      .from("orders")
+      .select("id, status, shiprocket_order_id, shiprocket_shipment_id, order_number, awb_code, courier_name")
+      .eq("shiprocket_shipment_id", srShipmentId)
+      .limit(1);
+
+    if (byShipmentId && byShipmentId.length > 0) {
+      order = byShipmentId[0];
+    }
+  }
+
+  // 3. Fallback lookup by channel order number (order_number)
+  const possibleChannelId = channelOrderId || (srOrderId && srOrderId.startsWith("FS-") ? srOrderId : null);
+  if (!order && possibleChannelId) {
     const { data: byChannelId } = await supabase
       .from("orders")
-      .select("id, status, shiprocket_order_id, order_number")
-      .eq("order_number", channelOrderId)
+      .select("id, status, shiprocket_order_id, shiprocket_shipment_id, order_number, awb_code, courier_name")
+      .eq("order_number", possibleChannelId)
       .limit(1);
 
     if (byChannelId && byChannelId.length > 0) {
@@ -76,11 +205,11 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
     }
   }
 
-  // 3. Fallback lookup by awb_code
+  // 4. Fallback lookup by awb_code
   if (!order && awbCode) {
     const { data: byAwb } = await supabase
       .from("orders")
-      .select("id, status, shiprocket_order_id, order_number")
+      .select("id, status, shiprocket_order_id, shiprocket_shipment_id, order_number, awb_code, courier_name")
       .eq("awb_code", awbCode)
       .limit(1);
 
@@ -90,7 +219,7 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
   }
 
   if (!order) {
-    console.warn("Shiprocket Webhook: Order not found in database", { srOrderId, channelOrderId, awbCode });
+    console.warn("[Shiprocket Webhook] Order not found in database", { srOrderId, srShipmentId, channelOrderId, awbCode });
     return NextResponse.json({ received: true, note: "Order not found" }, { status: 200, headers });
   }
 
@@ -98,36 +227,35 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
     updated_at: new Date().toISOString(),
   };
 
-  if (srOrderId && !order.shiprocket_order_id) {
+  if (srOrderId && !order.shiprocket_order_id && !srOrderId.startsWith("FS-")) {
     updatePayload.shiprocket_order_id = srOrderId;
   }
-  if (awbCode) {
+  if (srShipmentId && !order.shiprocket_shipment_id) {
+    updatePayload.shiprocket_shipment_id = srShipmentId;
+  }
+  if (awbCode && order.awb_code !== awbCode) {
     updatePayload.awb_code = awbCode;
   }
-  if (body?.shipment_id) {
-    updatePayload.shiprocket_shipment_id = String(body.shipment_id);
-  }
   const courierName = body?.courier_name || body?.courier_company_name || body?.courier;
-  if (courierName) {
+  if (courierName && order.courier_name !== String(courierName)) {
     updatePayload.courier_name = String(courierName);
   }
 
-  // Map Shiprocket shipment status to FarmSmith order status
-  if (currentStatus.includes("CANCEL") || currentStatus.includes("RTO") || currentStatus.includes("RETURN")) {
-    updatePayload.status = "cancelled";
-  } else if (currentStatus.includes("DELIVERED")) {
-    updatePayload.status = "delivered";
-  } else if (
-    currentStatus.includes("IN TRANSIT") ||
-    currentStatus.includes("OUT FOR DELIVERY") ||
-    currentStatus.includes("DISPATCHED") ||
-    currentStatus.includes("SHIPPED") ||
-    currentStatus.includes("PICKED UP") ||
-    currentStatus.includes("PICKUP COMPLETED")
-  ) {
-    updatePayload.status = "shipped";
-  } else if (currentStatus.includes("PROCESSING") || currentStatus.includes("PACKING")) {
-    updatePayload.status = "processing";
+  const rawStatus = body?.current_status || body?.status || body?.shipment_status;
+  const statusCode = body?.status_code || body?.current_status_id;
+  const mappedStatus = mapShiprocketStatusToOrderStatus(rawStatus, statusCode);
+
+  if (mappedStatus) {
+    updatePayload.status = mappedStatus;
+  } else {
+    const rawStatusStr = rawStatus ? String(rawStatus).trim() : "";
+    if (rawStatusStr && !rawStatusStr.toUpperCase().includes("CANCELLATION REQUEST")) {
+      console.warn("[Shiprocket Webhook] Received unknown or unmapped shipment status:", {
+        rawStatus: rawStatusStr,
+        statusCode,
+        orderNumber: order.order_number,
+      });
+    }
   }
 
   if (Object.keys(updatePayload).length > 1) { // More than just updated_at
@@ -137,10 +265,14 @@ export async function handleShiprocketWebhook(request: Request): Promise<NextRes
       .eq("id", order.id);
 
     if (updateError) {
-      console.error("Failed to update order status via Shiprocket webhook", updateError);
+      console.error("[Shiprocket Webhook] Failed to update order status:", updateError);
       return NextResponse.json({ error: "Failed to update order" }, { status: 500, headers });
     }
   }
 
-  return NextResponse.json({ received: true, updatedStatus: updatePayload.status }, { status: 200, headers });
+  return NextResponse.json(
+    { received: true, orderNumber: order.order_number, updatedStatus: updatePayload.status ?? order.status },
+    { status: 200, headers }
+  );
 }
+
