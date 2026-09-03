@@ -103,8 +103,9 @@ export async function POST(request: Request) {
   if (body?.shipment_id) {
     updatePayload.shiprocket_shipment_id = String(body.shipment_id);
   }
-  if (body?.courier_name) {
-    updatePayload.courier_name = String(body.courier_name);
+  const courierName = body?.courier_name || body?.courier_company_name || body?.courier;
+  if (courierName) {
+    updatePayload.courier_name = String(courierName);
   }
 
   // Map Shiprocket shipment status to FarmSmith order status
