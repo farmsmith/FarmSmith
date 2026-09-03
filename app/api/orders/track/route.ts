@@ -30,16 +30,20 @@ export async function POST(request: Request) {
 
   const supabase = createAdminSupabaseClient();
 
-  const { data: order, error } = await supabase
+  const { data: rawOrder, error } = await supabase
     .from("orders")
-    .select("id, order_number, tracking_token, status, created_at, total_amount, subtotal_amount, shipping_amount, tax_amount, currency, awb_code, courier_name")
+    .select("id, order_number, tracking_token, status, created_at, updated_at, total_amount, subtotal_amount, shipping_amount, tax_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id")
     .eq("order_number", parsed.data.orderNumber)
     .eq("tracking_token", parsed.data.trackingToken)
     .maybeSingle();
 
-  if (error || !order) {
+  if (error || !rawOrder) {
     return NextResponse.json({ error: "Order not found" }, { status: 404, headers });
   }
+
+  // Import fulfillment reconciliation dynamically to run server-side status fallback for active orders
+  const { reconcileOrderStatusFromShiprocket } = await import("@/lib/shipping/fulfillment-webhook");
+  const order = await reconcileOrderStatusFromShiprocket(rawOrder);
 
   const { data: itemsData } = await supabase
     .from("order_items")

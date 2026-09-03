@@ -6,12 +6,12 @@ import type { OrderStatus } from "@/types/order";
 /**
  * Normalizes and maps Shiprocket shipment statuses to FarmSmith OrderStatus.
  *
- * Status Rules:
- * - "CANCELLATION REQUESTED" is NOT a confirmed cancellation and returns null (preserves active order status).
- * - Confirmed cancellations ("CANCELED", "CANCELLED", "RTO", "RETURN", etc.) map to "cancelled".
- * - "DELIVERED", "FULFILLED", etc. map to "delivered".
- * - "SHIPPED", "IN TRANSIT", "OUT FOR DELIVERY", "DISPATCHED", "PICKED UP", etc. map to "shipped".
- * - "PROCESSING", "PACKING", "ORDER CREATED", etc. map to "processing".
+ * Status Rules per Official Shiprocket Documentation:
+ * - 16 = "CANCELLATION REQUESTED" -> returns null (preserves active order status until confirmed).
+ * - 8 = "CANCELLED", 45 = "CANCELLED BEFORE DISPATCHED", 46 / 9 = "RTO IN TRANSIT", 10 = "RTO DELIVERED", 15 = "RETURN IN TRANSIT", 16 = "RETURN DELIVERED" -> "cancelled".
+ * - 7 = "DELIVERED" -> "delivered".
+ * - 6 = "SHIPPED", 17 = "OUT FOR DELIVERY", 18 = "IN TRANSIT", 42 = "PICKED UP", 1 = "AWB ASSIGNED", 2 = "LABEL GENERATED", 3 = "PICKUP SCHEDULED", 14 = "DISPATCHED" -> "shipped".
+ * - "PROCESSING", "PACKING", "NEW", "ORDER CREATED" -> "processing".
  */
 export function mapShiprocketStatusToOrderStatus(
   rawStatusStr?: string | null,
@@ -24,14 +24,14 @@ export function mapShiprocketStatusToOrderStatus(
     return null;
   }
 
-  // 1. Explicitly check for CANCELLATION REQUESTED first.
+  // 1. Explicitly check for CANCELLATION REQUESTED first (Status Code 16 or string matching).
   // "CANCELLATION REQUESTED" is pending review in Shiprocket and NOT a confirmed cancellation.
-  // Return null to ensure the active FarmSmith order status is not overwritten.
+  // Return null to ensure the active FarmSmith order status is not overwritten until confirmed.
   if (
     rawStatus === "CANCELLATION REQUESTED" ||
     rawStatus.includes("CANCELLATION REQUEST") ||
     rawStatus.includes("CANCEL REQUEST") ||
-    statusCode === 42
+    statusCode === 16
   ) {
     return null;
   }
@@ -48,11 +48,12 @@ export function mapShiprocketStatusToOrderStatus(
     rawStatus.includes(" RTO") ||
     rawStatus.startsWith("RETURN") ||
     rawStatus.includes(" RETURN") ||
-    statusCode === 8 ||  // Canceled
+    statusCode === 8 ||  // Cancelled
     statusCode === 9 ||  // RTO In Transit
     statusCode === 10 || // RTO Delivered
     statusCode === 15 || // Return In Transit
-    statusCode === 16    // Return Delivered
+    statusCode === 45 || // Cancelled Before Dispatched
+    statusCode === 46    // RTO In Transit
   ) {
     return "cancelled";
   }
@@ -67,7 +68,7 @@ export function mapShiprocketStatusToOrderStatus(
     return "delivered";
   }
 
-  // 4. Shipped / In Transit / Out for Delivery -> "shipped"
+  // 4. Shipped / In Transit / Out for Delivery / Picked Up -> "shipped"
   if (
     rawStatus.includes("IN TRANSIT") ||
     rawStatus.includes("OUT FOR DELIVERY") ||
@@ -86,8 +87,11 @@ export function mapShiprocketStatusToOrderStatus(
     statusCode === 3 ||
     statusCode === 4 ||
     statusCode === 5 ||
-    statusCode === 6 ||
-    statusCode === 14
+    statusCode === 6 ||  // Shipped
+    statusCode === 14 || // Dispatched
+    statusCode === 17 || // Out For Delivery
+    statusCode === 18 || // In Transit
+    statusCode === 42    // Picked Up (per official Shiprocket docs)
   ) {
     return "shipped";
   }
@@ -96,7 +100,8 @@ export function mapShiprocketStatusToOrderStatus(
   if (
     rawStatus.includes("PROCESSING") ||
     rawStatus.includes("PACKING") ||
-    rawStatus.includes("NEW") ||
+    rawStatus === "NEW" ||
+    rawStatus.startsWith("NEW ") ||
     rawStatus.includes("ORDER CREATED") ||
     rawStatus.includes("READY FOR SHIPMENT") ||
     rawStatus.includes("PENDING PICKUP")
@@ -105,6 +110,113 @@ export function mapShiprocketStatusToOrderStatus(
   }
 
   return null;
+}
+
+/**
+ * In-memory map to deduplicate concurrent status reconciliation requests for the same order.
+ */
+const inFlightReconciliations = new Map<string, Promise<any>>();
+
+/**
+ * Minimum interval between Shiprocket API reconciliation calls per order (60 seconds).
+ */
+const RECONCILIATION_THROTTLE_MS = 60_000;
+
+/**
+ * Server-side fallback reconciliation for active orders.
+ * Queries Shiprocket API on-demand when active orders ('processing', 'shipped') are viewed.
+ */
+export async function reconcileOrderStatusFromShiprocket(order: any): Promise<any> {
+  if (!order || (order.status !== "processing" && order.status !== "shipped")) {
+    return order;
+  }
+
+  // Throttle check: Skip if updated within the last 60 seconds
+  if (order.updated_at) {
+    const lastUpdate = new Date(order.updated_at).getTime();
+    if (Date.now() - lastUpdate < RECONCILIATION_THROTTLE_MS) {
+      return order;
+    }
+  }
+
+  // Deduplicate concurrent requests for the same order ID
+  const existingPromise = inFlightReconciliations.get(order.id);
+  if (existingPromise) {
+    return existingPromise;
+  }
+
+  const reconciliationPromise = (async () => {
+    try {
+      // Import client dynamically to prevent circular dependencies
+      const { getShiprocketOrderByChannelId } = await import("@/lib/shiprocket/client");
+
+      const srOrder = await getShiprocketOrderByChannelId(order.order_number);
+      if (!srOrder) {
+        return order;
+      }
+
+      const rawStatus = srOrder.status;
+      const statusCode = srOrder.status_code;
+      const shipment = srOrder.shipments?.[0];
+      const awbCode = shipment?.awb_code || null;
+      const courierName = shipment?.courier_name || null;
+      const srShipmentId = shipment?.id ? String(shipment.id) : null;
+      const srOrderId = srOrder.id ? String(srOrder.id) : null;
+
+      const mappedStatus = mapShiprocketStatusToOrderStatus(rawStatus, statusCode);
+
+      const updatePayload: Record<string, any> = {
+        updated_at: new Date().toISOString(),
+      };
+
+      if (srOrderId && !order.shiprocket_order_id && !srOrderId.startsWith("FS-")) {
+        updatePayload.shiprocket_order_id = srOrderId;
+      }
+      if (srShipmentId && !order.shiprocket_shipment_id) {
+        updatePayload.shiprocket_shipment_id = srShipmentId;
+      }
+      if (awbCode && order.awb_code !== awbCode) {
+        updatePayload.awb_code = awbCode;
+      }
+      if (courierName && order.courier_name !== String(courierName)) {
+        updatePayload.courier_name = String(courierName);
+      }
+
+      if (mappedStatus && mappedStatus !== order.status) {
+        updatePayload.status = mappedStatus;
+      }
+
+      if (Object.keys(updatePayload).length > 1) {
+        const supabase = createAdminSupabaseClient();
+        const { data: updatedRows, error: updateError } = await supabase
+          .from("orders")
+          .update(updatePayload)
+          .eq("id", order.id)
+          .select();
+
+        if (updateError) {
+          console.error("[Reconciliation] Failed to update order status:", updateError.message);
+          return order;
+        }
+
+        if (updatedRows && updatedRows.length > 0) {
+          return { ...order, ...updatedRows[0] };
+        }
+      }
+
+      return order;
+    } catch (err: any) {
+      // Graceful error handling: log sanitized warning, keep existing status
+      const errorMsg = err?.message || String(err);
+      console.warn(`[Reconciliation] Shiprocket status lookup failed for ${order.order_number}:`, errorMsg);
+      return order;
+    } finally {
+      inFlightReconciliations.delete(order.id);
+    }
+  })();
+
+  inFlightReconciliations.set(order.id, reconciliationPromise);
+  return reconciliationPromise;
 }
 
 /**

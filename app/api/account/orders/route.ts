@@ -32,9 +32,9 @@ export async function GET(request: Request) {
   }
 
   // Fetch orders strictly using the authenticated user's immutable customer_id
-  const { data: orders, error } = await supabase
+  const { data: rawOrders, error } = await supabase
     .from("orders")
-    .select("id, order_number, tracking_token, status, subtotal_amount, shipping_amount, tax_amount, total_amount, currency, created_at, updated_at")
+    .select("id, order_number, tracking_token, status, subtotal_amount, shipping_amount, tax_amount, total_amount, currency, shiprocket_order_id, shiprocket_shipment_id, created_at, updated_at")
     .eq("customer_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -43,5 +43,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Failed to load orders" }, { status: 500, headers });
   }
 
-  return NextResponse.json(orders ?? [], { status: 200, headers });
+  const { reconcileOrderStatusFromShiprocket } = await import("@/lib/shipping/fulfillment-webhook");
+  const orders = await Promise.all(
+    (rawOrders ?? []).map(async (o) => {
+      if (o.status === "processing" || o.status === "shipped") {
+        return await reconcileOrderStatusFromShiprocket(o);
+      }
+      return o;
+    })
+  );
+
+  return NextResponse.json(orders, { status: 200, headers });
 }
