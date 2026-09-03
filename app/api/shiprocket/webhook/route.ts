@@ -108,7 +108,7 @@ export async function POST(request: Request) {
   }
 
   // Map Shiprocket shipment status to FarmSmith order status
-  if (currentStatus.includes("CANCELLED") || currentStatus.includes("RTO") || currentStatus.includes("RETURN")) {
+  if (currentStatus.includes("CANCEL") || currentStatus.includes("RTO") || currentStatus.includes("RETURN")) {
     updatePayload.status = "cancelled";
   } else if (currentStatus.includes("DELIVERED")) {
     updatePayload.status = "delivered";
