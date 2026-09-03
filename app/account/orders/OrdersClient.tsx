@@ -6,6 +6,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import { Package } from "lucide-react";
+import { CopyButton } from "@/components/ui/CopyButton";
 import type { Order } from "@/types/order";
 
 function statusVariant(status: Order["status"]): "success" | "warning" | "error" | "muted" | "default" {
@@ -149,10 +150,11 @@ export default function OrdersClient() {
                 </div>
               </div>
               <div style={{ marginTop: "0.875rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
-                <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
                   {order.tracking_token && (
-                    <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", marginRight: "1rem" }}>
+                    <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
                       Tracking Key: <code style={{ background: "rgba(0,0,0,0.05)", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem", color: "var(--color-primary)" }}>{order.tracking_token.substring(0, 16)}...</code>
+                      <CopyButton text={order.tracking_token} label="Copy Key" />
                     </span>
                   )}
                   <Link

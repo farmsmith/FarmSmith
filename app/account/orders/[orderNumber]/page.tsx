@@ -7,6 +7,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import { Truck, ExternalLink } from "lucide-react";
+import { CopyButton } from "@/components/ui/CopyButton";
 import OrderStatusTimeline from "@/components/order/OrderStatusTimeline";
 import type { Order, OrderItem } from "@/types/order";
 
@@ -159,21 +160,24 @@ export default function AccountOrderDetailPage() {
                     <strong>{order.courier_name}</strong>
                   </p>
                 )}
-                <p style={{ margin: 0, color: "var(--color-foreground)" }}>
-                  <span style={{ color: "var(--color-muted)" }}>AWB:</span>{" "}
-                  <code
-                    style={{
-                      background: "rgba(0,0,0,0.05)",
-                      padding: "2px 8px",
-                      borderRadius: "var(--radius-sm)",
-                      fontFamily: "monospace",
-                      fontWeight: 600,
-                      color: "var(--color-primary)",
-                    }}
-                  >
-                    {order.awb_code}
-                  </code>
-                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <p style={{ margin: 0, color: "var(--color-foreground)" }}>
+                    <span style={{ color: "var(--color-muted)" }}>AWB:</span>{" "}
+                    <code
+                      style={{
+                        background: "rgba(0,0,0,0.05)",
+                        padding: "2px 8px",
+                        borderRadius: "var(--radius-sm)",
+                        fontFamily: "monospace",
+                        fontWeight: 600,
+                        color: "var(--color-primary)",
+                      }}
+                    >
+                      {order.awb_code}
+                    </code>
+                  </p>
+                  <CopyButton text={order.awb_code} label="Copy AWB" />
+                </div>
               </div>
             </div>
 

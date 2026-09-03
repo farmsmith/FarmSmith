@@ -7,6 +7,7 @@ import { CheckCircle, RefreshCw, Truck, ExternalLink } from "lucide-react";
 import OrderStatusTimeline from "@/components/order/OrderStatusTimeline";
 import { formatPrice } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
+import { CopyButton } from "@/components/ui/CopyButton";
 import type { PublicOrderStatus } from "@/types/order";
 
 export default function OrderConfirmationClient() {
@@ -190,7 +191,7 @@ export default function OrderConfirmationClient() {
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: "0.375rem",
+                  gap: "0.5rem",
                   background: "rgba(22, 101, 52, 0.08)",
                   border: "1px solid rgba(22, 101, 52, 0.2)",
                   padding: "0.625rem 1.25rem",
@@ -199,9 +200,11 @@ export default function OrderConfirmationClient() {
                   color: "var(--color-primary)",
                   fontWeight: 500,
                   marginTop: "0.5rem",
+                  flexWrap: "wrap",
                 }}
               >
-                🔑 <strong>Tracking Access Key:</strong> <code>{order.tracking_token}</code>
+                <span>🔑 <strong>Tracking Access Key:</strong> <code>{order.tracking_token}</code></span>
+                <CopyButton text={order.tracking_token} label="Copy Key" />
               </div>
             )}
           </div>
@@ -256,22 +259,25 @@ export default function OrderConfirmationClient() {
                         <strong>{order.courier_name}</strong>
                       </p>
                     )}
-                    <p style={{ margin: 0, color: "var(--color-foreground)" }}>
-                      <span style={{ color: "var(--color-muted)" }}>AWB:</span>{" "}
-                      <code
-                        style={{
-                          background: "rgba(0,0,0,0.05)",
-                          padding: "2px 8px",
-                          borderRadius: "var(--radius-sm)",
-                          fontFamily: "monospace",
-                          fontWeight: 600,
-                          color: "var(--color-primary)",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        {order.awb_code}
-                      </code>
-                    </p>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <p style={{ margin: 0, color: "var(--color-foreground)" }}>
+                        <span style={{ color: "var(--color-muted)" }}>AWB:</span>{" "}
+                        <code
+                          style={{
+                            background: "rgba(0,0,0,0.05)",
+                            padding: "2px 8px",
+                            borderRadius: "var(--radius-sm)",
+                            fontFamily: "monospace",
+                            fontWeight: 600,
+                            color: "var(--color-primary)",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {order.awb_code}
+                        </code>
+                      </p>
+                      <CopyButton text={order.awb_code} label="Copy AWB" />
+                    </div>
                   </div>
                 </div>
 

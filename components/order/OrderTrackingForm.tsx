@@ -4,15 +4,29 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Search } from "lucide-react";
+import { Search, ClipboardPaste, Check } from "lucide-react";
 
 export default function OrderTrackingForm() {
   const router = useRouter();
   const [orderNumber, setOrderNumber] = useState("");
   const [token, setToken] = useState("");
+  const [pasted, setPasted] = useState(false);
   const [errors, setErrors] = useState<{ orderNumber?: string; token?: string }>({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  const handlePasteToken = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setToken(text.trim());
+        setPasted(true);
+        setTimeout(() => setPasted(false), 2000);
+      }
+    } catch {
+      // Browser permission denied or unsupported
+    }
+  };
 
   const validate = () => {
     const e: typeof errors = {};
@@ -73,16 +87,46 @@ export default function OrderTrackingForm() {
         autoComplete="off"
         hint="Found in your confirmation email"
       />
-      <Input
-        id="track-token"
-        label="Tracking Token"
-        value={token}
-        onChange={(e) => setToken(e.target.value)}
-        error={errors.token}
-        placeholder="abc123..."
-        autoComplete="off"
-        hint="Also in your confirmation email"
-      />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <label htmlFor="track-token" style={{ fontSize: "0.875rem", fontWeight: 500, color: "var(--color-foreground)" }}>
+            Tracking Access Key
+          </label>
+          <button
+            type="button"
+            onClick={handlePasteToken}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.35rem",
+              background: pasted ? "rgba(22, 101, 52, 0.15)" : "rgba(22, 101, 52, 0.08)",
+              border: "1px solid " + (pasted ? "rgba(22, 101, 52, 0.3)" : "rgba(22, 101, 52, 0.2)"),
+              color: "var(--color-primary)",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              padding: "0.25rem 0.625rem",
+              borderRadius: "var(--radius-sm)",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+            title="Paste Tracking Access Key from clipboard"
+            id="paste-tracking-key-btn"
+          >
+            {pasted ? <Check size={13} style={{ color: "var(--color-primary)" }} /> : <ClipboardPaste size={13} />}
+            <span>{pasted ? "Pasted!" : "Paste from Clipboard"}</span>
+          </button>
+        </div>
+        <Input
+          id="track-token"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          error={errors.token}
+          placeholder="Paste long tracking key here..."
+          autoComplete="off"
+          hint="Check your order confirmation email for this key"
+        />
+      </div>
 
       {apiError && (
         <div
