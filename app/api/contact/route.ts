@@ -60,7 +60,13 @@ export async function POST(req: Request) {
 
     // 2. Send email notification via Resend API if key configured
     const resendApiKey = process.env.RESEND_API_KEY;
-    const recipientEmail = process.env.CONTACT_EMAIL || "farmsmith6@gmail.com";
+    const contactEmail = process.env.CONTACT_EMAIL;
+    const senderEmail = contactEmail
+      ? (contactEmail.includes("<") ? contactEmail : `FarmSmith Contact <${contactEmail}>`)
+      : "FarmSmith Contact <onboarding@resend.dev>";
+    const recipientEmail = contactEmail
+      ? (contactEmail.includes("<") ? contactEmail.match(/<([^>]+)>/)?.[1] || contactEmail : contactEmail)
+      : "farmsmith6@gmail.com";
 
     if (resendApiKey) {
       try {
@@ -71,7 +77,7 @@ export async function POST(req: Request) {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "FarmSmith Contact <onboarding@resend.dev>",
+            from: senderEmail,
             to: [recipientEmail],
             reply_to: email,
             subject: `[Contact Form] ${subject || "New Customer Inquiry from " + name}`,

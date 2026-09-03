@@ -75,13 +75,23 @@ export async function POST(request: Request) {
       // Trigger Shiprocket fulfillment and await completion (safely handles errors internally)
       await processOrderFulfillment(order.id);
 
-      // Asynchronously send order confirmation email
-      sendOrderConfirmationEmail(order.id).catch((emailErr) => {
-        console.error(`[RazorpayWebhook] Non-blocking order confirmation email failed for ${order.id}:`, emailErr);
-      });
+      // Await order confirmation email send safely without throwing or breaking webhook response
+      try {
+        const emailRes = await sendOrderConfirmationEmail(order.id);
+        if (!emailRes.success && !emailRes.skipped) {
+          console.warn(`[RazorpayWebhook] Order confirmation email error for ${order.id}:`, emailRes.error);
+        }
+      } catch (emailErr) {
+        console.error(`[RazorpayWebhook] Order confirmation email exception for ${order.id}:`, emailErr);
+      }
     } else if (order.status === "paid" || order.status === "processing") {
-      // Order already marked paid (e.g. by verify-payment route), ensure fulfillment is complete
+      // Order already marked paid (e.g. by verify-payment route), ensure fulfillment & email confirmation are completed
       await processOrderFulfillment(order.id);
+      try {
+        await sendOrderConfirmationEmail(order.id);
+      } catch (emailErr) {
+        console.error(`[RazorpayWebhook] Order confirmation email exception for ${order.id}:`, emailErr);
+      }
     } else if (order.status === "cancelled") {
       // A stale-order worker may have released stock just before Razorpay
       // captured the payment. Never silently discard a valid payment. Mark it

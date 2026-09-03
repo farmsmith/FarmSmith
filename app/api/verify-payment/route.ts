@@ -135,12 +135,22 @@ export async function POST(request: Request) {
         );
       }
 
-      // Idempotency check: if order is already paid, trigger fulfillment catch & return success
+      // Idempotency check: if order is already paid/processing, ensure fulfillment & send confirmation email safely
       if (order.status === "paid" || order.status === "processing" || order.status === "shipped" || order.status === "delivered") {
         // Asynchronously ensure fulfillment without blocking response
         processOrderFulfillment(order.id).catch((err) => {
           console.error("Background fulfillment error on verified order:", err);
         });
+
+        // Await order confirmation email send safely without throwing or breaking payment response
+        try {
+          const emailRes = await sendOrderConfirmationEmail(order.id);
+          if (!emailRes.success && !emailRes.skipped) {
+            console.warn(`[VerifyPayment] Order confirmation email error for ${order.id}:`, emailRes.error);
+          }
+        } catch (emailErr) {
+          console.error(`[VerifyPayment] Order confirmation email exception for ${order.id}:`, emailErr);
+        }
 
         return NextResponse.json(
           {
@@ -183,10 +193,15 @@ export async function POST(request: Request) {
           );
         }
 
-        // Asynchronously send order confirmation email without blocking response
-        sendOrderConfirmationEmail(order.id).catch((emailErr) => {
-          console.error(`[VerifyPayment] Non-blocking order confirmation email failed for ${order.id}:`, emailErr);
-        });
+        // Await order confirmation email send safely without throwing or breaking payment response
+        try {
+          const emailRes = await sendOrderConfirmationEmail(order.id);
+          if (!emailRes.success && !emailRes.skipped) {
+            console.warn(`[VerifyPayment] Order confirmation email error for ${order.id}:`, emailRes.error);
+          }
+        } catch (emailErr) {
+          console.error(`[VerifyPayment] Order confirmation email exception for ${order.id}:`, emailErr);
+        }
       } else if (order.status === "cancelled") {
         // Late payment after order expiration
         await supabase

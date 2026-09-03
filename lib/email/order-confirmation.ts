@@ -10,16 +10,28 @@ export interface SendEmailResult {
   skipped?: boolean;
 }
 
+// Module-level in-memory cache to prevent duplicate email dispatches within process lifecycle
+const dispatchedOrderEmails = new Set<string>();
+
 /**
  * Sends a branded order confirmation email to the customer using Resend.
  * Safe to be called asynchronously in background tasks.
  * Idempotent: checks if confirmation email was already dispatched.
  */
 export async function sendOrderConfirmationEmail(orderId: string): Promise<SendEmailResult> {
+  console.log(`[Email] Invoked sendOrderConfirmationEmail for orderId: ${orderId}`);
+
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) {
-    console.warn(`[Email] RESEND_API_KEY not configured. Skipping confirmation email for order ${orderId}`);
+    console.warn(`[Email] RESEND_API_KEY not configured in environment variables. Skipping confirmation email for order ${orderId}`);
     return { success: false, skipped: true, error: "RESEND_API_KEY missing" };
+  } else {
+    console.log(`[Email] RESEND_API_KEY is present (prefix: ${resendApiKey.substring(0, 4)}...)`);
+  }
+
+  if (dispatchedOrderEmails.has(orderId)) {
+    console.log(`[Email] Order confirmation email already dispatched for order ${orderId}. Skipping duplicate.`);
+    return { success: true, skipped: true };
   }
 
   try {
@@ -47,15 +59,24 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
       return { success: false, error: orderErr?.message || "Order not found" };
     }
 
+    console.log(`[Email] Loaded order ${order.order_number} for customer: ${order.customer_email} (items: ${order.order_items?.length || 0})`);
+
     if (!order.customer_email) {
-      console.warn(`[Email] Order ${orderId} has no customer_email. Skipping.`);
+      console.warn(`[Email] Order ${orderId} (${order.order_number}) has no customer_email. Skipping.`);
       return { success: false, skipped: true, error: "No customer_email on order" };
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://farm-smith.vercel.app";
+    const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://farm-smith.vercel.app";
     const directTrackingUrl = `${siteUrl}/order/${order.order_number}?token=${order.tracking_token}`;
     const generalTrackingUrl = `${siteUrl}/track`;
-    const senderEmail = process.env.CONTACT_EMAIL ? `FarmSmith <${process.env.CONTACT_EMAIL}>` : "FarmSmith <onboarding@resend.dev>";
+    
+    const contactEmail = process.env.CONTACT_EMAIL;
+    const rawSupportEmail = contactEmail
+      ? (contactEmail.includes("<") ? contactEmail.match(/<([^>]+)>/)?.[1] || contactEmail : contactEmail)
+      : "farmsmith6@gmail.com";
+
+    // Explicitly configured to FarmSmith <onboarding@resend.dev> for testing Resend email delivery without custom domain setup
+    const senderEmail = "FarmSmith <onboarding@resend.dev>";
 
     // Build items HTML table rows
     const itemsHtml = (order.order_items || [])
@@ -219,7 +240,7 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
                 <td style="background-color: #FBFAF6; padding: 24px; text-align: center; border-top: 1px solid #E5E7EB;">
                   <p style="margin: 0 0 6px; font-size: 13px; color: #4B5563;">Questions about your order?</p>
                   <p style="margin: 0; font-size: 13px;">
-                    Contact our support team at <a href="mailto:farmsmith6@gmail.com" style="color: #C4883E; font-weight: 600; text-decoration: none;">farmsmith6@gmail.com</a>
+                    Contact our support team at <a href="mailto:${rawSupportEmail}" style="color: #C4883E; font-weight: 600; text-decoration: none;">${rawSupportEmail}</a>
                   </p>
                   <p style="margin: 16px 0 0; font-size: 11px; color: #9CA3AF;">
                     © ${new Date().getFullYear()} FarmSmith Foods. All rights reserved.
@@ -236,6 +257,8 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     `;
 
     // Send HTTP POST request to Resend API
+    console.log(`[Email] Dispatching Resend API request for ${order.order_number}: from="${senderEmail}", to=["${order.customer_email}"], subject="Order Confirmation #${order.order_number} - FarmSmith"`);
+
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -257,6 +280,7 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     }
 
     const resData = await response.json();
+    dispatchedOrderEmails.add(orderId);
     console.log(`[Email] Order confirmation email successfully sent for ${order.order_number}. Resend ID: ${resData?.id}`);
 
     return { success: true, messageId: resData?.id };

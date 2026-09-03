@@ -189,10 +189,15 @@ export async function processOrderFulfillment(orderId: string): Promise<Fulfillm
     const firstName = nameParts[0] || "Customer";
     const lastName = nameParts.slice(1).join(" ") || "Customer";
 
+    const pickupLocation = process.env.SHIPROCKET_PICKUP_LOCATION;
+    if (!pickupLocation) {
+      throw new Error("SHIPROCKET_PICKUP_LOCATION is not configured in environment variables.");
+    }
+
     const payload: CreateShiprocketOrderPayload = {
       order_id: fullOrder.order_number,
       order_date: formattedDate,
-      pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "home",
+      pickup_location: pickupLocation,
       billing_customer_name: firstName,
       billing_last_name: lastName,
       billing_address: shippingAddr.line1 || "Main Street",
