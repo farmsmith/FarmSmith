@@ -29,6 +29,19 @@ function getProductBadge(product: Product) {
   return { label: "GI-Tagged", bg: "#4A6B5D", color: "#FFF" };
 }
 
+function formatWeightLabel(product: Product): string | null {
+  if (product.weight_grams && product.weight_grams > 0) {
+    if (product.weight_grams >= 1000 && product.weight_grams % 1000 === 0) {
+      return `${product.weight_grams / 1000}kg`;
+    }
+    return `${product.weight_grams}g`;
+  }
+  if (product.unit && /^\d+(g|kg|ml|l)$/i.test(product.unit.trim())) {
+    return product.unit.trim();
+  }
+  return null;
+}
+
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -62,6 +75,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   // Calculate review rating & count based on product id
   const rating = 4.9;
   const reviewCount = Math.floor(120 + (product.id.charCodeAt(0) % 50) * 7);
+
+  const weightLabel = formatWeightLabel(product);
 
   return (
     <article
@@ -188,21 +203,42 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.category || "SPICES & ESSENTIALS"}
         </p>
 
-        {/* Product Name */}
-        <Link href={`/shop/${product.slug}`} style={{ textDecoration: "none" }}>
-          <h3
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "1.0625rem",
-              fontWeight: 700,
-              color: "var(--color-primary)",
-              marginBottom: "0.25rem",
-              lineHeight: 1.35,
-            }}
-          >
-            {product.name}
-          </h3>
-        </Link>
+        {/* Product Name & Weight Badge Row */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.25rem" }}>
+          <Link href={`/shop/${product.slug}`} style={{ textDecoration: "none", flex: 1, minWidth: 0 }}>
+            <h3
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "1.0625rem",
+                fontWeight: 700,
+                color: "var(--color-primary)",
+                lineHeight: 1.35,
+              }}
+            >
+              {product.name}
+            </h3>
+          </Link>
+
+          {weightLabel && (
+            <span
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                color: "var(--color-primary)",
+                background: "rgba(31, 58, 46, 0.06)",
+                border: "1px solid rgba(31, 58, 46, 0.12)",
+                padding: "0.15rem 0.5rem",
+                borderRadius: "var(--radius-sm)",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+                marginTop: "0.1rem",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {weightLabel}
+            </span>
+          )}
+        </div>
 
         {/* Short spec line — Only shown for Turmeric */}
         {isTurmeric && (
@@ -216,7 +252,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               textOverflow: "ellipsis",
             }}
           >
-            {product.weight_grams ? `${product.weight_grams}g · GI-Tagged Pure Batch` : "Lab Tested · Pure Origin"}
+            GI-Tagged Pure Batch
           </p>
         )}
 

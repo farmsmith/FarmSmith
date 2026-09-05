@@ -402,7 +402,10 @@ export default function CheckoutClient() {
     }
   };
 
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
+
   const handlePaymentSuccess = (orderNumber: string, trackingToken: string) => {
+    setIsOrderPlaced(true);
     clearCart();
     router.push(`/order/${orderNumber}?token=${trackingToken}`);
   };
@@ -411,6 +414,32 @@ export default function CheckoutClient() {
     return (
       <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div className="skeleton" style={{ width: "220px", height: "2rem" }} />
+      </div>
+    );
+  }
+
+  if (isOrderPlaced) {
+    return (
+      <div
+        style={{
+          minHeight: "70vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "1.25rem",
+          textAlign: "center",
+          padding: "2rem",
+        }}
+      >
+        <div
+          className="skeleton"
+          style={{ width: "48px", height: "48px", borderRadius: "50%", margin: "0 auto" }}
+        />
+        <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "1.5rem", color: "var(--color-primary)" }}>
+          Order Confirmed!
+        </h1>
+        <p style={{ color: "var(--color-muted)" }}>Redirecting to your order tracking page...</p>
       </div>
     );
   }

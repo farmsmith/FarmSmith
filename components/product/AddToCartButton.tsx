@@ -123,7 +123,7 @@ export default function AddToCartButton({
             display: "flex",
             alignItems: "center",
             width: "100%",
-            height: size === "lg" ? "3.25rem" : "2.5rem",
+            height: size === "lg" ? "3rem" : "2.375rem",
             border: "1.5px solid var(--color-primary)",
             borderRadius: "var(--radius-md)",
             overflow: "hidden",
@@ -141,10 +141,10 @@ export default function AddToCartButton({
             }}
             aria-label={`Decrease quantity of ${product.name}`}
             style={{
-              width: "2.75rem",
+              width: "2.5rem",
               height: "100%",
               border: "none",
-              background: "var(--color-surface)",
+              background: "rgba(31, 58, 46, 0.05)",
               color: "var(--color-primary)",
               cursor: "pointer",
               display: "flex",
@@ -161,12 +161,12 @@ export default function AddToCartButton({
             style={{
               flex: 1,
               textAlign: "center",
-              fontSize: "0.9375rem",
+              fontSize: "0.8125rem",
               fontWeight: 700,
               color: "var(--color-primary)",
             }}
           >
-            {cartItem.quantity}
+            {cartItem.quantity} in Cart
           </span>
 
           <button
@@ -175,10 +175,10 @@ export default function AddToCartButton({
             disabled={cartItem.quantity >= Math.min(product.stock_quantity, 50)}
             aria-label={`Increase quantity of ${product.name}`}
             style={{
-              width: "2.75rem",
+              width: "2.5rem",
               height: "100%",
               border: "none",
-              background: "var(--color-surface)",
+              background: "rgba(31, 58, 46, 0.05)",
               color: "var(--color-primary)",
               cursor: cartItem.quantity >= product.stock_quantity ? "not-allowed" : "pointer",
               display: "flex",
@@ -196,7 +196,20 @@ export default function AddToCartButton({
           variant={added ? "accent" : "outline"}
           size={size}
           onClick={() => handleAdd(false)}
-          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.4rem",
+            height: size === "lg" ? "3rem" : "2.375rem",
+            border: added ? "none" : "1.5px solid var(--color-primary)",
+            color: added ? "#FFFFFF" : "var(--color-primary)",
+            fontWeight: 600,
+            fontSize: "0.8125rem",
+            borderRadius: "var(--radius-md)",
+            transition: "all 0.15s ease",
+          }}
           aria-label={
             added
               ? `${product.name} added to cart`
@@ -206,12 +219,12 @@ export default function AddToCartButton({
         >
           {added ? (
             <>
-              <Check size={16} aria-hidden="true" />
+              <Check size={15} aria-hidden="true" />
               Added to Cart!
             </>
           ) : (
             <>
-              <ShoppingCart size={16} aria-hidden="true" />
+              <ShoppingCart size={15} aria-hidden="true" />
               Add to Cart
             </>
           )}
@@ -229,16 +242,21 @@ export default function AddToCartButton({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "0.5rem",
-            background: "linear-gradient(135deg, #172D23 0%, #294A3B 100%)",
+            gap: "0.4rem",
+            height: size === "lg" ? "3rem" : "2.375rem",
+            background: "linear-gradient(135deg, #1F3A2E 0%, #2D5241 100%)",
             border: "none",
             color: "#FFFFFF",
-            boxShadow: "0 4px 12px rgba(23, 45, 35, 0.15)",
+            fontWeight: 600,
+            fontSize: "0.8125rem",
+            borderRadius: "var(--radius-md)",
+            boxShadow: "0 3px 10px rgba(31, 58, 46, 0.15)",
+            transition: "all 0.15s ease",
           }}
           aria-label={`Buy ${product.name} now`}
           id={`buy-now-${product.id}`}
         >
-          <Zap size={16} aria-hidden="true" fill="#D9A441" color="#D9A441" />
+          <Zap size={15} aria-hidden="true" fill="#C4883E" color="#C4883E" />
           Buy Now
         </Button>
       )}
