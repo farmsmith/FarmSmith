@@ -37,12 +37,14 @@ export default function Navbar() {
   const closeAllMenus = () => {
     setMenuOpen(false);
     setAccountMenuOpen(false);
+    closeDrawer();
   };
 
-  // Auto-close both menus whenever the route changes
+  // Auto-close menus and drawer whenever the route changes
   useEffect(() => {
     closeAllMenus();
   }, [pathname]);
+
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();

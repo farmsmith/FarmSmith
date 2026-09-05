@@ -29,6 +29,7 @@ function renderAction(action: UIStateAction, defaultVariant: "primary" | "outlin
       <Link
         key={label}
         href={href}
+        onClick={onClick}
         aria-label={ariaLabel || label}
         target={isExternal ? "_blank" : undefined}
         rel={isExternal ? "noopener noreferrer" : undefined}
@@ -42,6 +43,7 @@ function renderAction(action: UIStateAction, defaultVariant: "primary" | "outlin
       </Link>
     );
   }
+
 
 
   return (
