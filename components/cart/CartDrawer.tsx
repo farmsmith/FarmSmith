@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart/context";
 import CartItemRow from "./CartItemRow";
 import CartSummary from "./CartSummary";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/states";
 
 interface CartDrawerProps {
   open: boolean;
@@ -134,39 +135,18 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
           }}
         >
           {items.length === 0 ? (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "1rem",
-                padding: "3rem 0",
-                textAlign: "center",
-              }}
-            >
-              <ShoppingBag
-                size={48}
-                style={{ color: "var(--color-muted)", opacity: 0.4 }}
-                aria-hidden="true"
-              />
-              <p
-                style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "1.125rem",
-                  color: "var(--color-primary)",
+            <div style={{ padding: "2.5rem 0" }}>
+              <EmptyState
+                layout="compact"
+                icon={<ShoppingBag size={32} aria-hidden="true" />}
+                title="Your cart is empty"
+                description="Add something wholesome to get started."
+                primaryAction={{
+                  label: "Browse Products",
+                  href: "/shop",
+                  onClick: onClose,
                 }}
-              >
-                Your cart is empty
-              </p>
-              <p style={{ fontSize: "0.875rem", color: "var(--color-muted)" }}>
-                Add something wholesome to get started.
-              </p>
-              <Link href="/shop" onClick={onClose} style={{ textDecoration: "none" }}>
-                <Button variant="primary" size="md">
-                  Browse Products
-                </Button>
-              </Link>
+              />
             </div>
           ) : (
             <div>

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import CheckoutClient from "./CheckoutClient";
+import CheckoutLoading from "./loading";
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -13,21 +14,7 @@ export const metadata: Metadata = {
 
 export default function CheckoutPage() {
   return (
-    <Suspense
-      fallback={
-        <div
-          style={{
-            background: "var(--color-background)",
-            minHeight: "80vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div className="skeleton" style={{ width: "300px", height: "1.5rem" }} />
-        </div>
-      }
-    >
+    <Suspense fallback={<CheckoutLoading />}>
       <CheckoutClient />
     </Suspense>
   );

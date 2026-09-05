@@ -7,6 +7,7 @@ import Image from "next/image";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { SuccessState, ErrorState } from "@/components/ui/states";
 
 function SignupForm() {
   const router = useRouter();
@@ -74,12 +75,16 @@ function SignupForm() {
       });
 
       if (authError) {
-        setError(authError.message ?? "Sign up failed. Please try again.");
+        if (authError.message?.toLowerCase().includes("already registered") || authError.message?.toLowerCase().includes("exists")) {
+          setError("An account with this email already exists. Please sign in.");
+        } else {
+          setError("Sign up could not be completed. Please check your information and try again.");
+        }
         return;
       }
       setSuccess(true);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError("Unable to connect to the registration service. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -95,20 +100,23 @@ function SignupForm() {
           justifyContent: "center",
           background: "var(--color-background)",
           padding: "2rem",
-          textAlign: "center",
         }}
       >
-        <div>
-          <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "2rem", color: "var(--color-primary)", marginBottom: "1rem" }}>
-            Check your email
-          </h1>
-          <p style={{ color: "var(--color-muted)", maxWidth: "400px", lineHeight: 1.7, marginBottom: "2rem" }}>
-            We've sent a confirmation link to <strong>{email}</strong>.
-            Click the link to activate your account.
-          </p>
-          <Button variant="primary" size="md" onClick={() => router.push(`/login${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`)}>
-            Go to Sign In
-          </Button>
+        <div style={{ maxWidth: "460px", width: "100%" }}>
+          <SuccessState
+            layout="card"
+            title="Check your email"
+            description={
+              <span>
+                We've sent a confirmation link to <strong>{email}</strong>. Click the link in your inbox to activate your account.
+              </span>
+            }
+            primaryAction={{
+              label: "Go to Sign In",
+              onClick: () => router.push(`/login${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`),
+            }}
+            className="py-8"
+          />
         </div>
       </div>
     );
@@ -222,19 +230,13 @@ function SignupForm() {
             />
 
             {error && (
-              <div
+              <ErrorState
+                layout="inline"
+                title="Registration failed"
+                description={error}
                 role="alert"
-                style={{
-                  background: "var(--color-error-bg)",
-                  border: "1px solid var(--color-error)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "0.75rem 1rem",
-                  fontSize: "0.875rem",
-                  color: "var(--color-error)",
-                }}
-              >
-                {error}
-              </div>
+                ariaLive="assertive"
+              />
             )}
 
             <Button type="submit" variant="primary" size="lg" loading={loading} id="signup-submit">
@@ -254,9 +256,53 @@ function SignupForm() {
   );
 }
 
+function SignupSkeleton() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        minHeight: "90vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--color-background)",
+        padding: "2rem 1rem",
+      }}
+    >
+      <span className="sr-only">Loading sign up page...</span>
+      <div style={{ width: "100%", maxWidth: "440px", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+          <div className="skeleton" style={{ width: "56px", height: "56px", borderRadius: "50%", margin: "0 auto" }} />
+          <div className="skeleton" style={{ width: "200px", height: "1.75rem" }} />
+          <div className="skeleton" style={{ width: "160px", height: "0.875rem" }} />
+        </div>
+        <div
+          style={{
+            background: "var(--color-card)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-xl)",
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.125rem",
+          }}
+        >
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)" }} />
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)" }} />
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)" }} />
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)" }} />
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)" }} />
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)", marginTop: "0.5rem" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SignupClient() {
   return (
-    <Suspense fallback={<div style={{ minHeight: "80vh" }} />}>
+    <Suspense fallback={<SignupSkeleton />}>
       <SignupForm />
     </Suspense>
   );

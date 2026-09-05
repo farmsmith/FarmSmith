@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { SuccessState, ErrorState } from "@/components/ui/states";
 
 export default function ResetPasswordClient() {
   const [email, setEmail] = useState("");
@@ -92,15 +93,20 @@ export default function ResetPasswordClient() {
           }}
         >
           {sent ? (
-            <div style={{ textAlign: "center" }}>
-              <p style={{ color: "var(--color-muted)", lineHeight: 1.7, marginBottom: "1.5rem" }}>
-                We sent a reset link to <strong style={{ color: "var(--color-primary)" }}>{email}</strong>.
-                Click it to set a new password.
-              </p>
-              <Link href="/login" style={{ color: "var(--color-accent)", fontWeight: 600, textDecoration: "none" }}>
-                Back to Sign In
-              </Link>
-            </div>
+            <SuccessState
+              layout="card"
+              title="Reset link sent"
+              description={
+                <span>
+                  We sent a reset link to <strong style={{ color: "var(--color-primary)" }}>{email}</strong>. Check your inbox to choose a new password.
+                </span>
+              }
+              primaryAction={{
+                label: "Back to Sign In",
+                href: "/login",
+              }}
+              className="py-4"
+            />
           ) : (
             <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               <Input
@@ -116,19 +122,13 @@ export default function ResetPasswordClient() {
               />
 
               {error && (
-                <div
+                <ErrorState
+                  layout="inline"
+                  title="Could not send reset link"
+                  description={error}
                   role="alert"
-                  style={{
-                    background: "var(--color-error-bg)",
-                    border: "1px solid var(--color-error)",
-                    borderRadius: "var(--radius-md)",
-                    padding: "0.75rem 1rem",
-                    fontSize: "0.875rem",
-                    color: "var(--color-error)",
-                  }}
-                >
-                  {error}
-                </div>
+                  ariaLive="assertive"
+                />
               )}
 
               <Button type="submit" variant="primary" size="lg" loading={loading} id="reset-submit">

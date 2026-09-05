@@ -26,11 +26,44 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+function getProductNetWeight(product: Product): string {
+  if (product.unit && product.unit.trim().length > 0) {
+    const raw = product.unit.trim();
+    // e.g. "100g" or "100 g" -> "100 gram"
+    if (/^(\d+)\s*g$/i.test(raw)) {
+      const num = raw.match(/^(\d+)\s*g$/i)?.[1];
+      return `${num} gram`;
+    }
+    // e.g. "500ml" -> "500 ml"
+    if (/^(\d+)\s*ml$/i.test(raw)) {
+      const num = raw.match(/^(\d+)\s*ml$/i)?.[1];
+      return `${num} ml`;
+    }
+    // e.g. "1kg" -> "1 kg"
+    if (/^(\d+)\s*kg$/i.test(raw)) {
+      const num = raw.match(/^(\d+)\s*kg$/i)?.[1];
+      return `${num} kg`;
+    }
+    return raw;
+  }
+  if (product.weight_grams && product.weight_grams > 0) {
+    if (product.weight_grams >= 1000 && product.weight_grams % 1000 === 0) {
+      return `${product.weight_grams / 1000} kg`;
+    }
+    return `${product.weight_grams} gram`;
+  }
+  return "100 gram";
+}
+
 // Build product facts from product fields — this drives the numbered facts grid
 function buildProductFacts(product: Product) {
   const facts = [];
   if (product.category) {
     facts.push({ label: "Category", value: product.category, detail: "GI-tagged sourcing region" });
+  }
+  const weight = getProductNetWeight(product);
+  if (weight && weight !== "Standard Pack") {
+    facts.push({ label: "Net Quantity", value: weight, detail: "Net contents as packaged" });
   }
   facts.push({ label: "Testing", value: "Lab Certified", detail: "Third-party batch testing. Zero lead chromate, zero synthetic dyes." });
   facts.push({ label: "Sourcing", value: "GI-Tagged Origin", detail: "Traceable to the GI-registered growing region in India." });
@@ -199,10 +232,31 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     color: "var(--color-muted)",
                     lineHeight: 1.8,
                     whiteSpace: "pre-line",
+                    marginBottom: "1.25rem",
                   }}
                 >
                   {product.description}
                 </p>
+
+                {/* Net Weight Info */}
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.625rem",
+                    background: "rgba(31, 58, 46, 0.04)",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-md)",
+                    padding: "0.5rem 0.875rem",
+                  }}
+                >
+                  <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)", fontWeight: 500 }}>
+                    Net Weight:
+                  </span>
+                  <span style={{ fontSize: "0.9375rem", fontWeight: 700, color: "var(--color-primary)" }}>
+                    {getProductNetWeight(product)}
+                  </span>
+                </div>
               </div>
             )}
           </div>

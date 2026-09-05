@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
+import { OfflineBanner } from "@/components/ui/states";
 
 const siteUrl = process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -82,6 +83,7 @@ export default function RootLayout({
           </>
         )}
         <CartProvider>
+          <OfflineBanner />
           <ScrollToTop />
           <Navbar />
           <main className="flex-1">{children}</main>

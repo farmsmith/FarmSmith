@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
@@ -8,6 +8,10 @@ import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import { Truck, ExternalLink } from "lucide-react";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { ErrorState, OfflineState, PermissionDeniedState, SessionExpiredState } from "@/components/ui/states";
+import { useNetworkStatus } from "@/lib/hooks/useNetworkStatus";
+
+
 import OrderStatusTimeline from "@/components/order/OrderStatusTimeline";
 import type { Order, OrderItem } from "@/types/order";
 
@@ -30,46 +34,77 @@ function statusLabel(status: Order["status"]): string {
 }
 
 export default function AccountOrderDetailPage() {
+  const { isOnline } = useNetworkStatus();
   const params = useParams<{ orderNumber: string }>();
   const { orderNumber } = params;
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  const fetchOrder = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setPermissionDenied(false);
+    setSessionExpired(false);
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setSessionExpired(true);
+        return;
+      }
+      const res = await fetch(`/api/account/orders/${orderNumber}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.status === 401) {
+        setSessionExpired(true);
+        return;
+      }
+      if (res.status === 403) {
+        setPermissionDenied(true);
+        return;
+      }
+      if (res.status === 404) {
+        setError("Order not found or no longer available.");
+        return;
+      }
+      if (!res.ok) {
+        setError("We couldn't load details for this order. Please try again.");
+        return;
+      }
+      const data = await res.json() as OrderDetail;
+      setOrder(data);
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [orderNumber]);
+
+
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      setLoading(true);
-      try {
-        const supabase = createBrowserSupabaseClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-        const res = await fetch(`/api/account/orders/${orderNumber}`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        if (res.status === 404) { setError("Order not found."); return; }
-        if (!res.ok) { setError("Failed to load order."); return; }
-        const data = await res.json() as OrderDetail;
-        setOrder(data);
-      } catch {
-        setError("Network error.");
-      } finally {
-        setLoading(false);
-      }
-    };
     void fetchOrder();
-  }, [orderNumber]);
+  }, [fetchOrder]);
 
   if (loading) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div
+        role="status"
+        aria-live="polite"
+        style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+      >
+        <span className="sr-only">Loading order details...</span>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="skeleton" style={{ height: "80px", borderRadius: "var(--radius-md)" }} />
+          <div key={i} className="skeleton" style={{ height: "90px", borderRadius: "var(--radius-md)" }} aria-hidden="true" />
         ))}
       </div>
     );
   }
 
-  if (error || !order) {
+  if (sessionExpired || permissionDenied || error || !order) {
     return (
       <div
         style={{
@@ -77,16 +112,66 @@ export default function AccountOrderDetailPage() {
           border: "1px solid var(--color-border)",
           borderRadius: "var(--radius-lg)",
           padding: "2rem",
-          textAlign: "center",
         }}
       >
-        <p style={{ color: "var(--color-error)", marginBottom: "1rem" }}>{error ?? "Order not found."}</p>
-        <Link href="/account/orders" style={{ color: "var(--color-accent)", fontWeight: 600, textDecoration: "none" }}>
-          ← Back to Orders
-        </Link>
+        {sessionExpired ? (
+          <SessionExpiredState
+            layout="card"
+            redirectUrl={`/account/orders/${orderNumber}`}
+            className="py-6"
+          />
+        ) : permissionDenied ? (
+          <PermissionDeniedState
+            layout="card"
+            title="Order Access Restricted"
+            description="You do not have permission to view details for this order."
+            primaryAction={{
+              label: "Back to Orders",
+              href: "/account/orders",
+            }}
+            secondaryAction={{
+              label: "Go Home",
+              href: "/",
+              variant: "outline",
+            }}
+            className="py-6"
+          />
+        ) : error && !isOnline ? (
+          <OfflineState
+            layout="card"
+            title="You're offline"
+            description="We couldn't load this order's details because your device lost internet connection."
+            primaryAction={{
+              label: "Try Again",
+              onClick: () => void fetchOrder(),
+            }}
+            secondaryAction={{
+              label: "Back to Orders",
+              href: "/account/orders",
+            }}
+            className="py-6"
+          />
+        ) : (
+          <ErrorState
+            layout="card"
+            title="Could not load order"
+            description={error ?? "We were unable to retrieve details for this order."}
+            primaryAction={{
+              label: "Try Again",
+              onClick: () => void fetchOrder(),
+            }}
+            secondaryAction={{
+              label: "Back to Orders",
+              href: "/account/orders",
+            }}
+            className="py-6"
+          />
+        )}
       </div>
     );
   }
+
+
 
   return (
     <div

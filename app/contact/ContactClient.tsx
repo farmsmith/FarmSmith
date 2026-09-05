@@ -3,10 +3,20 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
+import { FieldError } from "@/components/ui/FieldError";
+import { SuccessState, ErrorState } from "@/components/ui/states";
+
 export default function ContactClient() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    subject?: string;
+    message?: string;
+  }>({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,9 +24,36 @@ export default function ContactClient() {
     message: "",
   });
 
+  const validate = () => {
+    const errs: typeof fieldErrors = {};
+    if (!formData.name.trim()) {
+      errs.name = "Full name is required";
+    } else if (formData.name.trim().length > 100) {
+      errs.name = "Name cannot exceed 100 characters";
+    }
+
+    if (!formData.email.trim()) {
+      errs.email = "Email address is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      errs.email = "Enter a valid email address";
+    } else if (formData.email.trim().length > 255) {
+      errs.email = "Email cannot exceed 255 characters";
+    }
+
+    if (!formData.message.trim()) {
+      errs.message = "Message is required";
+    } else if (formData.message.trim().length > 2000) {
+      errs.message = "Message cannot exceed 2000 characters";
+    }
+
+    return errs;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) return;
+    const errs = validate();
+    setFieldErrors(errs);
+    if (Object.keys(errs).length > 0) return;
 
     setSubmitting(true);
     setErrorMessage(null);
@@ -30,7 +67,7 @@ export default function ContactClient() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to send message");
+        throw new Error(data.error || "Failed to send message. Please try again.");
       }
 
       setSubmitted(true);
@@ -40,6 +77,7 @@ export default function ContactClient() {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div style={{ background: "var(--color-background)", minHeight: "85vh" }}>
@@ -209,25 +247,24 @@ export default function ContactClient() {
             </h3>
 
             {submitted ? (
-              <div
-                style={{
-                  background: "rgba(42, 72, 50, 0.08)",
-                  border: "1px solid var(--color-primary)",
-                  borderRadius: "var(--radius-lg)",
-                  padding: "2rem 1.5rem",
-                  textAlign: "center",
+              <SuccessState
+                layout="card"
+                icon={<CheckCircle2 size={36} aria-hidden="true" />}
+                title="Message sent successfully"
+                description="Your inquiry has been received. Our team will get back to you within 24 hours."
+                primaryAction={{
+                  label: "Send Another Message",
+                  onClick: () => {
+                    setSubmitted(false);
+                    setFormData({ name: "", email: "", subject: "", message: "" });
+                    setFieldErrors({});
+                    setErrorMessage(null);
+                  },
                 }}
-              >
-                <CheckCircle2 size={42} style={{ color: "var(--color-primary)", marginBottom: "0.75rem" }} />
-                <h4 style={{ fontFamily: "var(--font-heading)", color: "var(--color-primary)", margin: "0 0 0.5rem" }}>
-                  Thank you!
-                </h4>
-                <p style={{ color: "var(--color-muted)", fontSize: "0.9375rem", margin: 0 }}>
-                  Your message has been received. Our team will get back to you within 24 hours.
-                </p>
-              </div>
+                className="py-6"
+              />
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 <div>
                   <label htmlFor="contact-name" style={{ display: "block", fontSize: "0.875rem", fontWeight: 600, color: "var(--color-primary)", marginBottom: "0.375rem" }}>
                     Full Name *
@@ -238,17 +275,23 @@ export default function ContactClient() {
                     required
                     placeholder="Your Name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                    }}
+                    aria-invalid={Boolean(fieldErrors.name)}
+                    aria-describedby={fieldErrors.name ? "contact-name-error" : undefined}
                     style={{
                       width: "100%",
                       padding: "0.75rem 1rem",
                       borderRadius: "var(--radius-md)",
-                      border: "1px solid var(--color-border)",
+                      border: fieldErrors.name ? "1px solid var(--color-error)" : "1px solid var(--color-border)",
                       background: "var(--color-surface)",
                       fontSize: "0.9375rem",
                       outline: "none",
                     }}
                   />
+                  <FieldError id="contact-name-error" message={fieldErrors.name} />
                 </div>
 
                 <div>
@@ -261,17 +304,23 @@ export default function ContactClient() {
                     required
                     placeholder="you@example.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                    }}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? "contact-email-error" : undefined}
                     style={{
                       width: "100%",
                       padding: "0.75rem 1rem",
                       borderRadius: "var(--radius-md)",
-                      border: "1px solid var(--color-border)",
+                      border: fieldErrors.email ? "1px solid var(--color-error)" : "1px solid var(--color-border)",
                       background: "var(--color-surface)",
                       fontSize: "0.9375rem",
                       outline: "none",
                     }}
                   />
+                  <FieldError id="contact-email-error" message={fieldErrors.email} />
                 </div>
 
                 <div>
@@ -306,58 +355,56 @@ export default function ContactClient() {
                     rows={4}
                     placeholder="How can we help you?"
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, message: e.target.value });
+                      if (fieldErrors.message) setFieldErrors((prev) => ({ ...prev, message: undefined }));
+                    }}
+                    aria-invalid={Boolean(fieldErrors.message)}
+                    aria-describedby={fieldErrors.message ? "contact-message-error" : undefined}
                     style={{
                       width: "100%",
                       padding: "0.75rem 1rem",
                       borderRadius: "var(--radius-md)",
-                      border: "1px solid var(--color-border)",
+                      border: fieldErrors.message ? "1px solid var(--color-error)" : "1px solid var(--color-border)",
                       background: "var(--color-surface)",
                       fontSize: "0.9375rem",
                       outline: "none",
                       resize: "vertical",
                     }}
                   />
+                  <FieldError id="contact-message-error" message={fieldErrors.message} />
                 </div>
 
+
                 {errorMessage && (
-                  <div
-                    style={{
-                      background: "rgba(220, 38, 38, 0.1)",
-                      border: "1px solid var(--color-error)",
-                      borderRadius: "var(--radius-md)",
-                      padding: "0.75rem 1rem",
-                      fontSize: "0.875rem",
-                      color: "var(--color-error)",
-                    }}
-                  >
-                    {errorMessage}
-                  </div>
+                  <ErrorState
+                    layout="inline"
+                    title="Could not send message"
+                    description={errorMessage}
+                    role="alert"
+                    ariaLive="assertive"
+                  />
                 )}
 
-                <button
+                <Button
                   type="submit"
+                  variant="primary"
+                  size="lg"
+                  loading={submitting}
                   disabled={submitting}
+                  id="contact-submit-btn"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "0.5rem",
-                    background: "var(--color-primary)",
-                    color: "#FBFAF6",
-                    padding: "0.875rem 1.5rem",
-                    borderRadius: "var(--radius-md)",
-                    fontWeight: 600,
-                    fontSize: "0.9375rem",
-                    border: "none",
-                    cursor: submitting ? "not-allowed" : "pointer",
-                    opacity: submitting ? 0.7 : 1,
-                    transition: "opacity 0.2s ease",
+                    width: "auto",
                   }}
+                  aria-label={submitting ? "Sending message..." : "Send Message"}
                 >
-                  <Send size={18} />
+                  <Send size={18} aria-hidden="true" />
                   <span>{submitting ? "Sending..." : "Send Message"}</span>
-                </button>
+                </Button>
               </form>
             )}
           </div>

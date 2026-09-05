@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import OrderConfirmationClient from "./OrderConfirmationClient";
+import OrderConfirmationLoading from "./loading";
 
 export const metadata: Metadata = {
   title: "Order Confirmation",
@@ -13,13 +14,7 @@ export const metadata: Metadata = {
 
 export default function OrderConfirmationPage() {
   return (
-    <Suspense
-      fallback={
-        <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div className="skeleton" style={{ width: "300px", height: "1.5rem" }} />
-        </div>
-      }
-    >
+    <Suspense fallback={<OrderConfirmationLoading />}>
       <OrderConfirmationClient />
     </Suspense>
   );

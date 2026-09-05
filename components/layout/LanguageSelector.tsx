@@ -28,6 +28,32 @@ export default function LanguageSelector() {
   const [selectedLang, setSelectedLang] = useState<Language>(LANGUAGES[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Helper to clear all variations of Google Translate cookies
+  const clearGoogleTranslateCookies = () => {
+    const host = window.location.hostname;
+    const hostParts = host.split(".");
+    const domains = ["", host, `.${host}`];
+    if (hostParts.length > 2) {
+      const rootDomain = hostParts.slice(-2).join(".");
+      domains.push(rootDomain, `.${rootDomain}`);
+    }
+    const paths = ["/", window.location.pathname];
+
+    domains.forEach((d) => {
+      paths.forEach((p) => {
+        const domainAttr = d ? `; domain=${d}` : "";
+        const pathAttr = p ? `; path=${p}` : "; path=/";
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT${pathAttr}${domainAttr};`;
+        document.cookie = `googtrans_sync=; expires=Thu, 01 Jan 1970 00:00:00 GMT${pathAttr}${domainAttr};`;
+      });
+    });
+
+    try {
+      sessionStorage.removeItem("googtrans");
+      localStorage.removeItem("googtrans");
+    } catch (_) {}
+  };
+
   // Initialize Google Translate Script dynamically
   useEffect(() => {
     // Check if script already exists
@@ -57,48 +83,92 @@ export default function LanguageSelector() {
     if (match && match[1]) {
       const parts = match[1].split("/");
       const currentCode = parts[parts.length - 1];
-      const found = LANGUAGES.find((l) => l.code === currentCode);
-      if (found) setSelectedLang(found);
+      if (currentCode === "en" || !currentCode) {
+        setSelectedLang(LANGUAGES[0]);
+      } else {
+        const found = LANGUAGES.find((l) => l.code === currentCode);
+        if (found) setSelectedLang(found);
+      }
+    } else {
+      setSelectedLang(LANGUAGES[0]);
     }
   }, []);
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click/tap
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const changeLanguage = (lang: Language) => {
     setSelectedLang(lang);
     setIsOpen(false);
 
-    if (lang.code === "en") {
-      // Clear cookie for English
-      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
-      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`;
+    const host = window.location.hostname;
 
-      window.location.reload();
+    if (lang.code === "en") {
+      // 1. Thoroughly wipe all Google Translate cookies
+      clearGoogleTranslateCookies();
+
+      // 2. Set explicit English cookie so translate engine resets
+      document.cookie = "googtrans=/en/en; path=/;";
+      document.cookie = "googtrans=/auto/en; path=/;";
+      if (host && host !== "localhost" && !/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
+        document.cookie = `googtrans=/en/en; path=/; domain=.${host};`;
+      }
+
+      // 3. Reset Google Translate combo in DOM if loaded
+      const selectElem = (document.querySelector(".goog-te-combo") ||
+        document.querySelector("#google_translate_element select")) as HTMLSelectElement | null;
+
+      if (selectElem) {
+        let defaultIndex = 0;
+        for (let i = 0; i < selectElem.options.length; i++) {
+          if (selectElem.options[i].value === "en" || selectElem.options[i].value === "") {
+            defaultIndex = i;
+            break;
+          }
+        }
+        selectElem.selectedIndex = defaultIndex;
+        selectElem.dispatchEvent(new Event("change"));
+      }
+
+      // 4. Force reload after a tiny delay so the clean DOM and English state are restored
+      setTimeout(() => {
+        window.location.reload();
+      }, 150);
       return;
     }
 
-    // Set google translate cookie
+    // Setting a non-English language
+    clearGoogleTranslateCookies();
+
     const cookieVal = `/en/${lang.code}`;
     document.cookie = `googtrans=${cookieVal}; path=/;`;
-    document.cookie = `googtrans=${cookieVal}; path=/; domain=${window.location.hostname};`;
+    if (host && host !== "localhost" && !/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
+      document.cookie = `googtrans=${cookieVal}; path=/; domain=.${host};`;
+    }
 
     // Trigger select element in hidden container if available
-    const selectElem = document.querySelector("#google_translate_element select") as HTMLSelectElement | null;
+    const selectElem = (document.querySelector(".goog-te-combo") ||
+      document.querySelector("#google_translate_element select")) as HTMLSelectElement | null;
+
     if (selectElem) {
       selectElem.value = lang.code;
       selectElem.dispatchEvent(new Event("change"));
     } else {
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 150);
     }
   };
 
@@ -175,6 +245,7 @@ export default function LanguageSelector() {
 
       {/* Styled Premium Language Button */}
       <button
+        type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Select Language"
         className={`notranslate lang-btn ${isOpen ? "is-open" : ""}`}
@@ -221,6 +292,7 @@ export default function LanguageSelector() {
             const isSelected = selectedLang.code === lang.code;
             return (
               <button
+                type="button"
                 key={lang.code}
                 onClick={() => changeLanguage(lang)}
                 className="notranslate lang-dropdown-item"

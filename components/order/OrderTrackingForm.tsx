@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Search, ClipboardPaste, Check } from "lucide-react";
+import { ErrorState } from "@/components/ui/states";
 
 export default function OrderTrackingForm() {
   const router = useRouter();
@@ -129,19 +130,13 @@ export default function OrderTrackingForm() {
       </div>
 
       {apiError && (
-        <div
+        <ErrorState
+          layout="inline"
+          title="Lookup failed"
+          description={apiError}
           role="alert"
-          style={{
-            background: "var(--color-error-bg)",
-            border: "1px solid var(--color-error)",
-            borderRadius: "var(--radius-md)",
-            padding: "0.875rem 1rem",
-            fontSize: "0.875rem",
-            color: "var(--color-error)",
-          }}
-        >
-          {apiError}
-        </div>
+          ariaLive="assertive"
+        />
       )}
 
       <Button

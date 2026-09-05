@@ -7,6 +7,7 @@ import Image from "next/image";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { ErrorState } from "@/components/ui/states";
 
 function LoginForm() {
   const router = useRouter();
@@ -40,12 +41,12 @@ function LoginForm() {
       const supabase = createBrowserSupabaseClient();
       const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) {
-        setError(authError.message ?? "Sign in failed. Please check your credentials.");
+        setError("Invalid email or password. Please check your credentials and try again.");
         return;
       }
       router.push(redirectTo);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError("Unable to connect to the authentication service. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -133,19 +134,13 @@ function LoginForm() {
             </div>
 
             {error && (
-              <div
+              <ErrorState
+                layout="inline"
+                title="Sign in failed"
+                description={error}
                 role="alert"
-                style={{
-                  background: "var(--color-error-bg)",
-                  border: "1px solid var(--color-error)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "0.75rem 1rem",
-                  fontSize: "0.875rem",
-                  color: "var(--color-error)",
-                }}
-              >
-                {error}
-              </div>
+                ariaLive="assertive"
+              />
             )}
 
             <Button type="submit" variant="primary" size="lg" loading={loading} id="login-submit">
@@ -165,9 +160,50 @@ function LoginForm() {
   );
 }
 
+function LoginSkeleton() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        minHeight: "90vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--color-background)",
+        padding: "2rem",
+      }}
+    >
+      <span className="sr-only">Loading sign in page...</span>
+      <div style={{ width: "100%", maxWidth: "420px", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+        <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+          <div className="skeleton" style={{ width: "56px", height: "56px", borderRadius: "50%", margin: "0 auto" }} />
+          <div className="skeleton" style={{ width: "180px", height: "1.75rem" }} />
+          <div className="skeleton" style={{ width: "220px", height: "0.875rem" }} />
+        </div>
+        <div
+          style={{
+            background: "var(--color-card)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-xl)",
+            padding: "2rem",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.25rem",
+          }}
+        >
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)" }} />
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)" }} />
+          <div className="skeleton" style={{ height: "48px", borderRadius: "var(--radius-md)", marginTop: "0.5rem" }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginClient() {
   return (
-    <Suspense fallback={<div style={{ minHeight: "80vh" }} />}>
+    <Suspense fallback={<LoginSkeleton />}>
       <LoginForm />
     </Suspense>
   );

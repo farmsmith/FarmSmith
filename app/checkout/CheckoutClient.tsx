@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/Button";
 import RazorpayButton from "@/components/checkout/RazorpayButton";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { formatPrice } from "@/lib/utils/cn";
+import { Skeleton } from "@/components/ui/states/StateSkeleton";
+import { EmptyState } from "@/components/ui/states";
 import type { CheckoutRequest, CheckoutResponse } from "@/types/payment";
 
 interface QuoteData {
@@ -412,8 +414,29 @@ export default function CheckoutClient() {
 
   if (!sessionChecked) {
     return (
-      <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div className="skeleton" style={{ width: "220px", height: "2rem" }} />
+      <div
+        role="status"
+        aria-live="polite"
+        style={{ minHeight: "85vh", paddingInline: "0.75rem", paddingBlock: "1.5rem 6rem", background: "var(--color-background)" }}
+      >
+        <span className="sr-only">Checking account session...</span>
+        <div className="container" style={{ maxWidth: "1100px", margin: "0 auto" }}>
+          <Skeleton variant="rectangular" height="54px" borderRadius="var(--radius-lg)" style={{ marginBottom: "2rem" }} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1.5rem" }} className="lg:grid-cols-[1.15fr_0.85fr]">
+            <div style={{ background: "var(--color-card)", borderRadius: "var(--radius-lg)", padding: "2rem", border: "1px solid var(--color-border)", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              <Skeleton variant="text" width="220px" height="1.5rem" />
+              <Skeleton variant="text" width="300px" height="0.875rem" />
+              <Skeleton variant="rectangular" height="48px" borderRadius="var(--radius-md)" style={{ marginTop: "0.5rem" }} />
+              <Skeleton variant="rectangular" height="48px" borderRadius="var(--radius-md)" />
+              <Skeleton variant="rectangular" height="52px" borderRadius="var(--radius-md)" style={{ marginTop: "1rem" }} />
+            </div>
+            <div style={{ background: "var(--color-card)", borderRadius: "var(--radius-lg)", padding: "2rem", border: "1px solid var(--color-border)", height: "fit-content", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <Skeleton variant="text" width="160px" height="1.25rem" />
+              <Skeleton variant="rectangular" height="52px" borderRadius="var(--radius-md)" />
+              <Skeleton variant="text" width="100%" height="0.875rem" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -519,29 +542,17 @@ export default function CheckoutClient() {
 
   if (items.length === 0) {
     return (
-      <div
-        style={{
-          minHeight: "70vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "1.25rem",
-          textAlign: "center",
-          padding: "2rem",
-        }}
-      >
-        <ShoppingBag size={56} style={{ color: "var(--color-muted)", opacity: 0.4 }} aria-hidden="true" />
-        <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "1.75rem", color: "var(--color-primary)" }}>
-          Your cart is empty
-        </h1>
-        <p style={{ color: "var(--color-muted)" }}>Add something farm-fresh before checking out.</p>
-        <Link
-          href="/shop"
-          style={{ background: "var(--color-primary)", color: "var(--color-card)", padding: "0.875rem 2rem", borderRadius: "var(--radius-md)", fontWeight: 600, textDecoration: "none" }}
-        >
-          Browse Products
-        </Link>
+      <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <EmptyState
+          layout="page"
+          icon={<ShoppingBag size={48} aria-hidden="true" />}
+          title="Your cart is empty"
+          description="Add something farm-fresh before checking out."
+          primaryAction={{
+            label: "Browse Products",
+            href: "/shop",
+          }}
+        />
       </div>
     );
   }
@@ -1283,12 +1294,14 @@ export default function CheckoutClient() {
                       variant="accent"
                       size="lg"
                       loading={checkoutLoading}
+                      disabled={checkoutLoading}
                       style={{ width: "100%", padding: "1rem", fontSize: "1rem" }}
                       onClick={async () => {
                         await createCheckoutOrder();
                       }}
+                      aria-label={checkoutLoading ? "Initializing payment..." : `Proceed to Online Payment — ${formatPrice(calculatedTotal)}`}
                     >
-                      Proceed to Online Payment — {formatPrice(calculatedTotal)}
+                      {checkoutLoading ? "Initializing Payment..." : `Proceed to Online Payment — ${formatPrice(calculatedTotal)}`}
                     </Button>
                   )
                 ) : (
@@ -1297,6 +1310,7 @@ export default function CheckoutClient() {
                     variant="primary"
                     size="lg"
                     loading={checkoutLoading}
+                    disabled={checkoutLoading}
                     style={{ width: "100%", padding: "1rem", fontSize: "1rem" }}
                     onClick={async () => {
                       let resp = checkoutResponse;
@@ -1307,8 +1321,9 @@ export default function CheckoutClient() {
                         handlePaymentSuccess(resp.orderNumber, resp.trackingToken);
                       }
                     }}
+                    aria-label={checkoutLoading ? "Placing order..." : `Place Order (COD) — ${formatPrice(calculatedTotal)}`}
                   >
-                    Place Order (COD) — {formatPrice(calculatedTotal)}
+                    {checkoutLoading ? "Placing Order..." : `Place Order (COD) — ${formatPrice(calculatedTotal)}`}
                   </Button>
                 )}
               </div>

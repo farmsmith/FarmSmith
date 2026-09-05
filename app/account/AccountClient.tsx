@@ -6,6 +6,9 @@ import { User, Phone, Mail, Edit3, Save, X } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { SuccessState, ErrorState, PermissionDeniedState, SessionExpiredState } from "@/components/ui/states";
+
+
 
 interface CustomerProfile {
   email: string;
@@ -23,6 +26,8 @@ export default function AccountClient() {
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
+  const [sessionExpired, setSessionExpired] = useState<boolean>(false);
 
   // Validation
   const [fieldErrors, setFieldErrors] = useState<{ fullName?: string; phone?: string }>({});
@@ -68,7 +73,11 @@ export default function AccountClient() {
             const res = await fetch("/api/account/profile", {
               headers: { Authorization: `Bearer ${session.access_token}` },
             });
-            if (res.ok) {
+            if (res.status === 401) {
+              setSessionExpired(true);
+            } else if (res.status === 403) {
+              setPermissionDenied(true);
+            } else if (res.ok) {
               const data = await res.json();
               const fetchedProfile = {
                 email: data.email || userEmail,
@@ -78,7 +87,11 @@ export default function AccountClient() {
               setProfile(fetchedProfile);
               setEditForm(fetchedProfile);
             }
+          } else {
+            setSessionExpired(true);
           }
+        } else {
+          setSessionExpired(true);
         }
       } catch (err) {
         console.error("Profile load error:", err);
@@ -88,6 +101,7 @@ export default function AccountClient() {
     };
     void fetchProfile();
   }, []);
+
 
   const validateProfile = () => {
     const e: typeof fieldErrors = {};
@@ -117,7 +131,7 @@ export default function AccountClient() {
       const supabase = createBrowserSupabaseClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        setProfileError("Session expired. Please log in again.");
+        setSessionExpired(true);
         return;
       }
 
@@ -132,6 +146,16 @@ export default function AccountClient() {
           phone: editForm.phone.trim(),
         }),
       });
+
+      if (res.status === 401) {
+        setSessionExpired(true);
+        return;
+      }
+
+      if (res.status === 403) {
+        setProfileError("You do not have permission to modify this profile.");
+        return;
+      }
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -162,6 +186,41 @@ export default function AccountClient() {
     setProfileError(null);
   };
 
+  if (sessionExpired) {
+    return (
+      <div className="container" style={{ paddingBlock: "2rem 3.5rem", paddingInline: "1rem" }}>
+        <SessionExpiredState
+          layout="card"
+          redirectUrl="/account"
+          className="max-w-2xl mx-auto py-8"
+        />
+      </div>
+    );
+  }
+
+  if (permissionDenied) {
+    return (
+      <div className="container" style={{ paddingBlock: "2rem 3.5rem", paddingInline: "1rem" }}>
+        <PermissionDeniedState
+          layout="card"
+          title="Account Access Restricted"
+          description="You do not have permission to view or manage this customer account profile."
+          primaryAction={{
+            label: "Go Home",
+            href: "/",
+          }}
+          secondaryAction={{
+            label: "Browse Products",
+            href: "/shop",
+            variant: "outline",
+          }}
+          className="max-w-2xl mx-auto py-8"
+        />
+      </div>
+    );
+  }
+
+
   if (loading) {
     return (
       <div className="container" style={{ paddingBlock: "2rem 3rem" }}>
@@ -169,6 +228,7 @@ export default function AccountClient() {
       </div>
     );
   }
+
 
   return (
     <div style={{ background: "var(--color-background)", minHeight: "80vh", width: "100%", overflowX: "hidden" }}>
@@ -249,38 +309,26 @@ export default function AccountClient() {
 
           {/* Feedback messages */}
           {profileSuccess && (
-            <div
-              style={{
-                background: "rgba(42, 72, 50, 0.1)",
-                border: "1px solid var(--color-primary)",
-                borderRadius: "var(--radius-md)",
-                padding: "0.75rem 1rem",
-                fontSize: "0.875rem",
-                color: "var(--color-primary)",
-                marginBottom: "1.5rem",
-                overflowWrap: "anywhere",
-                wordBreak: "break-word",
-              }}
-            >
-              {profileSuccess}
+            <div style={{ marginBottom: "1.5rem" }}>
+              <SuccessState
+                layout="inline"
+                title="Profile updated"
+                description={profileSuccess}
+                role="status"
+                ariaLive="polite"
+              />
             </div>
           )}
 
           {profileError && (
-            <div
-              style={{
-                background: "var(--color-error-bg)",
-                border: "1px solid var(--color-error)",
-                borderRadius: "var(--radius-md)",
-                padding: "0.75rem 1rem",
-                fontSize: "0.875rem",
-                color: "var(--color-error)",
-                marginBottom: "1.5rem",
-                overflowWrap: "anywhere",
-                wordBreak: "break-word",
-              }}
-            >
-              {profileError}
+            <div style={{ marginBottom: "1.5rem" }}>
+              <ErrorState
+                layout="inline"
+                title="Update failed"
+                description={profileError}
+                role="alert"
+                ariaLive="assertive"
+              />
             </div>
           )}
 

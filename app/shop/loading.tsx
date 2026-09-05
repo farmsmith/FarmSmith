@@ -1,6 +1,14 @@
+import { Skeleton, SkeletonCard } from "@/components/ui/states/StateSkeleton";
+
 export default function ShopLoading() {
   return (
-    <div style={{ background: "var(--color-background)", minHeight: "80vh" }}>
+    <div
+      role="status"
+      aria-live="polite"
+      style={{ background: "var(--color-background)", minHeight: "80vh" }}
+    >
+      <span className="sr-only">Loading products catalog...</span>
+      {/* Header Banner Skeleton */}
       <div
         style={{
           background: "var(--color-card)",
@@ -9,11 +17,13 @@ export default function ShopLoading() {
         }}
       >
         <div className="container">
-          <div className="skeleton" style={{ width: "80px", height: "0.75rem", marginBottom: "0.75rem" }} />
-          <div className="skeleton" style={{ width: "280px", height: "2rem", marginBottom: "0.75rem" }} />
-          <div className="skeleton" style={{ width: "400px", height: "1rem" }} />
+          <Skeleton variant="text" width="90px" height="0.75rem" style={{ marginBottom: "0.75rem" }} />
+          <Skeleton variant="text" width="280px" height="2.25rem" style={{ marginBottom: "0.75rem" }} />
+          <Skeleton variant="text" width="420px" height="1rem" />
         </div>
       </div>
+
+      {/* Products Grid Skeleton */}
       <div className="container" style={{ paddingBlock: "3rem" }}>
         <div
           style={{
@@ -22,24 +32,8 @@ export default function ShopLoading() {
             gap: "1.5rem",
           }}
         >
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              style={{
-                background: "var(--color-card)",
-                borderRadius: "var(--radius-xl)",
-                border: "1px solid var(--color-border)",
-                overflow: "hidden",
-              }}
-            >
-              <div className="skeleton" style={{ aspectRatio: "4/3" }} />
-              <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                <div className="skeleton" style={{ width: "60%", height: "1rem" }} />
-                <div className="skeleton" style={{ width: "80%", height: "1.25rem" }} />
-                <div className="skeleton" style={{ width: "40%", height: "0.875rem" }} />
-                <div className="skeleton" style={{ height: "44px", borderRadius: "var(--radius-md)", marginTop: "0.5rem" }} />
-              </div>
-            </div>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <SkeletonCard key={i} />
           ))}
         </div>
       </div>

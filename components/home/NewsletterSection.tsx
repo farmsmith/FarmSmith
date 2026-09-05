@@ -3,15 +3,25 @@
 import React, { useState } from "react";
 import { Heart, Send, CheckCircle2 } from "lucide-react";
 
+import { FieldError } from "@/components/ui/FieldError";
+
 export default function NewsletterSection() {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [subscribed, setSubscribed] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
+    if (!email.trim()) {
+      setError("Email address is required");
+      return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Enter a valid email address");
+      return;
+    }
+    setError(null);
+    setSubscribed(true);
   };
 
   return (
@@ -68,6 +78,8 @@ export default function NewsletterSection() {
 
           {subscribed ? (
             <div
+              role="status"
+              aria-live="polite"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -81,56 +93,67 @@ export default function NewsletterSection() {
                 fontSize: "0.9375rem",
               }}
             >
-              <CheckCircle2 size={18} /> Thank you for subscribing to FarmSmith Journal!
+              <CheckCircle2 size={18} aria-hidden="true" /> Thank you for subscribing to FarmSmith Journal!
             </div>
           ) : (
             <form
               onSubmit={handleSubmit}
+              noValidate
               style={{
                 display: "flex",
-                gap: "0.75rem",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem",
                 maxWidth: "480px",
                 margin: "0 auto",
-                flexWrap: "wrap",
               }}
             >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address..."
-                required
-                style={{
-                  flex: "1 1 240px",
-                  height: "3rem",
-                  paddingInline: "1.25rem",
-                  borderRadius: "var(--radius-md)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(0, 0, 0, 0.25)",
-                  color: "#FFFFFF",
-                  fontSize: "0.875rem",
-                }}
-              />
-              <button
-                type="submit"
-                style={{
-                  background: "#D9A441",
-                  color: "#1F3A2E",
-                  fontWeight: 700,
-                  fontSize: "0.875rem",
-                  paddingInline: "1.5rem",
-                  height: "3rem",
-                  borderRadius: "var(--radius-md)",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Subscribe <Send size={16} />
-              </button>
+              <div style={{ display: "flex", gap: "0.75rem", width: "100%", flexWrap: "wrap" }}>
+                <input
+                  id="newsletter-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="Enter your email address..."
+                  required
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "newsletter-email-error" : undefined}
+                  style={{
+                    flex: "1 1 240px",
+                    height: "3rem",
+                    paddingInline: "1.25rem",
+                    borderRadius: "var(--radius-md)",
+                    border: error ? "1.5px solid #EF4444" : "1px solid rgba(255,255,255,0.2)",
+                    background: "rgba(0, 0, 0, 0.25)",
+                    color: "#FFFFFF",
+                    fontSize: "0.875rem",
+                  }}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    background: "#D9A441",
+                    color: "#1F3A2E",
+                    fontWeight: 700,
+                    fontSize: "0.875rem",
+                    paddingInline: "1.5rem",
+                    height: "3rem",
+                    borderRadius: "var(--radius-md)",
+                    border: "none",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Subscribe <Send size={16} />
+                </button>
+              </div>
+              <FieldError id="newsletter-email-error" message={error} className="text-[#FCA5A5] self-start" />
             </form>
           )}
         </div>

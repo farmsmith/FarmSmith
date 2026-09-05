@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Package, Sparkles, Rocket } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
+import { EmptyState } from "@/components/ui/states";
 import type { Product } from "@/types/product";
 
 interface ShopClientProps {
@@ -312,25 +313,17 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       {/* 3. Product Catalog Content */}
       <div className="container" style={{ paddingTop: "2.5rem" }}>
         {filteredProducts.length === 0 ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "1.25rem",
-              padding: "5rem 0",
-              textAlign: "center",
+          <EmptyState
+            layout="section"
+            icon={<Package size={40} aria-hidden="true" />}
+            title="No products found"
+            description="We couldn't find any products in this category. Adjust your filter to see more items."
+            primaryAction={{
+              label: "Show All Products",
+              onClick: () => setSelectedCategory("All Items"),
             }}
-          >
-            <Package size={56} style={{ color: "var(--color-muted)", opacity: 0.4 }} />
-            <h2 style={{ fontFamily: "var(--font-heading)", color: "var(--color-primary)", fontSize: "1.5rem" }}>
-              No products found
-            </h2>
-            <p style={{ color: "var(--color-muted)", maxWidth: "340px" }}>
-              We couldn't find any products in this category. Select another category above.
-            </p>
-          </div>
+            className="py-16"
+          />
         ) : (
           <>
             {/* SECTION 1: Available Now (Flagship Products) */}

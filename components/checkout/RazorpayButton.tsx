@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
+import { ErrorState } from "@/components/ui/states";
 import type { CheckoutResponse } from "@/types/payment";
 import type { CartItem } from "@/lib/cart/types";
 
@@ -151,29 +152,25 @@ export default function RazorpayButton({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
       {error && (
-        <div
+        <ErrorState
+          layout="inline"
+          title="Payment notice"
+          description={error}
           role="alert"
-          style={{
-            background: "var(--color-error-bg)",
-            border: "1px solid var(--color-error)",
-            borderRadius: "var(--radius-md)",
-            padding: "0.75rem 1rem",
-            fontSize: "0.875rem",
-            color: "var(--color-error)",
-          }}
-        >
-          {error}
-        </div>
+          ariaLive="assertive"
+        />
       )}
       <Button
         variant="accent"
         size="lg"
         onClick={handlePay}
         loading={loading}
+        disabled={loading}
         style={{ width: "100%", fontSize: "1rem" }}
         id="razorpay-pay-btn"
+        aria-label={loading ? "Opening secure payment gateway..." : "Pay Securely"}
       >
-        Pay Securely
+        {loading ? "Opening Gateway..." : "Pay Securely"}
       </Button>
       <p style={{ fontSize: "0.75rem", color: "var(--color-muted)", textAlign: "center" }}>
         Powered by Razorpay. Your payment info is never stored on our servers.

@@ -8,9 +8,12 @@ import OrderStatusTimeline from "@/components/order/OrderStatusTimeline";
 import { formatPrice } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { SuccessState, ErrorState, OfflineState } from "@/components/ui/states";
+import { useNetworkStatus } from "@/lib/hooks/useNetworkStatus";
 import type { PublicOrderStatus } from "@/types/order";
 
 export default function OrderConfirmationClient() {
+  const { isOnline } = useNetworkStatus();
   const params = useParams<{ orderNumber: string }>();
   const searchParams = useSearchParams();
   const trackingToken = searchParams.get("token") ?? "";
@@ -36,21 +39,26 @@ export default function OrderConfirmationClient() {
         const res = await fetch("/api/orders/track", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderNumber, trackingToken }),
+          body: JSON.stringify({
+            orderNumber,
+            trackingToken,
+          }),
         });
 
         if (res.status === 404) {
-          setError("Order not found. Please check your order number and tracking token.");
+          setError("Order not found. Please verify your order number and tracking key.");
           return;
         }
+
         if (!res.ok) {
-          setError("Unable to load order status. Please try again.");
+          setError("Failed to fetch order status. Please try again.");
           return;
         }
+
         const data = (await res.json()) as PublicOrderStatus;
         setOrder(data);
       } catch {
-        setError("Network error. Please check your connection.");
+        setError("Network error. Please check your connection and try again.");
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -66,14 +74,19 @@ export default function OrderConfirmationClient() {
   if (loading) {
     return (
       <div
+        role="status"
+        aria-live="polite"
         style={{
-          minHeight: "60vh",
+          background: "var(--color-background)",
+          minHeight: "80vh",
+          paddingBlock: "4rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <div style={{ textAlign: "center" }}>
+        <span className="sr-only">Loading order confirmation...</span>
+        <div style={{ maxWidth: "600px", width: "100%", textAlign: "center" }}>
           <div
             className="skeleton"
             style={{ width: "200px", height: "1.5rem", margin: "0 auto 1rem" }}
@@ -93,39 +106,44 @@ export default function OrderConfirmationClient() {
         style={{
           minHeight: "60vh",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: "1.25rem",
-          textAlign: "center",
           padding: "2rem",
         }}
       >
-        <h1
-          style={{
-            fontFamily: "var(--font-heading)",
-            color: "var(--color-primary)",
-            fontSize: "1.75rem",
-          }}
-        >
-          Order not found
-        </h1>
-        <p style={{ color: "var(--color-muted)", maxWidth: "400px" }}>
-          {error ?? "We couldn't find this order."}
-        </p>
-        <Link
-          href="/track"
-          style={{
-            background: "var(--color-primary)",
-            color: "var(--color-card)",
-            padding: "0.875rem 2rem",
-            borderRadius: "var(--radius-md)",
-            fontWeight: 600,
-            textDecoration: "none",
-          }}
-        >
-          Track an Order
-        </Link>
+        <div style={{ maxWidth: "520px", width: "100%" }}>
+          {error && !isOnline ? (
+            <OfflineState
+              layout="card"
+              title="You're offline"
+              description="We couldn't retrieve this order because your device is not connected to the internet."
+              primaryAction={{
+                label: "Try Again",
+                onClick: () => void fetchOrder(true),
+              }}
+              secondaryAction={{
+                label: "Track an Order",
+                href: "/track",
+              }}
+              className="py-6"
+            />
+          ) : (
+            <ErrorState
+              layout="card"
+              title="Could not load order"
+              description={error ?? "We couldn't retrieve this order. Please verify your order number and tracking key."}
+              primaryAction={{
+                label: "Try Again",
+                onClick: () => void fetchOrder(true),
+              }}
+              secondaryAction={{
+                label: "Track an Order",
+                href: "/track",
+              }}
+              className="py-6"
+            />
+          )}
+        </div>
       </div>
     );
   }
@@ -147,66 +165,42 @@ export default function OrderConfirmationClient() {
       <div className="container">
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           {/* Header */}
-          <div
-            style={{
-              background: isPaid ? "#F0FDF4" : "var(--color-card)",
-              border: `1px solid ${isPaid ? "#86EFAC" : "var(--color-border)"}`,
-              borderRadius: "var(--radius-xl)",
-              padding: "2rem",
-              textAlign: "center",
-              marginBottom: "2rem",
-            }}
-          >
-            {isPaid && (
-              <CheckCircle
-                size={48}
-                style={{ color: "#22C55E", margin: "0 auto 1rem" }}
-                aria-hidden="true"
-              />
-            )}
-            <p
-              className="eyebrow"
-              style={{ marginBottom: "0.5rem", color: "var(--color-accent)" }}
+          <div style={{ marginBottom: "2rem" }}>
+            <SuccessState
+              layout="card"
+              variant={isPaid ? "success" : "default"}
+              icon={isPaid ? <CheckCircle size={40} aria-hidden="true" /> : undefined}
+              eyebrow={isPaid ? "Payment Confirmed" : "Order Placed"}
+              title={isPaid ? "Thank you for your order!" : "Order received"}
+              description={
+                <span>
+                  Order <strong style={{ color: "var(--color-primary)" }}>{order.order_number}</strong>
+                </span>
+              }
             >
-              {isPaid ? "Payment Confirmed" : "Order Placed"}
-            </p>
-            <h1
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "1.75rem",
-                color: "var(--color-primary)",
-                marginBottom: "0.5rem",
-              }}
-            >
-              {isPaid ? "Thank you for your order!" : "Order received"}
-            </h1>
-            <p style={{ color: "var(--color-muted)", fontSize: "0.9375rem", marginBottom: "0.75rem" }}>
-              Order{" "}
-              <strong style={{ color: "var(--color-primary)" }}>
-                {order.order_number}
-              </strong>
-            </p>
-            {order.tracking_token && (
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  background: "rgba(22, 101, 52, 0.08)",
-                  border: "1px solid rgba(22, 101, 52, 0.2)",
-                  padding: "0.625rem 1.25rem",
-                  borderRadius: "var(--radius-md)",
-                  fontSize: "0.875rem",
-                  color: "var(--color-primary)",
-                  fontWeight: 500,
-                  marginTop: "0.5rem",
-                  flexWrap: "wrap",
-                }}
-              >
-                <span>🔑 <strong>Tracking Access Key:</strong> <code>{order.tracking_token}</code></span>
-                <CopyButton text={order.tracking_token} label="Copy Key" />
-              </div>
-            )}
+              {order.tracking_token && (
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    background: "rgba(22, 101, 52, 0.08)",
+                    border: "1px solid rgba(22, 101, 52, 0.2)",
+                    padding: "0.625rem 1.25rem",
+                    borderRadius: "var(--radius-md)",
+                    fontSize: "0.875rem",
+                    color: "var(--color-primary)",
+                    fontWeight: 500,
+                    marginTop: "0.75rem",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span>🔑 <strong>Tracking Access Key:</strong> <code>{order.tracking_token}</code></span>
+                  <CopyButton text={order.tracking_token} label="Copy Key" />
+                </div>
+              )}
+            </SuccessState>
           </div>
 
           {/* Shipment Details & External Tracking (only shown if awb_code exists and is non-empty) */}
