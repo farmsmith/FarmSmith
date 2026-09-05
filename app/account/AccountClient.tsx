@@ -6,9 +6,7 @@ import { User, Phone, Mail, Edit3, Save, X } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { SuccessState, ErrorState, PermissionDeniedState, SessionExpiredState } from "@/components/ui/states";
-
-
+import { SuccessState, ErrorState, PermissionDeniedState, SessionExpiredState, LoadingState } from "@/components/ui/states";
 
 interface CustomerProfile {
   email: string;
@@ -37,9 +35,10 @@ export default function AccountClient() {
       setLoading(true);
       try {
         const supabase = createBrowserSupabaseClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
 
-        if (user) {
+        if (user && session) {
           const userMetaName = user.user_metadata?.full_name || user.user_metadata?.name || "";
           const userMetaPhone = user.user_metadata?.phone || (user as any).phone || "";
           const userEmail = user.email || "";
@@ -68,27 +67,22 @@ export default function AccountClient() {
           setEditForm(initialProfile);
 
           // Fetch profile from API
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            const res = await fetch("/api/account/profile", {
-              headers: { Authorization: `Bearer ${session.access_token}` },
-            });
-            if (res.status === 401) {
-              setSessionExpired(true);
-            } else if (res.status === 403) {
-              setPermissionDenied(true);
-            } else if (res.ok) {
-              const data = await res.json();
-              const fetchedProfile = {
-                email: data.email || userEmail,
-                fullName: data.fullName || initialName,
-                phone: data.phone || initialPhone,
-              };
-              setProfile(fetchedProfile);
-              setEditForm(fetchedProfile);
-            }
-          } else {
+          const res = await fetch("/api/account/profile", {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          if (res.status === 401) {
             setSessionExpired(true);
+          } else if (res.status === 403) {
+            setPermissionDenied(true);
+          } else if (res.ok) {
+            const data = await res.json();
+            const fetchedProfile = {
+              email: data.email || userEmail,
+              fullName: data.fullName || initialName,
+              phone: data.phone || initialPhone,
+            };
+            setProfile(fetchedProfile);
+            setEditForm(fetchedProfile);
           }
         } else {
           setSessionExpired(true);
@@ -101,6 +95,7 @@ export default function AccountClient() {
     };
     void fetchProfile();
   }, []);
+
 
 
   const validateProfile = () => {
@@ -223,11 +218,32 @@ export default function AccountClient() {
 
   if (loading) {
     return (
-      <div className="container" style={{ paddingBlock: "2rem 3rem" }}>
-        <div className="skeleton" style={{ height: "300px", borderRadius: "var(--radius-xl)", maxWidth: "640px", margin: "0 auto" }} />
+      <div style={{ background: "var(--color-background)", minHeight: "80vh", width: "100%", overflowX: "hidden" }}>
+        <div className="container" style={{ paddingBlock: "2rem 3.5rem", paddingInline: "1rem" }}>
+          <div
+            style={{
+              maxWidth: "640px",
+              width: "100%",
+              margin: "0 auto",
+              background: "var(--color-card)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-xl)",
+              padding: "clamp(1.5rem, 5vw, 3rem)",
+              boxShadow: "var(--shadow-card)",
+              boxSizing: "border-box",
+            }}
+          >
+            <LoadingState
+              layout="section"
+              title="Loading your profile..."
+              description="Fetching your account details and preferences."
+            />
+          </div>
+        </div>
       </div>
     );
   }
+
 
 
   return (

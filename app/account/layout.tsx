@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import type { Session } from "@supabase/supabase-js";
 
+import { LoadingState } from "@/components/ui/states";
+
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
@@ -26,15 +28,18 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          padding: "2rem",
         }}
       >
-        <div
-          className="skeleton"
-          style={{ width: "200px", height: "1.5rem" }}
+        <LoadingState
+          layout="compact"
+          title="Loading your account..."
+          description="Verifying your session, please wait..."
         />
       </div>
     );
   }
+
 
   // Not authenticated
   if (!session) return null;

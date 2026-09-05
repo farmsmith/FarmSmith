@@ -8,9 +8,8 @@ import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import { Truck, ExternalLink } from "lucide-react";
 import { CopyButton } from "@/components/ui/CopyButton";
-import { ErrorState, OfflineState, PermissionDeniedState, SessionExpiredState } from "@/components/ui/states";
+import { ErrorState, OfflineState, PermissionDeniedState, SessionExpiredState, LoadingState } from "@/components/ui/states";
 import { useNetworkStatus } from "@/lib/hooks/useNetworkStatus";
-
 
 import OrderStatusTimeline from "@/components/order/OrderStatusTimeline";
 import type { Order, OrderItem } from "@/types/order";
@@ -83,8 +82,6 @@ export default function AccountOrderDetailPage() {
     }
   }, [orderNumber]);
 
-
-
   useEffect(() => {
     void fetchOrder();
   }, [fetchOrder]);
@@ -92,17 +89,24 @@ export default function AccountOrderDetailPage() {
   if (loading) {
     return (
       <div
-        role="status"
-        aria-live="polite"
-        style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        style={{
+          background: "var(--color-card)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "2rem",
+          boxShadow: "var(--shadow-card)",
+        }}
       >
-        <span className="sr-only">Loading order details...</span>
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="skeleton" style={{ height: "90px", borderRadius: "var(--radius-md)" }} aria-hidden="true" />
-        ))}
+        <LoadingState
+          layout="section"
+          title="Loading order details..."
+          description={`Fetching information for order #${orderNumber}...`}
+          className="py-12"
+        />
       </div>
     );
   }
+
 
   if (sessionExpired || permissionDenied || error || !order) {
     return (

@@ -7,9 +7,8 @@ import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import { Package } from "lucide-react";
 import { CopyButton } from "@/components/ui/CopyButton";
-import { EmptyState, ErrorState, OfflineState, PermissionDeniedState, SessionExpiredState } from "@/components/ui/states";
+import { EmptyState, ErrorState, OfflineState, PermissionDeniedState, SessionExpiredState, LoadingState } from "@/components/ui/states";
 import { useNetworkStatus } from "@/lib/hooks/useNetworkStatus";
-
 
 import type { Order } from "@/types/order";
 
@@ -66,8 +65,6 @@ export default function OrdersClient() {
     }
   }, []);
 
-
-
   useEffect(() => {
     void fetchOrders();
   }, [fetchOrders]);
@@ -75,22 +72,34 @@ export default function OrdersClient() {
   if (loading) {
     return (
       <div
-        role="status"
-        aria-live="polite"
-        style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        style={{
+          background: "var(--color-card)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "2rem",
+          boxShadow: "var(--shadow-card)",
+        }}
       >
-        <span className="sr-only">Loading your orders...</span>
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="skeleton"
-            style={{ height: "110px", borderRadius: "var(--radius-lg)" }}
-            aria-hidden="true"
-          />
-        ))}
+        <h1
+          style={{
+            fontFamily: "var(--font-heading)",
+            fontSize: "1.375rem",
+            color: "var(--color-primary)",
+            marginBottom: "1.75rem",
+          }}
+        >
+          My Orders
+        </h1>
+        <LoadingState
+          layout="section"
+          title="Loading your orders..."
+          description="Retrieving your past purchases and shipment statuses."
+          className="py-12"
+        />
       </div>
     );
   }
+
 
   return (
     <div

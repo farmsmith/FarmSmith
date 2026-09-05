@@ -43,15 +43,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Failed to load orders" }, { status: 500, headers });
   }
 
-  const { reconcileOrderStatusFromShiprocket } = await import("@/lib/shipping/fulfillment-webhook");
-  const orders = await Promise.all(
-    (rawOrders ?? []).map(async (o) => {
-      if (o.status === "processing" || o.status === "shipped") {
-        return await reconcileOrderStatusFromShiprocket(o);
-      }
-      return o;
-    })
-  );
-
-  return NextResponse.json(orders, { status: 200, headers });
+  return NextResponse.json(rawOrders ?? [], { status: 200, headers });
 }
+
