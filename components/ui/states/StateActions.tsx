@@ -33,12 +33,16 @@ function renderAction(action: UIStateAction, defaultVariant: "primary" | "outlin
         target={isExternal ? "_blank" : undefined}
         rel={isExternal ? "noopener noreferrer" : undefined}
         className={cn(buttonVariants({ variant, size: "md" }), "no-underline")}
+        style={{
+          color: variant === "primary" || variant === "destructive" ? "#FFFFFF" : undefined,
+        }}
       >
         {icon && <span aria-hidden="true" className="shrink-0">{icon}</span>}
         <span>{label}</span>
       </Link>
     );
   }
+
 
   return (
     <Button

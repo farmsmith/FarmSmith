@@ -16,8 +16,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary: [
-          "bg-[var(--color-primary)] text-[var(--color-card)]",
-          "hover:bg-[var(--color-primary-dark)]",
+          "bg-[var(--color-primary)] text-white",
+          "hover:bg-[var(--color-primary-dark)] hover:text-white",
           "active:scale-[0.98]",
           "focus-visible:ring-[var(--color-primary)]",
         ],
@@ -29,7 +29,7 @@ const buttonVariants = cva(
         ],
         outline: [
           "border border-[var(--color-primary)] text-[var(--color-primary)] bg-transparent",
-          "hover:bg-[var(--color-primary)] hover:text-[var(--color-card)]",
+          "hover:bg-[var(--color-primary)] hover:text-white",
           "active:scale-[0.98]",
           "focus-visible:ring-[var(--color-primary)]",
         ],
@@ -44,6 +44,7 @@ const buttonVariants = cva(
           "focus-visible:ring-[var(--color-error)]",
         ],
       },
+
       size: {
         sm: "h-8 px-3 text-sm rounded-[var(--radius-sm)]",
         md: "h-11 px-6 text-sm rounded-[var(--radius-md)]",
