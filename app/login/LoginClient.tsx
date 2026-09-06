@@ -4,11 +4,10 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { ShieldCheck, Truck, Sparkles, MessageCircle, Eye, EyeOff } from "lucide-react";
+import { ShieldCheck, Truck, Sparkles, MessageCircle, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { ErrorState } from "@/components/ui/states";
 
 function LoginForm() {
   const router = useRouter();
@@ -20,6 +19,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUnregistered, setIsUnregistered] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   useEffect(() => {
@@ -50,24 +50,46 @@ function LoginForm() {
 
     setLoading(true);
     setError(null);
+    setIsUnregistered(false);
 
     try {
+      const cleanEmail = email.trim().toLowerCase();
       const supabase = createBrowserSupabaseClient();
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         password,
       });
+
       if (authError) {
-        setError("Invalid email or password. Please check your credentials and try again.");
+        // Differentiate between unregistered email and wrong password
+        try {
+          const checkRes = await fetch("/api/auth/check-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: cleanEmail }),
+          });
+          const checkData = await checkRes.json();
+          if (checkRes.ok && checkData.exists === false) {
+            setIsUnregistered(true);
+            setError("This email is not registered.");
+            return;
+          }
+        } catch {
+          // If check fails, fallback to invalid password
+        }
+
+        setError("Invalid password. Please try again.");
         return;
       }
+
       router.push(redirectTo);
     } catch {
-      setError("Unable to connect to the authentication service. Please check your connection and try again.");
+      setError("Unable to connect to authentication service. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div
@@ -176,14 +198,45 @@ function LoginForm() {
             </div>
 
             {error && (
-              <ErrorState
-                layout="inline"
-                title="Sign in failed"
-                description={error}
+              <div
                 role="alert"
-                ariaLive="assertive"
-              />
+                aria-live="assertive"
+                style={{
+                  padding: "0.625rem 0.875rem",
+                  borderRadius: "var(--radius-md)",
+                  background: "var(--color-error-bg)",
+                  border: "1px solid rgba(192, 57, 43, 0.25)",
+                  color: "var(--color-error)",
+                  fontSize: "0.84rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
+                  lineHeight: 1.4,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <AlertCircle size={16} className="shrink-0" aria-hidden="true" />
+                  <span>{error}</span>
+                </div>
+                {isUnregistered && (
+                  <Link
+                    href={`/signup${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
+                    style={{
+                      color: "var(--color-error)",
+                      fontWeight: 700,
+                      textDecoration: "underline",
+                      whiteSpace: "nowrap",
+                      fontSize: "0.84rem",
+                    }}
+                  >
+                    Register now →
+                  </Link>
+                )}
+              </div>
             )}
+
 
             <Button type="submit" variant="primary" size="lg" loading={loading} id="login-submit" style={{ width: "100%" }}>
               Sign In
