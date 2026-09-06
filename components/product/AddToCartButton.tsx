@@ -161,12 +161,12 @@ export default function AddToCartButton({
             style={{
               flex: 1,
               textAlign: "center",
-              fontSize: "0.8125rem",
+              fontSize: "0.9375rem",
               fontWeight: 700,
               color: "var(--color-primary)",
             }}
           >
-            {cartItem.quantity} in Cart
+            {cartItem.quantity}
           </span>
 
           <button
