@@ -247,22 +247,18 @@ export default function AccountClient() {
 
 
   return (
-    <div style={{ background: "var(--color-background)", minHeight: "80vh", width: "100%", overflowX: "hidden" }}>
-      <div className="container" style={{ paddingBlock: "2rem 3.5rem", paddingInline: "1rem" }}>
-        <div
-          style={{
-            maxWidth: "640px",
-            width: "100%",
-            margin: "0 auto",
-            background: "var(--color-card)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-xl)",
-            padding: "clamp(1.25rem, 4vw, 2.25rem)",
-            boxShadow: "var(--shadow-card)",
-            boxSizing: "border-box",
-            overflow: "hidden",
-          }}
-        >
+    <div style={{ width: "100%" }}>
+      <div
+        style={{
+          width: "100%",
+          background: "var(--color-card)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "var(--radius-xl)",
+          padding: "clamp(1.5rem, 4vw, 2.5rem)",
+          boxShadow: "var(--shadow-card)",
+          boxSizing: "border-box",
+        }}
+      >
           {/* Header */}
           <div
             style={{
@@ -617,7 +613,6 @@ export default function AccountClient() {
             </form>
           )}
         </div>
-      </div>
     </div>
   );
 }

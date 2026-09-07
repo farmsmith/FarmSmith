@@ -1,15 +1,15 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, Award, Sparkles, Sprout, HeartPulse, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, QrCode, ShieldCheck, Leaf, Heart, Award } from "lucide-react";
 
 const TICKER_ITEMS = [
-  { icon: Award, label: "GI-Tagged Kandhamal Origin" },
-  { icon: ShieldCheck, label: "Zero Lead Chromate & Dyes" },
-  { icon: Sparkles, label: "5.4% High Curcumin Tested" },
-  { icon: Sprout, label: "100% Organically Farmed" },
-  { icon: HeartPulse, label: "Crafted with a Mother's Care" },
-  { icon: CheckCircle2, label: "Batch-Specific Lab Proof" },
+  { icon: CheckCircle2, label: "Independent Testing" },
+  { icon: QrCode, label: "Batch Traceability" },
+  { icon: ShieldCheck, label: "No Adulteration" },
+  { icon: Leaf, label: "Pesticides Free" },
+  { icon: Heart, label: "Thoughtfully Sourced by a Mother" },
+  { icon: Award, label: "Traditional Cultivation" },
 ];
 
 export default function TrustTicker() {

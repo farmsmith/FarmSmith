@@ -29,3 +29,4 @@ yarn-error.log*
 # Temporary media storage
 .tempmediaStorage/
 *.tsbuildinfo
+scratch/

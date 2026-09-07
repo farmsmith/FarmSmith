@@ -14,8 +14,8 @@ import LanguageSelector from "./LanguageSelector";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Our Product" },
-  { href: "/why-us", label: "Why FarmSmith" },
-  { href: "/about-us", label: "About Us" },
+  { href: "/why-us", label: "Our Standards" },
+  { href: "/about-us", label: "Our Story" },
   { href: "/contact", label: "Contact" },
 ];
 

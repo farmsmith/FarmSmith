@@ -103,20 +103,26 @@ export default function CartItemRow({ item }: CartItemRowProps) {
             }}
           >
             <button
-              onClick={() => updateQty(item.productId, item.quantity - 1)}
-              disabled={item.quantity <= 1}
-              aria-label={`Decrease quantity of ${item.name}`}
+              onClick={() => {
+                if (item.quantity <= 1) {
+                  removeItem(item.productId);
+                } else {
+                  updateQty(item.productId, item.quantity - 1);
+                }
+              }}
+              aria-label={item.quantity <= 1 ? `Remove ${item.name} from cart` : `Decrease quantity of ${item.name}`}
               style={{
                 width: "28px",
                 height: "28px",
                 border: "none",
                 background: "var(--color-surface)",
                 color: "var(--color-foreground)",
-                cursor: item.quantity <= 1 ? "not-allowed" : "pointer",
-                opacity: item.quantity <= 1 ? 0.4 : 1,
+                cursor: "pointer",
+                opacity: 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                transition: "background 0.15s ease",
               }}
             >
               <Minus size={12} aria-hidden="true" />

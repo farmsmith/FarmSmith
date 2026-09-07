@@ -23,7 +23,10 @@ function getProductBadge(product: Product) {
   if (product.stock_quantity < 5 && product.stock_quantity > 0) {
     return { label: "Limited Stock", bg: "#C0392B", color: "#FFF" };
   }
-  if (product.name.toLowerCase().includes("turmeric") || product.name.toLowerCase().includes("ghee")) {
+  if (product.name.toLowerCase().includes("turmeric")) {
+    return null;
+  }
+  if (product.name.toLowerCase().includes("ghee")) {
     return { label: "Bestseller", bg: "#1F3A2E", color: "#FFF" };
   }
   return { label: "GI-Tagged", bg: "#4A6B5D", color: "#FFF" };
@@ -204,15 +207,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
 
         {/* Product Name & Weight Badge Row */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.25rem" }}>
-          <Link href={`/shop/${product.slug}`} style={{ textDecoration: "none", flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.35rem" }}>
+          <Link href={`/shop/${product.slug}`} style={{ textDecoration: "none", flex: 1, minWidth: 0, overflow: "hidden" }}>
             <h3
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "1.0625rem",
                 fontWeight: 700,
                 color: "var(--color-primary)",
-                lineHeight: 1.35,
+                lineHeight: 1.3,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {product.name}
@@ -231,7 +237,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 borderRadius: "var(--radius-sm)",
                 whiteSpace: "nowrap",
                 flexShrink: 0,
-                marginTop: "0.1rem",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -240,20 +245,22 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        {/* Short spec line — Only shown for Turmeric */}
+        {/* Short spec lines — Only shown for Turmeric */}
         {isTurmeric && (
-          <p
+          <div
             style={{
               fontSize: "0.8125rem",
               color: "var(--color-muted)",
               marginBottom: "0.5rem",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.15rem",
+              lineHeight: 1.4,
             }}
           >
-            GI-Tagged Pure Batch
-          </p>
+            <span>Batch tested for purity</span>
+            <span>GI-registered Origin</span>
+          </div>
         )}
 
         {/* Star Ratings — Only shown for Turmeric */}

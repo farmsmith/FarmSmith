@@ -48,8 +48,8 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   }
 
   return (
-    <div style={{ background: "var(--color-background)", minHeight: "calc(100vh - 4.25rem)", padding: "2.5rem 1rem" }}>
-      <div className="container" style={{ maxWidth: "680px", margin: "0 auto" }}>
+    <div style={{ background: "var(--color-background)", minHeight: "calc(100vh - 4.25rem)", padding: "2rem 1rem 4rem" }}>
+      <div className="container" style={{ maxWidth: "880px", margin: "0 auto" }}>
         {children}
       </div>
     </div>

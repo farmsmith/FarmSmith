@@ -32,7 +32,13 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
     }
 
     case "UPDATE_QTY": {
-      const qty = Math.max(1, Math.min(action.payload.quantity, MAX_QTY));
+      if (action.payload.quantity <= 0) {
+        return {
+          ...state,
+          items: state.items.filter((i) => i.productId !== action.payload.productId),
+        };
+      }
+      const qty = Math.min(action.payload.quantity, MAX_QTY);
       return {
         ...state,
         items: state.items.map((i) =>

@@ -9,7 +9,7 @@ import PurityShowcase from "@/components/home/PurityShowcase";
 import CustomerReviewsSection from "@/components/home/CustomerReviewsSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
 import FaqSection from "@/components/home/FaqSection";
-import { ShieldCheck, Award, Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 export const revalidate = 60; // Incremental Static Regeneration every 60 seconds
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const products = await getActiveProducts();
-  
+
   // Prioritize the flagship GI-Tagged Kandhamal Turmeric Powder product
   const featuredProduct =
     products.find((p) => p.slug === "kandhamal-turmeric-powder" || p.name.toLowerCase().includes("turmeric")) ??
@@ -37,11 +37,12 @@ export default async function HomePage() {
         style={{
           position: "relative",
           width: "100%",
-          minHeight: "calc(100dvh - 68px)",
+          minHeight: "calc(100dvh - 4.25rem)",
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
+          justifyContent: "space-between",
           overflow: "hidden",
-          paddingBlock: "4rem 4rem",
+          paddingTop: "2.5rem",
         }}
       >
         {/* Background Image */}
@@ -51,7 +52,7 @@ export default async function HomePage() {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: "cover", objectPosition: "center" }}
+          style={{ objectFit: "cover", objectPosition: "center 60%" }}
         />
 
         {/* Ambient Dark Gradient Overlay */}
@@ -65,159 +66,113 @@ export default async function HomePage() {
           }}
         />
 
-        <div className="container" style={{ position: "relative", zIndex: 2, maxWidth: "1150px", margin: "0 auto", paddingInline: "1rem" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "3rem", alignItems: "center" }} className="lg:grid-cols-12">
-            
-            {/* Left Content */}
-            <div className="lg:col-span-7">
-              {/* Trust Pill */}
-              <div
+        {/* Hero Content */}
+        <div
+          className="container"
+          style={{
+            position: "relative",
+            zIndex: 2,
+            maxWidth: "1150px",
+            margin: "0 auto",
+            paddingInline: "1rem",
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            paddingBottom: "2rem",
+          }}
+        >
+          <div style={{ maxWidth: "680px" }}>
+            {/* Trust Eyebrow */}
+            <div
+              style={{
+                fontSize: "0.8125rem",
+                fontWeight: 700,
+                color: "#D9A441",
+                letterSpacing: "0.08em",
+                marginBottom: "1rem",
+              }}
+            >
+              SINGLE ORIGIN &bull; BATCH TESTED &bull; TRACEABLE
+            </div>
+
+            <h1
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "clamp(2.25rem, 5vw, 3.75rem)",
+                color: "#FBFAF6",
+                marginBottom: "1.25rem",
+                lineHeight: 1.12,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Food crafted with{" "}
+              <span style={{ color: "#D9A441", fontStyle: "normal" }}>
+                a mother's care
+              </span>
+            </h1>
+
+            <p
+              style={{
+                fontSize: "1.125rem",
+                lineHeight: 1.7,
+                color: "rgba(251, 250, 246, 0.9)",
+                marginBottom: "2.5rem",
+                maxWidth: "560px",
+              }}
+            >
+              Carefully sourced foods from where they grow best, Batch Tested for quality and made easier to trust — one batch at a time.
+            </p>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+              <Link
+                href="/shop"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.625rem",
+                  background: "#D9A441",
+                  color: "#1F3A2E",
+                  padding: "0.9375rem 2.25rem",
+                  borderRadius: "var(--radius-md)",
+                  fontWeight: 700,
+                  fontSize: "0.9375rem",
+                  textDecoration: "none",
+                  boxShadow: "0 6px 20px rgba(217, 164, 65, 0.3)",
+                  transition: "transform 0.15s ease, background 0.15s ease",
+                }}
+              >
+                Explore the Shop <ArrowRight size={18} />
+              </Link>
+
+              <Link
+                href="/track"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "0.5rem",
-                  background: "rgba(217, 164, 65, 0.15)",
-                  border: "1px solid rgba(217, 164, 65, 0.4)",
-                  padding: "0.4rem 1rem",
-                  borderRadius: "100px",
-                  marginBottom: "1.25rem",
-                  backdropFilter: "blur(4px)",
-                }}
-              >
-                <Sparkles size={16} style={{ color: "#D9A441" }} />
-                <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#D9A441", letterSpacing: "0.03em" }}>
-                  100% GI-Tagged &bull; Batch-Lab Tested
-                </span>
-              </div>
-
-              <h1
-                style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "clamp(2.25rem, 5vw, 3.75rem)",
+                  border: "1.5px solid rgba(251, 250, 246, 0.5)",
                   color: "#FBFAF6",
-                  marginBottom: "1.25rem",
-                  lineHeight: 1.12,
-                  letterSpacing: "-0.02em",
+                  padding: "0.9375rem 2rem",
+                  borderRadius: "var(--radius-md)",
+                  fontWeight: 600,
+                  fontSize: "0.9375rem",
+                  textDecoration: "none",
+                  backdropFilter: "blur(4px)",
+                  transition: "background 0.15s ease",
                 }}
               >
-                Food crafted with{" "}
-                <span style={{ color: "#D9A441", fontStyle: "normal" }}>
-                  a mother's care
-                </span>
-              </h1>
-
-              <p
-                style={{
-                  fontSize: "1.125rem",
-                  lineHeight: 1.7,
-                  color: "rgba(251, 250, 246, 0.9)",
-                  marginBottom: "2.5rem",
-                  maxWidth: "560px",
-                }}
-              >
-                We started because we couldn't find spices and organic food we trusted enough for our own family. 
-                Every batch is lab-tested and every ingredient traced directly to its GI-tagged origin.
-              </p>
-
-              {/* Action Buttons */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                <Link
-                  href="/shop"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.625rem",
-                    background: "#D9A441",
-                    color: "#1F3A2E",
-                    padding: "0.9375rem 2.25rem",
-                    borderRadius: "var(--radius-md)",
-                    fontWeight: 700,
-                    fontSize: "0.9375rem",
-                    textDecoration: "none",
-                    boxShadow: "0 6px 20px rgba(217, 164, 65, 0.3)",
-                    transition: "transform 0.15s ease, background 0.15s ease",
-                  }}
-                >
-                  Explore Organic Shop <ArrowRight size={18} />
-                </Link>
-
-                <Link
-                  href="/track"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    border: "1.5px solid rgba(251, 250, 246, 0.5)",
-                    color: "#FBFAF6",
-                    padding: "0.9375rem 2rem",
-                    borderRadius: "var(--radius-md)",
-                    fontWeight: 600,
-                    fontSize: "0.9375rem",
-                    textDecoration: "none",
-                    backdropFilter: "blur(4px)",
-                    transition: "background 0.15s ease",
-                  }}
-                >
-                  Track Your Order
-                </Link>
-              </div>
+                Track Your Order
+              </Link>
             </div>
-
-            {/* Right Hero Feature Badge / Floating Lab Stats */}
-            <div className="lg:col-span-5 hidden lg:block">
-              <div
-                style={{
-                  background: "rgba(255, 255, 255, 0.08)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(255, 255, 255, 0.18)",
-                  borderRadius: "var(--radius-xl)",
-                  padding: "2rem",
-                  color: "#FFFFFF",
-                  boxShadow: "0 20px 50px rgba(0, 0, 0, 0.25)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1.25rem",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <Award size={28} style={{ color: "#D9A441" }} />
-                  <div>
-                    <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "1.125rem", color: "#FFFFFF", margin: 0 }}>
-                      Kandhamal GI Turmeric
-                    </h3>
-                    <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.7)" }}>Geographical Indication Registry #610</span>
-                  </div>
-                </div>
-
-                <div style={{ height: "1px", background: "rgba(255,255,255,0.15)" }} />
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                  <div style={{ background: "rgba(0,0,0,0.2)", padding: "0.875rem", borderRadius: "var(--radius-md)" }}>
-                    <span style={{ fontSize: "0.75rem", color: "#D9A441", fontWeight: 700, display: "block" }}>CURCUMIN CONTENT</span>
-                    <span style={{ fontSize: "1.25rem", fontWeight: 800 }}>5.42%</span>
-                    <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.6)", display: "block" }}>High Potency Verified</span>
-                  </div>
-
-                  <div style={{ background: "rgba(0,0,0,0.2)", padding: "0.875rem", borderRadius: "var(--radius-md)" }}>
-                    <span style={{ fontSize: "0.75rem", color: "#059669", fontWeight: 700, display: "block" }}>HEAVY METALS</span>
-                    <span style={{ fontSize: "1.25rem", fontWeight: 800 }}>0.00%</span>
-                    <span style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.6)", display: "block" }}>Zero Lead Chromate</span>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8125rem", color: "rgba(251,250,246,0.85)" }}>
-                  <ShieldCheck size={16} style={{ color: "#D9A441" }} />
-                  Third-party lab tested per individual batch.
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
-      </section>
 
-      {/* ───── 2. TRUST TICKER MARQUEE ───── */}
-      <TrustTicker />
+        {/* ───── 2. TRUST TICKER MARQUEE (Integrated at bottom of Hero) ───── */}
+        <div style={{ position: "relative", zIndex: 2, width: "100%" }}>
+          <TrustTicker />
+        </div>
+      </section>
 
       {/* ───── 3. FEATURED PRODUCTS SHOWCASE ───── */}
       {featuredProduct && (
@@ -239,7 +194,7 @@ export default async function HomePage() {
                   color: "var(--color-primary)",
                 }}
               >
-                Start with <span style={{ color: "#C4883E" }}>The Gold Standard</span>
+                Where we chose to <span style={{ color: "#C4883E" }}>begin</span>
               </h2>
             </div>
 
@@ -304,7 +259,7 @@ export default async function HomePage() {
 
         <div className="container" style={{ maxWidth: "1150px", margin: "0 auto", paddingInline: "1rem", position: "relative", zIndex: 2 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "3.5rem", alignItems: "center" }} className="lg:grid-cols-12">
-            
+
             {/* Text Left */}
             <div className="lg:col-span-7">
               <div
