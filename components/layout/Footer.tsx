@@ -24,9 +24,9 @@ function InstagramIcon({ size = 16, style }: { size?: number; style?: React.CSSP
 }
 
 const SHOP_LINKS = [
-  { href: "/shop", label: "All Products" },
-  { href: "/about-us", label: "About Us" },
-  { href: "/why-us", label: "Why FarmSmith" },
+  { href: "/shop", label: "Shop" },
+  { href: "/why-us", label: "Our Standards" },
+  { href: "/about-us", label: "Our Story" },
   { href: "/account", label: "My Account" },
 ];
 
@@ -98,18 +98,20 @@ export default function Footer() {
           <div style={{ flex: "1 1 320px", maxWidth: "420px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
               <Image
-                src="/images/farmsmith_circle_logo.png"
+                src="/images/farmsmith_logo_v2.png"
                 alt="FarmSmith Foods"
-                width={42}
-                height={42}
-                style={{ borderRadius: "50%" }}
+                width={44}
+                height={44}
+                unoptimized
+                style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }}
               />
               <span
                 style={{
-                  fontFamily: "var(--font-heading)",
-                  fontWeight: 600,
-                  fontSize: "1.375rem",
+                  fontFamily: "var(--font-serif-brand)",
+                  fontWeight: 700,
+                  fontSize: "1.45rem",
                   color: "var(--color-card)",
+                  letterSpacing: "0.02em",
                 }}
               >
                 FarmSmith Foods

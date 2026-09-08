@@ -23,8 +23,9 @@
   --color-error-bg:       #FDF0EE;
 
   /* Typography */
-  --font-heading:  "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-body:     "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading:      "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body:         "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif-brand:  "Playfair Display", "Georgia", "Cinzel", serif;
 
   /* Spacing scale */
   --spacing-section: 5rem;

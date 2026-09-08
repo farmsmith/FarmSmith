@@ -13,7 +13,7 @@ import LanguageSelector from "./LanguageSelector";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/shop", label: "Our Product" },
+  { href: "/shop", label: "Shop" },
   { href: "/why-us", label: "Our Standards" },
   { href: "/about-us", label: "Our Story" },
   { href: "/contact", label: "Contact" },
@@ -277,25 +277,26 @@ export default function Navbar() {
               href="/"
               onClick={closeAllMenus}
               aria-label="FarmSmith Foods — go to home"
-              style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}
+              style={{ display: "flex", alignItems: "center", gap: "0.675rem", textDecoration: "none" }}
             >
               <Image
-                src="/images/farmsmith_circle_logo.png"
+                src="/images/farmsmith_logo_v2.png"
                 alt="FarmSmith Foods"
-                width={38}
-                height={38}
+                width={44}
+                height={44}
                 priority
-                style={{ borderRadius: "50%" }}
+                unoptimized
+                style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }}
               />
               <span
                 className="notranslate nav-brand-text"
                 translate="no"
                 style={{
-                  fontFamily: "var(--font-heading)",
-                  fontWeight: 600,
-                  fontSize: "1.1875rem",
+                  fontFamily: "var(--font-serif-brand)",
+                  fontWeight: 700,
+                  fontSize: "1.3125rem",
                   color: "var(--color-primary)",
-                  letterSpacing: "-0.01em",
+                  letterSpacing: "0.02em",
                 }}
               >
                 FarmSmith

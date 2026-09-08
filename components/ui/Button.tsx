@@ -29,7 +29,7 @@ const buttonVariants = cva(
         ],
         outline: [
           "border border-[var(--color-primary)] text-[var(--color-primary)] bg-transparent",
-          "hover:bg-[var(--color-primary)] hover:text-white",
+          "hover:bg-[rgba(31,58,46,0.06)] hover:text-[var(--color-primary)]",
           "active:scale-[0.98]",
           "focus-visible:ring-[var(--color-primary)]",
         ],

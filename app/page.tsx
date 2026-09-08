@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import ProductCard from "@/components/product/ProductCard";
+import FeaturedProductShowcase from "@/components/home/FeaturedProductShowcase";
 import type { Product } from "@/types/product";
 import { getActiveProducts } from "@/lib/data/products";
 import TrustTicker from "@/components/home/TrustTicker";
@@ -97,12 +97,13 @@ export default async function HomePage() {
 
             <h1
               style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "clamp(2.25rem, 5vw, 3.75rem)",
+                fontFamily: "var(--font-serif-brand)",
+                fontSize: "clamp(2.35rem, 5.2vw, 4rem)",
+                fontWeight: 700,
                 color: "#FBFAF6",
                 marginBottom: "1.25rem",
-                lineHeight: 1.12,
-                letterSpacing: "-0.02em",
+                lineHeight: 1.15,
+                letterSpacing: "-0.01em",
               }}
             >
               Food crafted with{" "}
@@ -174,57 +175,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ───── 3. FEATURED PRODUCTS SHOWCASE ───── */}
+      {/* ───── 3. FEATURED PRODUCTS SHOWCASE (Split: Image Left, Content Right) ───── */}
       {featuredProduct && (
-        <section
-          className="section"
-          aria-labelledby="featured-heading"
-          style={{ background: "var(--color-background)", paddingBlock: "4rem" }}
-        >
-          <div className="container" style={{ maxWidth: "1100px", margin: "0 auto", paddingInline: "1rem" }}>
-            <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-              <p className="eyebrow" style={{ color: "#C4883E", marginBottom: "0.5rem" }}>
-                Our Featured Harvest
-              </p>
-              <h2
-                id="featured-heading"
-                style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-                  color: "var(--color-primary)",
-                }}
-              >
-                Where we chose to <span style={{ color: "#C4883E" }}>begin</span>
-              </h2>
-            </div>
-
-            <div style={{ maxWidth: "380px", margin: "0 auto" }}>
-              <ProductCard product={featuredProduct} />
-            </div>
-
-            <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-              <Link
-                href="/shop"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.625rem",
-                  background: "linear-gradient(135deg, #E2B356 0%, #D9A441 100%)",
-                  color: "#1F3A2E",
-                  fontWeight: 800,
-                  fontSize: "0.9375rem",
-                  textDecoration: "none",
-                  padding: "0.9375rem 2.25rem",
-                  borderRadius: "999px",
-                  boxShadow: "0 6px 20px rgba(217, 164, 65, 0.35)",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                View Complete Organic Collection <ArrowRight size={18} />
-              </Link>
-            </div>
-          </div>
-        </section>
+        <FeaturedProductShowcase product={featuredProduct} />
       )}
 
       {/* ───── 4. PURITY & LAB TRANSPARENCY SHOWCASE ───── */}
@@ -277,7 +230,7 @@ export default async function HomePage() {
               >
                 <Sparkles size={15} style={{ color: "#D9A441" }} />
                 <span style={{ fontSize: "0.78125rem", fontWeight: 800, color: "#D9A441", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  THE FUTURE OF FARMSMITH
+                  Farmsmith is growing
                 </span>
               </div>
 
@@ -292,9 +245,9 @@ export default async function HomePage() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                This is only <br />
+                From one origin <br />
                 <span style={{ color: "#D9A441", fontStyle: "normal" }}>
-                  the beginning.
+                  to many
                 </span>
               </h2>
 
@@ -307,7 +260,7 @@ export default async function HomePage() {
                   maxWidth: "540px",
                 }}
               >
-                Turmeric is our first product. We are actively developing a wider range of essential household foods — each built on verified sourcing, batch transparency, and uncompromised purity.
+                Kandhamal turmeric is where farmsmith begins. We are building a considered range of everyday foods, each chosen for its origin, quality and story.
               </p>
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
@@ -353,9 +306,9 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Teaser Graphics Right */}
-            <div className="lg:col-span-5 hidden lg:block">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+            {/* Teaser Graphics Right - Visible on all devices */}
+            <div className="lg:col-span-5 block">
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "1rem" }}>
                 <div
                   style={{
                     background: "rgba(255, 255, 255, 0.06)",
@@ -419,10 +372,10 @@ export default async function HomePage() {
                     UPCOMING
                   </span>
                   <h4 style={{ fontFamily: "var(--font-heading)", fontSize: "1.2rem", color: "#FFFFFF", marginBottom: "0.35rem", fontWeight: 700 }}>
-                    Raw Forest Honey
+                    Grains and pulses
                   </h4>
                   <p style={{ fontSize: "0.8125rem", color: "rgba(251,250,246,0.7)", margin: 0 }}>
-                    Unfiltered & wild
+                    From where it grows best
                   </p>
                 </div>
               </div>
