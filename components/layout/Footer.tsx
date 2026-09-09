@@ -307,9 +307,7 @@ export default function Footer() {
           }}
         >
           <p style={{ fontSize: "0.8125rem", color: "rgba(251,250,246,0.5)", margin: 0, fontFamily: "var(--font-body)", fontWeight: 400 }}>
-            © {new Date().getFullYear()} FARMSMITH. All rights reserved. &bull;{" "}
-            <Link href="/privacy-policy" style={{ color: "rgba(251,250,246,0.7)", textDecoration: "none" }}>Privacy Policy</Link> &bull;{" "}
-            <Link href="/terms" style={{ color: "rgba(251,250,246,0.7)", textDecoration: "none" }}>Terms & Conditions</Link>
+            © {new Date().getFullYear()} FARMSMITH. All rights reserved.
           </p>
         </div>
       </div>

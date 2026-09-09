@@ -101,11 +101,11 @@ export default function AboutUsPage() {
           <h1
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "clamp(2rem, 4.8vw, 3.25rem)",
+              fontSize: "clamp(1.6rem, 3.6vw, 2.35rem)",
               fontWeight: 600,
-              lineHeight: 1.25,
+              lineHeight: 1.35,
               color: "#FFFFFF",
-              maxWidth: "760px",
+              maxWidth: "720px",
               margin: "0 auto",
             }}
           >
@@ -416,12 +416,15 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* ───── BRAND PHILOSOPHY: THE FARMSMITH JOURNEY (MAROON BACKGROUND) ───── */}
+      {/* ───── BRAND PHILOSOPHY: THE FARMSMITH JOURNEY (EARTHY BROWN BACKGROUND) ───── */}
       <section
         style={{
-          background: "linear-gradient(135deg, #381212 0%, #290B0B 50%, #1A0606 100%)",
-          color: "#FBFAF6",
+          background: "linear-gradient(145deg, #2D1E12 0%, #1E140C 100%)",
+          color: "#FAF6EE",
           paddingBlock: "5.5rem",
+          borderTop: "1px solid rgba(217, 164, 65, 0.25)",
+          borderBottom: "1px solid rgba(217, 164, 65, 0.25)",
+          boxShadow: "0 20px 40px rgba(30, 20, 12, 0.35)",
         }}
       >
         <div className="container" style={{ maxWidth: "1200px", margin: "0 auto", paddingInline: "1rem" }}>
@@ -431,7 +434,7 @@ export default function AboutUsPage() {
               className="eyebrow"
               style={{
                 fontFamily: "var(--font-body)",
-                color: "#E2B356",
+                color: "#D9A441",
                 marginBottom: "0.5rem",
                 fontWeight: 500,
                 letterSpacing: "0.12em",
@@ -456,9 +459,9 @@ export default function AboutUsPage() {
             <p
               style={{
                 fontFamily: "var(--font-body)",
-                color: "rgba(251, 250, 246, 0.85)",
+                color: "#D9A441",
                 fontSize: "1.0625rem",
-                fontWeight: 400,
+                fontWeight: 500,
                 lineHeight: 1.7,
               }}
             >

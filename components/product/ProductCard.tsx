@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Star } from "lucide-react";
+import { Heart } from "lucide-react";
 import { formatPrice } from "@/lib/utils/cn";
 import AddToCartButton from "@/components/product/AddToCartButton";
 import type { Product } from "@/types/product";
@@ -74,11 +74,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const badge = getProductBadge(product);
   const currentImageUrl = slides[currentIdx];
-
-  // Calculate review rating & count based on product id
-  const rating = 4.9;
-  const reviewCount = Math.floor(120 + (product.id.charCodeAt(0) % 50) * 7);
-
   const weightLabel = formatWeightLabel(product);
 
   return (
@@ -265,19 +260,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
 
-        {/* Star Ratings — Only shown for Turmeric */}
-        {isTurmeric && (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", marginBottom: "0.875rem" }}>
-            <div style={{ display: "flex", color: "#D9A441", gap: "1px" }}>
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={13} fill="#D9A441" stroke="none" />
-              ))}
-            </div>
-            <span style={{ fontSize: "0.75rem", color: "var(--color-muted)", fontWeight: 600 }}>
-              {rating} ({reviewCount})
-            </span>
-          </div>
-        )}
+
 
         {/* For Turmeric: Push actions to bottom of tall card. For non-turmeric: Keep button close to title */}
         {isTurmeric && <div style={{ flex: 1 }} />}

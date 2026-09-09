@@ -218,7 +218,7 @@ export default function PurityShowcase() {
                 Batch Quality check report
               </h3>
               <p style={{ fontSize: "0.9375rem", color: "#4B5563", margin: "0.4rem 0 0", lineHeight: 1.6 }}>
-                Enter the batch code on your pack to verify the quality of your product
+                Enter the batch code on your pack to verify the quality of your product. Protective packaging design preserves natural freshness with a shelf life of 1 year for our pure turmeric.
               </p>
             </div>
 
