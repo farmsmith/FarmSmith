@@ -64,7 +64,7 @@ export default function PurityShowcase() {
   };
 
   return (
-    <section style={{ background: "var(--color-surface)", paddingBlock: "0 6rem" }}>
+    <section id="standards" style={{ background: "var(--color-surface)", paddingBlock: "0 6rem", scrollMarginTop: "5rem" }}>
       
       {/* 1. Full-width Dark Earthy Brown Section (Header + Know the Origin) */}
       <div

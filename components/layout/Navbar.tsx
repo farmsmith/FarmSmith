@@ -13,8 +13,8 @@ import LanguageSelector from "./LanguageSelector";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/why-us", label: "Our Standards" },
+  { href: "/#featured-harvest", label: "Shop" },
+  { href: "/#standards", label: "Our Standards" },
   { href: "/about-us", label: "Our Story" },
   { href: "/contact", label: "Contact" },
 ];
@@ -31,7 +31,28 @@ export default function Navbar() {
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
+    if (href.startsWith("/#")) return false;
     return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const handleNavLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    closeAllMenus();
+    if (href === "/" && pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (href === "/#featured-harvest" && pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById("featured-harvest");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (href === "/#standards" && pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById("standards");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
   };
 
   const closeAllMenus = () => {
@@ -272,10 +293,10 @@ export default function Navbar() {
               height: "4.25rem",
             }}
           >
-            {/* Left: Logo */}
+            {/* Left: Brand Logo & Title */}
             <Link
               href="/"
-              onClick={closeAllMenus}
+              onClick={(e) => handleNavLinkClick("/", e)}
               aria-label="FarmSmith Foods — go to home"
               style={{ display: "flex", alignItems: "center", gap: "0.675rem", textDecoration: "none" }}
             >
@@ -311,7 +332,7 @@ export default function Navbar() {
                   <Link
                     key={link.label}
                     href={link.href}
-                    onClick={closeAllMenus}
+                    onClick={(e) => handleNavLinkClick(link.href, e)}
                     className={`nav-link ${active ? "active" : ""}`}
                   >
                     {link.label.includes("FarmSmith") ? (
@@ -522,7 +543,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                onClick={closeAllMenus}
+                onClick={(e) => handleNavLinkClick(link.href, e)}
                 style={{
                   display: "block",
                   padding: "0.625rem 0.875rem",

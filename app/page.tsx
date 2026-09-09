@@ -127,7 +127,7 @@ export default async function HomePage() {
             {/* Action Buttons */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
               <Link
-                href="/shop"
+                href="/#featured-harvest"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -265,7 +265,7 @@ export default async function HomePage() {
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
                 <Link
-                  href="/shop"
+                  href="/#featured-harvest"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",

@@ -183,22 +183,35 @@ export default function Footer() {
                     gap: "0.625rem",
                   }}
                 >
-                  {SHOP_LINKS.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className="footer-link"
-                        onClick={(e) => {
-                          if (link.href === "/" && window.location.pathname === "/") {
-                            e.preventDefault();
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }
-                        }}
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
+                  {SHOP_LINKS.map((link) => {
+                    let targetHref = link.href;
+                    if (link.href === "/shop") targetHref = "/#featured-harvest";
+                    if (link.href === "/why-us") targetHref = "/#standards";
+                    return (
+                      <li key={link.href}>
+                        <Link
+                          href={targetHref}
+                          className="footer-link"
+                          onClick={(e) => {
+                            if (link.href === "/" && window.location.pathname === "/") {
+                              e.preventDefault();
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            } else if (link.href === "/shop" && window.location.pathname === "/") {
+                              e.preventDefault();
+                              const el = document.getElementById("featured-harvest");
+                              if (el) el.scrollIntoView({ behavior: "smooth" });
+                            } else if (link.href === "/why-us" && window.location.pathname === "/") {
+                              e.preventDefault();
+                              const el = document.getElementById("standards");
+                              if (el) el.scrollIntoView({ behavior: "smooth" });
+                            }
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 

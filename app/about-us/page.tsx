@@ -586,7 +586,7 @@ export default function AboutUsPage() {
             Experience naturally grown Farmsmith products,<br className="hidden sm:inline" /> purity backed by batch test
           </p>
           <Link
-            href="/shop"
+            href="/#featured-harvest"
             style={{
               display: "inline-flex",
               alignItems: "center",

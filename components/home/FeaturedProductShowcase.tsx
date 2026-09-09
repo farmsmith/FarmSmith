@@ -54,9 +54,10 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
 
   return (
     <section
+      id="featured-harvest"
       className="section"
       aria-labelledby="featured-heading"
-      style={{ background: "var(--color-background)", paddingBlock: "4.5rem" }}
+      style={{ background: "var(--color-background)", paddingBlock: "4.5rem", scrollMarginTop: "5rem" }}
     >
       <div className="container" style={{ maxWidth: "1100px", margin: "0 auto", paddingInline: "1.25rem" }}>
         {/* 2-Column Split: Standalone Image Left, Standalone Content Right */}

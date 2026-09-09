@@ -150,7 +150,7 @@ export default function GoldenMilkSection() {
             </div>
 
             <Link
-              href="/shop"
+              href="/#featured-harvest"
               style={{
                 display: "inline-flex",
                 alignItems: "center",

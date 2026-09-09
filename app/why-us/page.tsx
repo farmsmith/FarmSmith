@@ -440,7 +440,7 @@ export default function WhyUsPage() {
           </p>
 
           <Link
-            href="/shop"
+            href="/#featured-harvest"
             style={{
               display: "inline-flex",
               alignItems: "center",
