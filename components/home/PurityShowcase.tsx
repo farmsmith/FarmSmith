@@ -17,89 +17,97 @@ const SAMPLE_BATCHES: SampleBatch[] = [
   {
     code: "FS00001",
     batchNo: "FS00001",
-    product: "Farmsmith Turmeric Powder",
-    dyes: "Absent (100% Pure)",
-    heavyMetals: "Absent (Lab Cleared)",
-    pesticides: "Absent (Organically Grown)",
+    product: "Turmeric Powder",
+    dyes: "Absent",
+    heavyMetals: "Absent",
+    pesticides: "Absent",
     harvestDate: "Jan 2026",
   },
   {
     code: "FS00002",
     batchNo: "FS00002",
     product: "Organic Whole Turmeric Finger",
-    dyes: "Absent (100% Pure)",
-    heavyMetals: "Absent (Lab Cleared)",
-    pesticides: "Absent (Organically Grown)",
+    dyes: "Absent",
+    heavyMetals: "Absent",
+    pesticides: "Absent",
     harvestDate: "Dec 2025",
   },
 ];
 
 export default function PurityShowcase() {
-  const [selectedBatchCode, setSelectedBatchCode] = useState("FS00001");
+  const [selectedBatchCode, setSelectedBatchCode] = useState("");
   const [inputCode, setInputCode] = useState("");
-  const [activeBatch, setActiveBatch] = useState<SampleBatch>(SAMPLE_BATCHES[0]);
-  const [searched, setSearched] = useState(false);
+  const [activeBatch, setActiveBatch] = useState<SampleBatch | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    const query = inputCode.trim();
+    if (!query) {
+      setErrorMessage("Please enter a valid batch number to view the report.");
+      setActiveBatch(null);
+      return;
+    }
+
     const found = SAMPLE_BATCHES.find(
-      (b) => b.code.toLowerCase() === inputCode.trim().toLowerCase() || b.batchNo.toLowerCase() === inputCode.trim().toLowerCase()
+      (b) => b.code.toLowerCase() === query.toLowerCase() || b.batchNo.toLowerCase() === query.toLowerCase()
     );
+
     if (found) {
       setActiveBatch(found);
       setSelectedBatchCode(found.code);
+      setErrorMessage(null);
     } else {
-      // Default demo result if any custom query is typed
-      const codeStr = inputCode.toUpperCase() || "FS00001";
-      setActiveBatch({
-        code: codeStr,
-        batchNo: codeStr,
-        product: "FarmSmith Lab Verified Batch",
-        dyes: "Absent (100% Pure)",
-        heavyMetals: "Absent (Passed)",
-        pesticides: "Absent (Clean)",
-        harvestDate: "Recent Harvest 2026",
-      });
+      setActiveBatch(null);
+      setErrorMessage("Invalid Batch Code. Please check the code printed on your packaging and try again.");
     }
-    setSearched(true);
   };
 
   return (
-    <section style={{ background: "var(--color-surface)", paddingBlock: "5rem 6rem" }}>
-      <div className="container" style={{ maxWidth: "1100px", margin: "0 auto", paddingInline: "1rem" }}>
-        
+    <section style={{ background: "var(--color-surface)", paddingBlock: "0 6rem" }}>
+      
+      {/* 1. Full-width Dark Earthy Brown Section (Header + Know the Origin) */}
+      <div
+        style={{
+          background: "linear-gradient(145deg, #2D1E12 0%, #1E140C 100%)",
+          color: "#FAF6EE",
+          paddingBlock: "5rem 4.5rem",
+          marginBottom: "4rem",
+          borderTop: "1px solid rgba(217, 164, 65, 0.25)",
+          borderBottom: "1px solid rgba(217, 164, 65, 0.25)",
+          boxShadow: "0 20px 40px rgba(30, 20, 12, 0.35)",
+        }}
+      >
         {/* Section Header */}
-        <div style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 3.5rem" }}>
-          <p className="eyebrow" style={{ color: "#C4883E", marginBottom: "0.5rem", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.1em" }}>
-            our standard: batch transparency
+        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 4rem", paddingInline: "1.5rem" }}>
+          <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.12em" }}>
+            OUR STANDARD: BATCH TRANSPARENCY
           </p>
           <h2
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              color: "var(--color-primary)",
+              fontSize: "clamp(1.85rem, 4vw, 2.65rem)",
+              fontWeight: 600,
+              color: "#FAF6EE",
               lineHeight: 1.2,
               marginBottom: "1rem",
             }}
           >
-            You check the quality of our product
+            YOU check the quality of YOUR product
           </h2>
-          <p style={{ color: "var(--color-muted)", fontSize: "1rem", lineHeight: 1.7 }}>
+          <p style={{ color: "#D4C7B5", fontSize: "1.0625rem", fontFamily: "var(--font-body)", fontWeight: 400, lineHeight: 1.75 }}>
             Commercial spices often rely on synthetic yellow dyes and unchecked sourcing. 
             Here is how FarmSmith redefines purity with batch-specific third-party testing.
           </p>
         </div>
 
-        {/* 1. Know the Origin Section (Dark Earthy Brown with Kandhamal Fields & Hills) */}
+        {/* Know the Origin Grid */}
         <div
+          className="container"
           style={{
-            background: "linear-gradient(145deg, #2D1E12 0%, #1E140C 100%)",
-            color: "#FAF6EE",
-            borderRadius: "var(--radius-xl)",
-            padding: "clamp(2rem, 5vw, 3.5rem)",
-            marginBottom: "4rem",
-            boxShadow: "0 20px 40px rgba(30, 20, 12, 0.35)",
-            border: "1px solid rgba(217, 164, 65, 0.25)",
+            maxWidth: "1100px",
+            margin: "0 auto",
+            paddingInline: "1.5rem",
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
             gap: "2.5rem",
@@ -107,17 +115,11 @@ export default function PurityShowcase() {
           }}
         >
           <div>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(217, 164, 65, 0.15)", padding: "0.35rem 0.85rem", borderRadius: "100px", marginBottom: "1.25rem", border: "1px solid rgba(217, 164, 65, 0.3)" }}>
-              <Award size={16} style={{ color: "#D9A441" }} />
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#D9A441" }}>
-                GI Tagged Heritage (Reg: 610)
-              </span>
-            </div>
-            
             <h3
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+                fontWeight: 600,
                 color: "#FAF6EE",
                 lineHeight: 1.2,
                 marginBottom: "1.25rem",
@@ -173,6 +175,9 @@ export default function PurityShowcase() {
             />
           </div>
         </div>
+      </div>
+
+      <div className="container" style={{ maxWidth: "1100px", margin: "0 auto", paddingInline: "1rem" }}>
 
         {/* 2. Batch Quality Check Report Verification (Premium & Trustworthy) */}
         <div
@@ -200,9 +205,6 @@ export default function PurityShowcase() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
             <div style={{ maxWidth: "700px" }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "#C4883E", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.35rem" }}>
-                <ShieldCheck size={16} /> Verified Lab Certificate System
-              </div>
               <h3
                 style={{
                   fontFamily: "var(--font-heading)",
@@ -265,73 +267,84 @@ export default function PurityShowcase() {
                   whiteSpace: "nowrap",
                 }}
               >
-                <ShieldCheck size={18} style={{ color: "#D9A441" }} />
                 Verify Quality
               </button>
             </form>
 
-            {/* Batch Report Result Display - Certificate Card Look */}
-            <div
-              style={{
-                background: "#FAF7EE",
-                border: "1.5px solid #E4D5B7",
-                borderRadius: "1rem",
-                padding: "1.5rem 1.75rem",
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-                gap: "1.5rem",
-                boxShadow: "0 4px 16px rgba(196, 136, 62, 0.08)",
-                position: "relative",
-              }}
-            >
-              <div>
-                <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block" }}>
-                  Product & Batch No.
-                </span>
-                <p style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-primary)", margin: "0.3rem 0 0.15rem" }}>
-                  {activeBatch.product}
-                </p>
-                <span style={{ fontSize: "0.8125rem", color: "#9A6B27", fontWeight: 700, background: "rgba(217, 164, 65, 0.15)", padding: "0.2rem 0.6rem", borderRadius: "4px", display: "inline-block" }}>
-                  Batch no: {activeBatch.batchNo}
-                </span>
+            {/* Error Message when Invalid / Not Found */}
+            {errorMessage && (
+              <div
+                style={{
+                  background: "#FFF5F5",
+                  border: "1.5px solid #FEB2B2",
+                  borderRadius: "0.75rem",
+                  padding: "1rem 1.25rem",
+                  color: "#9B2C2C",
+                  fontSize: "0.9375rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.6rem",
+                  animation: "fadeIn 0.25s ease-in-out",
+                }}
+              >
+                <AlertTriangle size={18} style={{ color: "#E53E3E", flexShrink: 0 }} />
+                <span>{errorMessage}</span>
               </div>
+            )}
 
-              <div>
-                <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block" }}>
-                  Artificial colour/dyes
-                </span>
-                <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: "0.3rem 0 0", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <ShieldCheck size={18} style={{ color: "#059669" }} /> {activeBatch.dyes}
-                </p>
-                <span style={{ fontSize: "0.75rem", color: "#059669", fontWeight: 500 }}>
-                  ✓ Zero Synthetic Colorings
-                </span>
-              </div>
+            {/* Batch Report Result Display - Only shown when searched */}
+            {activeBatch && (
+              <div
+                style={{
+                  background: "#FAF7EE",
+                  border: "1.5px solid #E4D5B7",
+                  borderRadius: "1rem",
+                  padding: "1.75rem 2rem",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gap: "1.5rem",
+                  boxShadow: "0 4px 16px rgba(196, 136, 62, 0.08)",
+                  position: "relative",
+                  animation: "fadeIn 0.3s ease-in-out",
+                }}
+              >
+                <div style={{ width: "100%" }}>
+                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                    Product Name
+                  </span>
+                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-primary)", margin: 0 }}>
+                    {activeBatch.product}
+                  </p>
+                </div>
 
-              <div>
-                <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block" }}>
-                  Heavy metals
-                </span>
-                <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: "0.3rem 0 0", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <ShieldCheck size={18} style={{ color: "#059669" }} /> {activeBatch.heavyMetals}
-                </p>
-                <span style={{ fontSize: "0.75rem", color: "#059669", fontWeight: 500 }}>
-                  ✓ Lead, Mercury & Arsenic Free
-                </span>
-              </div>
+                <div style={{ width: "100%" }}>
+                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                    Artificial colour/dyes
+                  </span>
+                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: 0 }}>
+                    {activeBatch.dyes}
+                  </p>
+                </div>
 
-              <div>
-                <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block" }}>
-                  Pesticides
-                </span>
-                <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: "0.3rem 0 0", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <ShieldCheck size={18} style={{ color: "#059669" }} /> {activeBatch.pesticides}
-                </p>
-                <span style={{ fontSize: "0.75rem", color: "#059669", fontWeight: 500 }}>
-                  ✓ 100% Chemical & Pesticide Free
-                </span>
+                <div style={{ width: "100%" }}>
+                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                    Heavy metals
+                  </span>
+                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: 0 }}>
+                    {activeBatch.heavyMetals}
+                  </p>
+                </div>
+
+                <div style={{ width: "100%" }}>
+                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                    Pesticides
+                  </span>
+                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: 0 }}>
+                    {activeBatch.pesticides}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

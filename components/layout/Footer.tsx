@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin } from "lucide-react";
@@ -24,6 +26,7 @@ function InstagramIcon({ size = 16, style }: { size?: number; style?: React.CSSP
 }
 
 const SHOP_LINKS = [
+  { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/why-us", label: "Our Standards" },
   { href: "/about-us", label: "Our Story" },
@@ -51,7 +54,9 @@ export default function Footer() {
     >
       <style>{`
         .footer-link {
+          font-family: var(--font-subheading);
           font-size: 0.875rem;
+          font-weight: 500;
           color: rgba(251,250,246,0.75);
           text-decoration: none;
           transition: color 0.15s ease;
@@ -94,8 +99,8 @@ export default function Footer() {
             marginBottom: "3.5rem",
           }}
         >
-          {/* Left Side: FarmSmith Brand & Definition */}
-          <div style={{ flex: "1 1 320px", maxWidth: "420px" }}>
+          {/* Left Side: FarmSmith Brand & Manifesto */}
+          <div style={{ flex: "1 1 360px", maxWidth: "480px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
               <Image
                 src="/images/farmsmith_logo_v2.png"
@@ -108,8 +113,8 @@ export default function Footer() {
               <span
                 style={{
                   fontFamily: "var(--font-serif-brand)",
-                  fontWeight: 700,
-                  fontSize: "1.45rem",
+                  fontWeight: 600,
+                  fontSize: "1.5rem",
                   color: "var(--color-card)",
                   letterSpacing: "0.02em",
                 }}
@@ -117,52 +122,56 @@ export default function Footer() {
                 FarmSmith Foods
               </span>
             </div>
-            <p style={{ fontSize: "0.9375rem", lineHeight: 1.7, color: "rgba(251,250,246,0.8)", marginBottom: "1.5rem" }}>
-              Organic food crafted with a mother's care. We believe you deserve
-              to know exactly where your food came from, what happened to it, and
-              proof — not promises.
-            </p>
 
-            {/* Trust pills */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              {["GI-Tagged Origin", "Lab Tested", "100% Pure", "No Additives"].map((label) => (
-                <span
-                  key={label}
-                  style={{
-                    border: "1px solid var(--color-accent)",
-                    color: "var(--color-accent)",
-                    borderRadius: "var(--radius-full)",
-                    padding: "0.2rem 0.65rem",
-                    fontSize: "0.65rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {label}
-                </span>
-              ))}
+            {/* Replaced Manifesto Content */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.85rem",
+                fontSize: "0.9375rem",
+                lineHeight: 1.7,
+                color: "rgba(251,250,246,0.85)",
+                fontFamily: "var(--font-body)",
+                fontWeight: 400,
+              }}
+            >
+              <p style={{ margin: 0 }}>
+                In a world where it can be difficult to know where our food comes from and how it has been handled, we want to make those answers easier to find.
+              </p>
+              <p style={{ margin: 0 }}>
+                FarmSmith is our small step towards a more transparent food system — thoughtfully sourced, carefully selected and honest about what we know.
+              </p>
+              <p style={{ margin: 0, color: "rgba(251,250,246,0.92)" }}>
+                With every purchase, you help us build a food brand that values people, provenance and the world that sustains us.
+              </p>
             </div>
           </div>
 
-          {/* Right Side: Link Columns in 1 single row on all screen sizes */}
+          {/* Right Side: Link Columns */}
           <div style={{ flex: "1 1 auto", maxWidth: "540px" }}>
             <div className="footer-links-grid">
-              {/* Column 1: Shop */}
+              {/* Column 1: Explore */}
               <div>
                 <h3
+                  onClick={() => {
+                    if (window.location.pathname === "/") {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
                   style={{
-                    fontFamily: "var(--font-body)",
+                    fontFamily: "var(--font-subheading)",
                     fontSize: "0.75rem",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: "var(--color-accent)",
                     marginBottom: "1rem",
                     whiteSpace: "nowrap",
+                    cursor: "pointer",
                   }}
                 >
-                  Shop
+                  Explore
                 </h3>
                 <ul
                   style={{
@@ -176,7 +185,16 @@ export default function Footer() {
                 >
                   {SHOP_LINKS.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="footer-link">
+                      <Link
+                        href={link.href}
+                        className="footer-link"
+                        onClick={(e) => {
+                          if (link.href === "/" && window.location.pathname === "/") {
+                            e.preventDefault();
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }
+                        }}
+                      >
                         {link.label}
                       </Link>
                     </li>
@@ -188,9 +206,9 @@ export default function Footer() {
               <div>
                 <h3
                   style={{
-                    fontFamily: "var(--font-body)",
+                    fontFamily: "var(--font-subheading)",
                     fontSize: "0.75rem",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: "var(--color-accent)",
@@ -224,9 +242,9 @@ export default function Footer() {
               <div className="footer-connect-col">
                 <h3
                   style={{
-                    fontFamily: "var(--font-body)",
+                    fontFamily: "var(--font-subheading)",
                     fontSize: "0.75rem",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: "var(--color-accent)",
@@ -247,10 +265,10 @@ export default function Footer() {
                   }}
                 >
                   <li>
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", fontSize: "0.875rem", color: "rgba(251,250,246,0.8)", lineHeight: 1.5 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", fontSize: "0.875rem", color: "rgba(251,250,246,0.8)", lineHeight: 1.5, fontFamily: "var(--font-body)", fontWeight: 400 }}>
                       <MapPin size={16} style={{ marginTop: "3px", color: "var(--color-accent)", flexShrink: 0 }} />
                       <div style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
-                        <strong style={{ display: "block", color: "var(--color-card)", marginBottom: "0.15rem" }}>FARMSMITH</strong>
+                        <strong style={{ display: "block", color: "var(--color-card)", marginBottom: "0.15rem", fontFamily: "var(--font-subheading)", fontWeight: 500 }}>FARMSMITH</strong>
                         <span>
                           Plot No. 458, Bijayachandrapur,<br />
                           Paradeep, Jagatsinghpur,<br />
@@ -288,13 +306,10 @@ export default function Footer() {
             gap: "1rem",
           }}
         >
-          <p style={{ fontSize: "0.8125rem", color: "rgba(251,250,246,0.5)", margin: 0 }}>
-            © {new Date().getFullYear()} FarmSmith Foods. All rights reserved. &bull;{" "}
+          <p style={{ fontSize: "0.8125rem", color: "rgba(251,250,246,0.5)", margin: 0, fontFamily: "var(--font-body)", fontWeight: 400 }}>
+            © {new Date().getFullYear()} FARMSMITH. All rights reserved. &bull;{" "}
             <Link href="/privacy-policy" style={{ color: "rgba(251,250,246,0.7)", textDecoration: "none" }}>Privacy Policy</Link> &bull;{" "}
             <Link href="/terms" style={{ color: "rgba(251,250,246,0.7)", textDecoration: "none" }}>Terms & Conditions</Link>
-          </p>
-          <p style={{ fontSize: "0.8125rem", color: "rgba(251,250,246,0.4)", margin: 0 }}>
-            Made with care in Odisha, India.
           </p>
         </div>
       </div>

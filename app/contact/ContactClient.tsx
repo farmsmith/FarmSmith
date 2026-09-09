@@ -96,28 +96,31 @@ export default function ContactClient() {
               textTransform: "uppercase",
               letterSpacing: "0.15em",
               fontSize: "0.8125rem",
-              fontWeight: 700,
+              fontFamily: "var(--font-body)",
+              fontWeight: 500,
               color: "var(--color-accent)",
               display: "block",
               marginBottom: "0.75rem",
             }}
           >
-            Get In Touch
+            ALWAYS HAPPY TO HELP
           </span>
           <h1
             style={{
               fontFamily: "var(--font-heading)",
               fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
-              fontWeight: 700,
+              fontWeight: 600,
               marginBottom: "1rem",
               lineHeight: 1.15,
               color: "#FFFFFF",
             }}
           >
-            Contact FarmSmith Foods
+            Contact FarmSmith
           </h1>
           <p
             style={{
+              fontFamily: "var(--font-body)",
+              fontWeight: 400,
               color: "rgba(251, 250, 246, 0.85)",
               fontSize: "1.0625rem",
               lineHeight: 1.7,
@@ -125,7 +128,7 @@ export default function ContactClient() {
               margin: "0 auto",
             }}
           >
-            Have a question about our GI-tagged turmeric, order status, or bulk/B2B inquiries? We're here to help!
+            Have a question about our products, order status, or bulk/B2B inquiries? We&apos;re here to help.
           </p>
         </div>
       </section>
@@ -153,7 +156,7 @@ export default function ContactClient() {
               Reach Out Directly
             </h2>
             <p style={{ color: "var(--color-muted)", fontSize: "0.9375rem", lineHeight: 1.7, marginBottom: "2rem" }}>
-              Our support team is available Monday through Saturday from 9:00 AM to 6:00 PM IST.
+              We are available Monday through Friday, from 11:00 AM to 4:00 PM.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -216,7 +219,7 @@ export default function ContactClient() {
                   <MapPin size={22} />
                 </div>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: "0.9375rem", color: "var(--color-primary)" }}>Corporate & Registered Office</h4>
+                  <h4 style={{ margin: 0, fontSize: "0.9375rem", color: "var(--color-primary)" }}>Registered Office</h4>
                   <p style={{ margin: 0, color: "var(--color-muted)", fontSize: "0.875rem", lineHeight: 1.5 }}>
                     FARMSMITH, Plot No. 458, Bijayachandrapur, Paradeep, Jagatsinghpur, Odisha – 754120, India
                   </p>

@@ -23,9 +23,10 @@
   --color-error-bg:       #FDF0EE;
 
   /* Typography */
-  --font-heading:      "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  --font-body:         "Inter", system-ui, -apple-system, sans-serif;
-  --font-serif-brand:  "Playfair Display", "Georgia", "Cinzel", serif;
+  --font-heading:      "Cormorant Garamond", "Playfair Display", "Georgia", serif;
+  --font-subheading:   "Manrope", system-ui, -apple-system, sans-serif;
+  --font-body:         "Manrope", system-ui, -apple-system, sans-serif;
+  --font-serif-brand:  "Cormorant Garamond", "Playfair Display", "Georgia", serif;
 
   /* Spacing scale */
   --spacing-section: 5rem;
@@ -83,6 +84,7 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-body);
+  font-weight: 400;
   font-size: 1rem;
   line-height: 1.6;
   min-height: 100dvh;
@@ -100,10 +102,17 @@ main {
 }
 
 /* ─── Typography helpers ─── */
-h1, h2, h3, h4, h5, h6 {
+h1, h2 {
   font-family: var(--font-heading);
   font-weight: 600;
   line-height: 1.2;
+  color: var(--color-primary);
+}
+
+h3, h4, h5, h6 {
+  font-family: var(--font-subheading);
+  font-weight: 500;
+  line-height: 1.3;
   color: var(--color-primary);
 }
 
@@ -111,7 +120,11 @@ h1 { font-size: clamp(2.25rem, 5vw, 3.75rem); }
 h2 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); }
 h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
 
-p { margin-bottom: 0; }
+p {
+  margin-bottom: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+}
 
 a {
   color: inherit;
@@ -126,11 +139,13 @@ img, video {
 
 button {
   cursor: pointer;
-  font-family: var(--font-body);
+  font-family: var(--font-subheading);
+  font-weight: 500;
 }
 
 input, textarea, select {
   font-family: var(--font-body);
+  font-weight: 400;
 }
 
 /* ─── Focus rings (accessibility) ─── */

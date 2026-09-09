@@ -254,12 +254,14 @@ export default function ProductCard({ product }: ProductCardProps) {
               marginBottom: "0.5rem",
               display: "flex",
               flexDirection: "column",
-              gap: "0.15rem",
+              gap: "0.2rem",
               lineHeight: 1.4,
+              fontFamily: "var(--font-body)",
+              fontWeight: 400,
             }}
           >
-            <span>Batch tested for purity</span>
-            <span>GI-registered Origin</span>
+            <div>• Batch tested for Purity</div>
+            <div>• GI-registered Origin</div>
           </div>
         )}
 

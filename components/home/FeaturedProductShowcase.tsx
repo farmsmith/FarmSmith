@@ -59,34 +59,6 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
       style={{ background: "var(--color-background)", paddingBlock: "4.5rem" }}
     >
       <div className="container" style={{ maxWidth: "1100px", margin: "0 auto", paddingInline: "1.25rem" }}>
-        {/* Section Heading on Top */}
-        <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-          <p
-            className="eyebrow"
-            style={{
-              color: "#C4883E",
-              fontSize: "0.8125rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Our Featured Harvest
-          </p>
-          <h2
-            id="featured-heading"
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              color: "var(--color-primary)",
-              lineHeight: 1.2,
-            }}
-          >
-            Where we chose to <span style={{ color: "#C4883E" }}>begin</span>
-          </h2>
-        </div>
-
         {/* 2-Column Split: Standalone Image Left, Standalone Content Right */}
         <div
           style={{
@@ -124,28 +96,29 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                 position: "absolute",
                 top: "1rem",
                 right: "1rem",
-                zIndex: 3,
-                width: "36px",
-                height: "36px",
+                zIndex: 10,
+                width: "42px",
+                height: "42px",
                 borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.92)",
-                backdropFilter: "blur(6px)",
-                border: "none",
+                background: "rgba(255, 255, 255, 0.9)",
+                backdropFilter: "blur(4px)",
+                border: "1px solid rgba(0, 0, 0, 0.06)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                color: isWishlisted ? "#C0392B" : "#6B7A6B",
-                transition: "transform 0.15s ease, color 0.15s ease",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                transition: "transform 0.15s ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
-              <Heart size={18} fill={isWishlisted ? "#C0392B" : "none"} />
+              <Heart
+                size={20}
+                color={isWishlisted ? "#E05338" : "#1F3A2E"}
+                fill={isWishlisted ? "#E05338" : "none"}
+              />
             </button>
 
-            {/* Main Product Image */}
+            {/* Main Carousel Image */}
             <Link
               href={`/shop/${product.slug}`}
               aria-label={`View details of ${product.name}`}
@@ -160,9 +133,10 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                   sizes="(max-width: 768px) 100vw, 480px"
                   style={{
                     objectFit: "cover",
-                    transition: "transform 0.5s ease",
-                    transform: isHovered ? "scale(1.04)" : "scale(1)",
+                    transition: "transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                    transform: isHovered ? "scale(1.05)" : "scale(1)",
                   }}
+                  priority
                 />
               ) : (
                 <div
@@ -180,7 +154,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
               )}
             </Link>
 
-            {/* Thumbnail Indicators */}
+            {/* Pagination Indicators (Dots inside image) */}
             {slides.length > 1 && (
               <div
                 style={{
@@ -188,29 +162,32 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                   bottom: "1rem",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  zIndex: 3,
                   display: "flex",
-                  gap: "0.375rem",
-                  background: "rgba(0, 0, 0, 0.35)",
-                  padding: "0.25rem 0.625rem",
-                  borderRadius: "999px",
+                  gap: "0.4rem",
+                  zIndex: 10,
+                  background: "rgba(0,0,0,0.3)",
+                  padding: "0.35rem 0.6rem",
+                  borderRadius: "20px",
                   backdropFilter: "blur(4px)",
                 }}
               >
-                {slides.map((_, i) => (
+                {slides.map((_, idx) => (
                   <button
-                    key={i}
-                    onClick={() => setCurrentIdx(i)}
-                    aria-label={`View image ${i + 1}`}
+                    key={idx}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentIdx(idx);
+                    }}
+                    aria-label={`View image ${idx + 1}`}
                     style={{
-                      width: currentIdx === i ? "18px" : "6px",
+                      width: currentIdx === idx ? "20px" : "6px",
                       height: "6px",
-                      borderRadius: "999px",
+                      borderRadius: "3px",
+                      background: currentIdx === idx ? "#D9A441" : "rgba(255, 255, 255, 0.6)",
                       border: "none",
-                      background: currentIdx === i ? "#D9A441" : "rgba(255,255,255,0.65)",
-                      cursor: "pointer",
                       padding: 0,
-                      transition: "all 0.2s ease",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
                     }}
                   />
                 ))}
@@ -218,7 +195,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
             )}
           </div>
 
-          {/* RIGHT: Standalone Content Block */}
+          {/* RIGHT: Standalone Content Block with Attached Header */}
           <div
             style={{
               display: "flex",
@@ -227,17 +204,48 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
               paddingInline: "clamp(0rem, 2vw, 1rem)",
             }}
           >
+            {/* Attached Section Header - Centered */}
+            <div style={{ textAlign: "center", marginBottom: "0.25rem" }}>
+              <p
+                className="eyebrow"
+                style={{
+                  fontFamily: "var(--font-body)",
+                  color: "#C4883E",
+                  fontSize: "0.8125rem",
+                  fontWeight: 500,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  marginBottom: "0.35rem",
+                }}
+              >
+                Our Featured Harvest
+              </p>
+              <h2
+                id="featured-heading"
+                style={{
+                  fontFamily: "var(--font-heading)",
+                  fontSize: "clamp(1.85rem, 4vw, 2.6rem)",
+                  fontWeight: 600,
+                  color: "var(--color-primary)",
+                  lineHeight: 1.2,
+                  margin: 0,
+                }}
+              >
+                Where we chose to <span style={{ color: "#C4883E" }}>begin</span>
+              </h2>
+            </div>
+
             {/* Product Title */}
             <div>
               <Link href={`/shop/${product.slug}`} style={{ textDecoration: "none" }}>
                 <h3
                   style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "clamp(1.5rem, 3vw, 2rem)",
-                    fontWeight: 700,
+                    fontFamily: "var(--font-subheading)",
+                    fontSize: "clamp(1.25rem, 2.5vw, 1.5rem)",
+                    fontWeight: 500,
                     color: "var(--color-primary)",
                     margin: 0,
-                    lineHeight: 1.25,
+                    lineHeight: 1.3,
                   }}
                 >
                   Kandhamal Turmeric, the golden goodness
@@ -248,7 +256,9 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
             {/* Product Story / Description */}
             <p
               style={{
+                fontFamily: "var(--font-body)",
                 fontSize: "1rem",
+                fontWeight: 400,
                 lineHeight: 1.7,
                 color: "var(--color-muted)",
                 margin: 0,
@@ -264,15 +274,15 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                 fontSize: "0.9375rem",
                 color: "var(--color-muted)",
                 display: "flex",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "0.625rem",
+                flexDirection: "column",
+                gap: "0.35rem",
+                fontFamily: "var(--font-body)",
+                fontWeight: 400,
+                lineHeight: 1.5,
               }}
             >
-              <span>•</span>
-              <span>GI-registered Origin</span>
-              <span>•</span>
-              <span>Batch tested</span>
+              <div>• Batch tested for Purity</div>
+              <div>• GI-registered Origin</div>
             </div>
 
             {/* Star Rating */}
@@ -282,7 +292,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                   <Star key={i} size={16} fill="#D9A441" stroke="none" />
                 ))}
               </div>
-              <span style={{ fontSize: "0.875rem", color: "var(--color-muted)", fontWeight: 600 }}>
+              <span style={{ fontSize: "0.875rem", color: "var(--color-muted)", fontFamily: "var(--font-body)", fontWeight: 500 }}>
                 {rating} ({reviewCount} reviews)
               </span>
             </div>
@@ -293,13 +303,13 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                 style={{
                   fontFamily: "var(--font-heading)",
                   fontSize: "1.875rem",
-                  fontWeight: 800,
+                  fontWeight: 600,
                   color: "var(--color-primary)",
                 }}
               >
                 ₹129
               </span>
-              <span style={{ fontSize: "0.9375rem", color: "var(--color-muted)", fontWeight: 500 }}>
+              <span style={{ fontSize: "0.9375rem", color: "var(--color-muted)", fontFamily: "var(--font-body)", fontWeight: 500 }}>
                 / 100g
               </span>
             </div>
@@ -309,29 +319,6 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
               <AddToCartButton product={product} size="lg" />
             </div>
           </div>
-        </div>
-
-        {/* BOTTOM: Centered Explore Button */}
-        <div style={{ textAlign: "center", marginTop: "3.5rem" }}>
-          <Link
-            href="/shop"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.625rem",
-              background: "linear-gradient(135deg, #E2B356 0%, #D9A441 100%)",
-              color: "#1F3A2E",
-              fontWeight: 800,
-              fontSize: "0.9375rem",
-              textDecoration: "none",
-              padding: "0.9375rem 2.25rem",
-              borderRadius: "999px",
-              boxShadow: "0 6px 20px rgba(217, 164, 65, 0.35)",
-              transition: "all 0.2s ease",
-            }}
-          >
-            Explore more Farmsmith products <ArrowRight size={18} />
-          </Link>
         </div>
       </div>
     </section>

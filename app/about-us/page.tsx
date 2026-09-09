@@ -25,7 +25,7 @@ const JOURNEY_STEPS = [
   {
     step: "02",
     title: "The Search",
-    desc: "Uncovering supply chain gaps, lack of batch testing, and unverified claims across everyday Indian kitchen spices.",
+    desc: "Uncovering supply chain gaps, lack of batch testing, and unverified claims across everyday Indian kitchen staples.",
   },
   {
     step: "03",
@@ -34,8 +34,8 @@ const JOURNEY_STEPS = [
   },
   {
     step: "04",
-    title: "The Mission",
-    desc: "Building a community on Instagram around food awareness, pesticide education, and conscious choices for families.",
+    title: "The Purpose",
+    desc: "To help families make more informed choices about the food they bring home — by encouraging awareness about where food comes from, how it is grown, and what goes into it.",
   },
   {
     step: "05",
@@ -56,44 +56,61 @@ export default function AboutUsPage() {
           textAlign: "center",
         }}
       >
-        <div className="container" style={{ maxWidth: "800px" }}>
+        <div className="container" style={{ maxWidth: "860px", margin: "0 auto" }}>
           <span
             style={{
               textTransform: "uppercase",
               letterSpacing: "0.15em",
               fontSize: "0.8125rem",
-              fontWeight: 700,
+              fontFamily: "var(--font-body)",
+              fontWeight: 500,
               color: "#D9A441",
               display: "block",
-              marginBottom: "0.75rem",
+              marginBottom: "1.25rem",
             }}
           >
-            Our Story & Mission
+            OUR STORY AND PURPOSE
           </span>
+
+          {/* Big Brand Logo */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.75rem" }}>
+            <div
+              style={{
+                position: "relative",
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                background: "#FFFFFF",
+                overflow: "hidden",
+                border: "3px solid #D9A441",
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35)",
+              }}
+            >
+              <Image
+                src="/images/farmsmith_logo_v2.png"
+                alt="FarmSmith Logo"
+                fill
+                sizes="120px"
+                unoptimized
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            </div>
+          </div>
+
           <h1
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
-              fontWeight: 700,
-              marginBottom: "1.25rem",
-              lineHeight: 1.15,
+              fontSize: "clamp(2rem, 4.8vw, 3.25rem)",
+              fontWeight: 600,
+              lineHeight: 1.25,
               color: "#FFFFFF",
-            }}
-          >
-            Rooted in Soil, <br /> Committed to Purity
-          </h1>
-          <p
-            style={{
-              color: "rgba(251, 250, 246, 0.88)",
-              fontSize: "1.125rem",
-              lineHeight: 1.7,
-              maxWidth: "680px",
+              maxWidth: "760px",
               margin: "0 auto",
             }}
           >
-            FarmSmith Foods was born with a single-minded goal: 
-            <br />Restoring honesty to Indian spices through certified origin, sustainable farming, and lab-proven purity.
-          </p>
+            &ldquo;Food doesn&apos;t begin on a supermarket shelf. It begins with soil, water, people and place.&rdquo;
+          </h1>
         </div>
       </section>
 
@@ -110,49 +127,87 @@ export default function AboutUsPage() {
         >
           {/* Text Content */}
           <div>
-            <span className="eyebrow" style={{ marginBottom: "0.5rem", color: "#C4883E" }}>
-              The Origin Story
-            </span>
             <h2
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+                fontWeight: 600,
                 color: "var(--color-primary)",
                 marginBottom: "1.25rem",
                 lineHeight: 1.2,
+                letterSpacing: "-0.01em",
               }}
             >
-              Why We Started FarmSmith Foods
+              WHY FARMSMITH EXISTS
             </h2>
-            <p
+
+            {/* Founder Quote Card */}
+            <div
               style={{
-                color: "var(--color-muted)",
-                fontSize: "1rem",
-                lineHeight: 1.75,
-                marginBottom: "1rem",
-              }}
-            >
-              Modern commercial spice supply chains are plagued with adulteration—metanil yellow, lead chromate, chalk powder, and exhausted residues where natural essential oils have been extracted.
-            </p>
-            <p
-              style={{
-                color: "var(--color-muted)",
-                fontSize: "1rem",
-                lineHeight: 1.75,
+                background: "rgba(217, 164, 65, 0.1)",
+                borderLeft: "3px solid #D9A441",
+                padding: "1rem 1.25rem",
+                borderRadius: "0 var(--radius-md) var(--radius-md) 0",
                 marginBottom: "1.5rem",
               }}
             >
-              We established FarmSmith Foods to bridge the gap between heritage farmers cultivating GI-tagged heirloom crops and health-conscious families who deserve uncompromised nutrition.
-            </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-heading)",
+                  fontSize: "1.125rem",
+                  fontWeight: 600,
+                  fontStyle: "italic",
+                  color: "var(--color-primary)",
+                  lineHeight: 1.5,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                &ldquo;Every mother deserves access to safe and nourishing food she can trust for her child and family.&rdquo;
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-subheading)",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  color: "#C4883E",
+                  margin: 0,
+                }}
+              >
+                — Subhashree Behera, Founder, FarmSmith
+              </p>
+            </div>
 
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.75rem" }}>
-              {VALUES.map((item, idx) => (
-                <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", fontSize: "0.9375rem", color: "var(--color-foreground)" }}>
-                  <CheckCircle2 size={20} style={{ color: "#C4883E", flexShrink: 0, marginTop: "2px" }} />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.95rem",
+                color: "var(--color-muted)",
+                fontFamily: "var(--font-body)",
+                fontSize: "0.96875rem",
+                fontWeight: 400,
+                lineHeight: 1.75,
+              }}
+            >
+              <p style={{ margin: 0 }}>
+                A former Oil &amp; Gas sector executive, Subhashree chose to leave her corporate career to bring honest food to every household. She realised the importance of safe food for our well being after becoming a mother.
+              </p>
+              <p style={{ margin: 0 }}>
+                FarmSmith was born from a desire to bring honest, thoughtfully sourced food to everyday households — food with a known origin, considered sourcing and greater transparency about its quality.
+              </p>
+              <p style={{ margin: 0 }}>
+                We also want to reconnect with something we believe is worth preserving: the knowledge, crops and traditions of India&apos;s agricultural heritage.
+              </p>
+              <p style={{ margin: 0 }}>
+                Our aim is not to romanticise the past or claim that everything traditional is automatically better. It is to learn from what was valuable, preserve what deserves to continue, and bring those ideas thoughtfully to today&apos;s everyday plate.
+              </p>
+              <p style={{ margin: 0, fontWeight: 500, color: "var(--color-primary)" }}>
+                Because food is more than something we consume.
+              </p>
+              <p style={{ margin: 0 }}>
+                What we eat influences our well-being, and how we grow our food shapes the environment around us.
+              </p>
+            </div>
           </div>
 
           {/* Image */}
@@ -178,68 +233,219 @@ export default function AboutUsPage() {
           </div>
         </div>
 
-        {/* Stats Strip */}
+        {/* Botanical Green Heritage Band with Pure Artwork / Leaf & Crop Motifs (No Words) */}
         <div
           style={{
-            background: "#162E22",
-            color: "#FBFAF6",
+            position: "relative",
+            background: "linear-gradient(135deg, #162D21 0%, #1F3E2F 50%, #15291E 100%)",
             borderRadius: "var(--radius-xl)",
-            padding: "3rem 2rem",
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "2rem",
-            textAlign: "center",
-            border: "1px solid rgba(217, 164, 65, 0.25)",
+            padding: "2.25rem 2rem",
+            overflow: "hidden",
+            border: "1px solid rgba(217, 164, 65, 0.35)",
+            boxShadow: "0 16px 40px rgba(22, 45, 33, 0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <div>
-            <div style={{ fontFamily: "var(--font-heading)", fontSize: "2.75rem", fontWeight: 700, color: "#D9A441" }}>
-              100%
+          {/* Subtle Ambient Dots Pattern */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: 0.08,
+              backgroundImage: `radial-gradient(#D9A441 1px, transparent 1px)`,
+              backgroundSize: "16px 16px",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Symmetrical Ornamental Crop & Foliage Divider */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "clamp(1rem, 3vw, 2.5rem)",
+              width: "100%",
+              maxWidth: "850px",
+              zIndex: 1,
+            }}
+          >
+            {/* Left Gradient Line */}
+            <div
+              style={{
+                flex: 1,
+                height: "1px",
+                background: "linear-gradient(90deg, transparent, rgba(217, 164, 65, 0.6))",
+              }}
+            />
+
+            {/* Botanical Motif 1: Sprout Leaf */}
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
+                background: "rgba(217, 164, 65, 0.12)",
+                border: "1px solid rgba(217, 164, 65, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#D9A441",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+              </svg>
             </div>
-            <div style={{ fontSize: "0.9375rem", color: "rgba(251,250,246,0.85)", marginTop: "0.25rem" }}>
-              GI Tagged Origin
+
+            {/* Botanical Motif 2: Sun & Earth */}
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(217, 164, 65, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#F4EFE4",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2" />
+                <path d="M12 20v2" />
+                <path d="m4.93 4.93 1.41 1.41" />
+                <path d="m17.66 17.66 1.41 1.41" />
+                <path d="M2 12h2" />
+                <path d="M20 12h2" />
+                <path d="m6.34 17.66-1.41 1.41" />
+                <path d="m19.07 4.93-1.41 1.41" />
+              </svg>
             </div>
-          </div>
-          <div>
-            <div style={{ fontFamily: "var(--font-heading)", fontSize: "2.75rem", fontWeight: 700, color: "#D9A441" }}>
-              5.5%+
+
+            {/* Central Emblem: Golden Wheat & Harvest Sheaf */}
+            <div
+              style={{
+                width: "58px",
+                height: "58px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, rgba(217, 164, 65, 0.25) 0%, rgba(217, 164, 65, 0.1) 100%)",
+                border: "2px solid #D9A441",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#D9A441",
+                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m2 22 10-10" />
+                <path d="M16 8a4 4 0 0 0-4-4" />
+                <path d="M12 4a4 4 0 0 0-4 4" />
+                <path d="M20 12a4 4 0 0 0-4-4" />
+                <path d="M16 4a4 4 0 0 0-4 4" />
+                <path d="m12 12 4-4" />
+                <path d="m8 8 4-4" />
+                <path d="m16 16 4-4" />
+                <path d="m12 8 4 4" />
+              </svg>
             </div>
-            <div style={{ fontSize: "0.9375rem", color: "rgba(251,250,246,0.85)", marginTop: "0.25rem" }}>
-              Natural Curcumin Content
+
+            {/* Botanical Motif 4: Sprout */}
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(217, 164, 65, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#F4EFE4",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 20h10" />
+                <path d="M10 20c5.5-2.5.8-6.4 3-13" />
+                <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4.1 5.5.8z" />
+                <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.4 2-4.6-2.7-.2-4.2.8-5.2 2z" />
+              </svg>
             </div>
-          </div>
-          <div>
-            <div style={{ fontFamily: "var(--font-heading)", fontSize: "2.75rem", fontWeight: 700, color: "#D9A441" }}>
-              0%
+
+            {/* Botanical Motif 5: Leaf Pair */}
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
+                background: "rgba(217, 164, 65, 0.12)",
+                border: "1px solid rgba(217, 164, 65, 0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#D9A441",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13 20A7 7 0 0 0 14.2 6.1C8.5 5 7 4.48 5 2c-1 2-2 4.18-2 8 0 5.5 4.78 10 10 10Z" />
+                <path d="M22 21c0-3-1.85-5.36-5.08-6C14.5 14.52 12 13 11 12" />
+              </svg>
             </div>
-            <div style={{ fontSize: "0.9375rem", color: "rgba(251,250,246,0.85)", marginTop: "0.25rem" }}>
-              Dyes or Fillers
-            </div>
-          </div>
-          <div>
-            <div style={{ fontFamily: "var(--font-heading)", fontSize: "2.75rem", fontWeight: 700, color: "#D9A441" }}>
-              NABL
-            </div>
-            <div style={{ fontSize: "0.9375rem", color: "rgba(251,250,246,0.85)", marginTop: "0.25rem" }}>
-              Batch Lab Certified
-            </div>
+
+            {/* Right Gradient Line */}
+            <div
+              style={{
+                flex: 1,
+                height: "1px",
+                background: "linear-gradient(90deg, rgba(217, 164, 65, 0.6), transparent)",
+              }}
+            />
           </div>
         </div>
       </section>
 
-      {/* ───── BRAND PHILOSOPHY: THE FARMSMITH JOURNEY ───── */}
-      <section style={{ background: "var(--color-surface)", paddingBlock: "5.5rem" }}>
+      {/* ───── BRAND PHILOSOPHY: THE FARMSMITH JOURNEY (MAROON BACKGROUND) ───── */}
+      <section
+        style={{
+          background: "linear-gradient(135deg, #381212 0%, #290B0B 50%, #1A0606 100%)",
+          color: "#FBFAF6",
+          paddingBlock: "5.5rem",
+        }}
+      >
         <div className="container" style={{ maxWidth: "1200px", margin: "0 auto", paddingInline: "1rem" }}>
           
           <div style={{ textAlign: "center", maxWidth: "680px", margin: "0 auto 4rem" }}>
-            <p className="eyebrow" style={{ color: "#C4883E", marginBottom: "0.5rem", fontWeight: 700, letterSpacing: "0.1em" }}>
+            <p
+              className="eyebrow"
+              style={{
+                fontFamily: "var(--font-body)",
+                color: "#E2B356",
+                marginBottom: "0.5rem",
+                fontWeight: 500,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+              }}
+            >
               BRAND PHILOSOPHY
             </p>
             <h2
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "clamp(2rem, 4vw, 2.75rem)",
-                color: "var(--color-primary)",
+                fontWeight: 600,
+                color: "#FFFFFF",
                 lineHeight: 1.2,
                 marginBottom: "0.875rem",
                 letterSpacing: "-0.02em",
@@ -247,8 +453,16 @@ export default function AboutUsPage() {
             >
               The FarmSmith Journey
             </h2>
-            <p style={{ color: "var(--color-muted)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
-              From a mother's question to a movement for food transparency.
+            <p
+              style={{
+                fontFamily: "var(--font-body)",
+                color: "rgba(251, 250, 246, 0.85)",
+                fontSize: "1.0625rem",
+                fontWeight: 400,
+                lineHeight: 1.7,
+              }}
+            >
+              From a mother&apos;s question to a movement for food transparency.
             </p>
           </div>
 
@@ -345,14 +559,20 @@ export default function AboutUsPage() {
             style={{
               fontFamily: "var(--font-heading)",
               fontSize: "clamp(1.85rem, 4vw, 2.5rem)",
+              fontWeight: 600,
               color: "#FFFFFF",
               marginBottom: "1rem",
+              lineHeight: 1.2,
             }}
           >
-            <span style={{ color: "#FFFFFF" }}>Join Us in Restoring</span> <span style={{ color: "#D9A441" }}>Food Purity</span>
+            <span style={{ color: "#FFFFFF" }}>Join Us in Restoring</span>
+            <br className="mobile-br" />{" "}
+            <span style={{ color: "#D9A441" }}>Food Purity</span>
           </h2>
           <p
             style={{
+              fontFamily: "var(--font-body)",
+              fontWeight: 400,
               color: "rgba(251, 250, 246, 0.9)",
               fontSize: "1.0625rem",
               lineHeight: 1.7,
@@ -360,7 +580,7 @@ export default function AboutUsPage() {
               margin: "0 auto 2.25rem",
             }}
           >
-            Experience the natural aroma, vibrant color, and verified lab purity of FarmSmith's GI-tagged produce.
+            Experience naturally grown Farmsmith products,<br className="hidden sm:inline" /> purity backed by batch test
           </p>
           <Link
             href="/shop"
@@ -372,7 +592,8 @@ export default function AboutUsPage() {
               color: "#1F3A2E",
               padding: "1rem 2.5rem",
               borderRadius: "var(--radius-md)",
-              fontWeight: 800,
+              fontFamily: "var(--font-subheading)",
+              fontWeight: 500,
               fontSize: "0.9375rem",
               textDecoration: "none",
               boxShadow: "0 8px 25px rgba(217, 164, 65, 0.35)",
