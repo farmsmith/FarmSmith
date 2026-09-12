@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Star, ArrowRight } from "lucide-react";
+import { Heart, ArrowRight } from "lucide-react";
 import { formatPrice } from "@/lib/utils/cn";
 import AddToCartButton from "@/components/product/AddToCartButton";
 import type { Product } from "@/types/product";
@@ -49,8 +49,6 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
 
   const currentImageUrl = slides[currentIdx];
   const weightLabel = formatWeightLabel(product);
-  const rating = 4.9;
-  const reviewCount = Math.floor(120 + (product.id.charCodeAt(0) % 50) * 7);
 
   return (
     <section
@@ -286,17 +284,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
               <div>• GI-registered Origin</div>
             </div>
 
-            {/* Star Rating */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <div style={{ display: "flex", color: "#D9A441", gap: "2px" }}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={16} fill="#D9A441" stroke="none" />
-                ))}
-              </div>
-              <span style={{ fontSize: "0.875rem", color: "var(--color-muted)", fontFamily: "var(--font-body)", fontWeight: 500 }}>
-                {rating} ({reviewCount} reviews)
-              </span>
-            </div>
+
 
             {/* Price & Unit */}
             <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginTop: "0.25rem" }}>

@@ -35,9 +35,9 @@ const SAMPLE_BATCHES: SampleBatch[] = [
 ];
 
 export default function PurityShowcase() {
-  const [selectedBatchCode, setSelectedBatchCode] = useState("");
+  const [selectedBatchCode, setSelectedBatchCode] = useState("FS00001");
   const [inputCode, setInputCode] = useState("");
-  const [activeBatch, setActiveBatch] = useState<SampleBatch | null>(null);
+  const [activeBatch, setActiveBatch] = useState<SampleBatch | null>(SAMPLE_BATCHES[0]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -45,7 +45,6 @@ export default function PurityShowcase() {
     const query = inputCode.trim();
     if (!query) {
       setErrorMessage("Please enter a valid batch number to view the report.");
-      setActiveBatch(null);
       return;
     }
 
@@ -58,13 +57,25 @@ export default function PurityShowcase() {
       setSelectedBatchCode(found.code);
       setErrorMessage(null);
     } else {
-      setActiveBatch(null);
       setErrorMessage("Invalid Batch Code. Please check the code printed on your packaging and try again.");
     }
   };
 
   return (
     <section id="standards" style={{ background: "var(--color-surface)", paddingBlock: "0 6rem", scrollMarginTop: "5rem" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .batch-report-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 1.25rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .batch-report-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
       
       {/* 1. Full-width Dark Earthy Brown Section (Header + Know the Origin) */}
       <div
@@ -292,32 +303,37 @@ export default function PurityShowcase() {
               </div>
             )}
 
-            {/* Batch Report Result Display - Only shown when searched */}
+            {/* Batch Report Result Display */}
             {activeBatch && (
               <div
+                className="batch-report-grid"
                 style={{
                   background: "#FAF7EE",
                   border: "1.5px solid #E4D5B7",
                   borderRadius: "1rem",
                   padding: "1.75rem 2rem",
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gridTemplateColumns: "1.4fr 1fr 1fr 1fr",
                   gap: "1.5rem",
+                  alignItems: "start",
                   boxShadow: "0 4px 16px rgba(196, 136, 62, 0.08)",
                   position: "relative",
                   animation: "fadeIn 0.3s ease-in-out",
                 }}
               >
-                <div style={{ width: "100%" }}>
+                <div style={{ textAlign: "center" }}>
                   <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
-                    Product Name
+                    PRODUCT & BATCH
                   </span>
-                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-primary)", margin: 0 }}>
-                    {activeBatch.product}
+                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-primary)", margin: "0 0 0.25rem 0", whiteSpace: "nowrap" }}>
+                    Farmsmith Turmeric Powder
+                  </p>
+                  <p style={{ fontSize: "0.8125rem", color: "var(--color-muted)", margin: 0, fontWeight: 600 }}>
+                    Batch no : {activeBatch.batchNo}
                   </p>
                 </div>
 
-                <div style={{ width: "100%" }}>
+                <div style={{ textAlign: "center" }}>
                   <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
                     Artificial colour/dyes
                   </span>
@@ -326,7 +342,7 @@ export default function PurityShowcase() {
                   </p>
                 </div>
 
-                <div style={{ width: "100%" }}>
+                <div style={{ textAlign: "center" }}>
                   <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
                     Heavy metals
                   </span>
@@ -335,7 +351,7 @@ export default function PurityShowcase() {
                   </p>
                 </div>
 
-                <div style={{ width: "100%" }}>
+                <div style={{ textAlign: "center" }}>
                   <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
                     Pesticides
                   </span>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, ArrowRight } from "lucide-react";
+import { CheckCircle2, ArrowRight, Wheat, Apple, Carrot, Salad, SaladIcon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "About Us — Food Crafted with a Mother's Care",
@@ -115,14 +115,14 @@ export default function AboutUsPage() {
       </section>
 
       {/* Main Story Content */}
-      <section className="container" style={{ paddingBlock: "4.5rem 5rem" }}>
+      <section className="container" style={{ paddingTop: "4.5rem", paddingBottom: "0" }}>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
             gap: "3.5rem",
             alignItems: "center",
-            marginBottom: "5rem",
+            marginBottom: 0,
           }}
         >
           {/* Text Content */}
@@ -232,187 +232,179 @@ export default function AboutUsPage() {
             />
           </div>
         </div>
+      </section>
 
-        {/* Botanical Green Heritage Band with Pure Artwork / Leaf & Crop Motifs (No Words) */}
+      {/* Botanical Green Heritage Band with Pure Artwork / Leaf & Crop Motifs (Full-Width to Screen - Sleek & Thin) */}
+      <section
+        style={{
+          width: "100%",
+          position: "relative",
+          background: "linear-gradient(135deg, #162D21 0%, #1F3E2F 50%, #15291E 100%)",
+          padding: "1rem 2rem",
+          overflow: "hidden",
+          borderTop: "1px solid rgba(217, 164, 65, 0.35)",
+          borderBottom: "1px solid rgba(217, 164, 65, 0.35)",
+          boxShadow: "0 10px 25px rgba(22, 45, 33, 0.18)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBlock: "4.75rem",
+        }}
+      >
+        {/* Subtle Ambient Dots Pattern */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.08,
+            backgroundImage: `radial-gradient(#D9A441 1px, transparent 1px)`,
+            backgroundSize: "16px 16px",
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Symmetrical Ornamental Crop & Foliage Divider */}
         <div
           style={{
-            position: "relative",
-            background: "linear-gradient(135deg, #162D21 0%, #1F3E2F 50%, #15291E 100%)",
-            borderRadius: "var(--radius-xl)",
-            padding: "2.25rem 2rem",
-            overflow: "hidden",
-            border: "1px solid rgba(217, 164, 65, 0.35)",
-            boxShadow: "0 16px 40px rgba(22, 45, 33, 0.2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            gap: "clamp(0.85rem, 2.5vw, 2rem)",
+            width: "100%",
+            maxWidth: "850px",
+            zIndex: 1,
           }}
         >
-          {/* Subtle Ambient Dots Pattern */}
+          {/* Left Gradient Line */}
           <div
-            aria-hidden="true"
             style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0.08,
-              backgroundImage: `radial-gradient(#D9A441 1px, transparent 1px)`,
-              backgroundSize: "16px 16px",
-              pointerEvents: "none",
+              flex: 1,
+              height: "1px",
+              background: "linear-gradient(90deg, transparent, rgba(217, 164, 65, 0.6))",
             }}
           />
 
-          {/* Symmetrical Ornamental Crop & Foliage Divider */}
+          {/* Botanical Motif 1: Sprout Leaf */}
           <div
             style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              background: "rgba(217, 164, 65, 0.12)",
+              border: "1px solid rgba(217, 164, 65, 0.3)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "clamp(1rem, 3vw, 2.5rem)",
-              width: "100%",
-              maxWidth: "850px",
-              zIndex: 1,
+              color: "#D9A441",
+              flexShrink: 0,
             }}
           >
-            {/* Left Gradient Line */}
-            <div
-              style={{
-                flex: 1,
-                height: "1px",
-                background: "linear-gradient(90deg, transparent, rgba(217, 164, 65, 0.6))",
-              }}
-            />
-
-            {/* Botanical Motif 1: Sprout Leaf */}
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "50%",
-                background: "rgba(217, 164, 65, 0.12)",
-                border: "1px solid rgba(217, 164, 65, 0.3)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#D9A441",
-                flexShrink: 0,
-              }}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-              </svg>
-            </div>
-
-            {/* Botanical Motif 2: Sun & Earth */}
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.06)",
-                border: "1px solid rgba(217, 164, 65, 0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#F4EFE4",
-                flexShrink: 0,
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2" />
-                <path d="M12 20v2" />
-                <path d="m4.93 4.93 1.41 1.41" />
-                <path d="m17.66 17.66 1.41 1.41" />
-                <path d="M2 12h2" />
-                <path d="M20 12h2" />
-                <path d="m6.34 17.66-1.41 1.41" />
-                <path d="m19.07 4.93-1.41 1.41" />
-              </svg>
-            </div>
-
-            {/* Central Emblem: Golden Wheat & Harvest Sheaf */}
-            <div
-              style={{
-                width: "58px",
-                height: "58px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, rgba(217, 164, 65, 0.25) 0%, rgba(217, 164, 65, 0.1) 100%)",
-                border: "2px solid #D9A441",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#D9A441",
-                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.25)",
-                flexShrink: 0,
-              }}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m2 22 10-10" />
-                <path d="M16 8a4 4 0 0 0-4-4" />
-                <path d="M12 4a4 4 0 0 0-4 4" />
-                <path d="M20 12a4 4 0 0 0-4-4" />
-                <path d="M16 4a4 4 0 0 0-4 4" />
-                <path d="m12 12 4-4" />
-                <path d="m8 8 4-4" />
-                <path d="m16 16 4-4" />
-                <path d="m12 8 4 4" />
-              </svg>
-            </div>
-
-            {/* Botanical Motif 4: Sprout */}
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                background: "rgba(255, 255, 255, 0.06)",
-                border: "1px solid rgba(217, 164, 65, 0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#F4EFE4",
-                flexShrink: 0,
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 20h10" />
-                <path d="M10 20c5.5-2.5.8-6.4 3-13" />
-                <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4.1 5.5.8z" />
-                <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.4 2-4.6-2.7-.2-4.2.8-5.2 2z" />
-              </svg>
-            </div>
-
-            {/* Botanical Motif 5: Leaf Pair */}
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "50%",
-                background: "rgba(217, 164, 65, 0.12)",
-                border: "1px solid rgba(217, 164, 65, 0.3)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#D9A441",
-                flexShrink: 0,
-              }}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M13 20A7 7 0 0 0 14.2 6.1C8.5 5 7 4.48 5 2c-1 2-2 4.18-2 8 0 5.5 4.78 10 10 10Z" />
-                <path d="M22 21c0-3-1.85-5.36-5.08-6C14.5 14.52 12 13 11 12" />
-              </svg>
-            </div>
-
-            {/* Right Gradient Line */}
-            <div
-              style={{
-                flex: 1,
-                height: "1px",
-                background: "linear-gradient(90deg, rgba(217, 164, 65, 0.6), transparent)",
-              }}
-            />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+            </svg>
           </div>
+
+          {/* Botanical Motif 2: Sun & Earth */}
+          <div
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(217, 164, 65, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#F4EFE4",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2" />
+              <path d="M12 20v2" />
+              <path d="m4.93 4.93 1.41 1.41" />
+              <path d="m17.66 17.66 1.41 1.41" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="m6.34 17.66-1.41 1.41" />
+              <path d="m19.07 4.93-1.41 1.41" />
+            </svg>
+          </div>
+
+          {/* Central Emblem: Golden Emblem */}
+          <div
+            style={{
+              width: "46px",
+              height: "46px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, rgba(217, 164, 65, 0.25) 0%, rgba(217, 164, 65, 0.1) 100%)",
+              border: "2px solid #D9A441",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#D9A441",
+              boxShadow: "0 0 16px rgba(217, 164, 65, 0.35)",
+              flexShrink: 0,
+            }}
+          >
+            <Apple size={22} strokeWidth={1.8} />
+          </div>
+
+          {/* Botanical Motif 4: Sprout */}
+          <div
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(217, 164, 65, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#F4EFE4",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 20h10" />
+              <path d="M10 20c5.5-2.5.8-6.4 3-13" />
+              <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4.1 5.5.8z" />
+              <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.4 2-4.6-2.7-.2-4.2.8-5.2 2z" />
+            </svg>
+          </div>
+
+          {/* Botanical Motif 5: Leaf Pair */}
+          <div
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              background: "rgba(217, 164, 65, 0.12)",
+              border: "1px solid rgba(217, 164, 65, 0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#D9A441",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 20A7 7 0 0 0 14.2 6.1C8.5 5 7 4.48 5 2c-1 2-2 4.18-2 8 0 5.5 4.78 10 10 10Z" />
+              <path d="M22 21c0-3-1.85-5.36-5.08-6C14.5 14.52 12 13 11 12" />
+            </svg>
+          </div>
+
+          {/* Right Gradient Line */}
+          <div
+            style={{
+              flex: 1,
+              height: "1px",
+              background: "linear-gradient(90deg, rgba(217, 164, 65, 0.6), transparent)",
+            }}
+          />
         </div>
       </section>
 
@@ -428,7 +420,7 @@ export default function AboutUsPage() {
         }}
       >
         <div className="container" style={{ maxWidth: "1200px", margin: "0 auto", paddingInline: "1rem" }}>
-          
+
           <div style={{ textAlign: "center", maxWidth: "680px", margin: "0 auto 4rem" }}>
             <p
               className="eyebrow"
