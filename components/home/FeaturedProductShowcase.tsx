@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ArrowRight } from "lucide-react";
+import { Heart, ArrowRight, MessageSquarePlus } from "lucide-react";
 import { formatPrice } from "@/lib/utils/cn";
 import AddToCartButton from "@/components/product/AddToCartButton";
+import AddReviewModal from "@/components/product/AddReviewModal";
 import type { Product } from "@/types/product";
 
 interface FeaturedProductShowcaseProps {
@@ -29,6 +30,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const slides =
     product.images && product.images.length > 1
@@ -286,6 +288,40 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
 
 
 
+            {/* Add Review Trigger */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <button
+                type="button"
+                onClick={() => setIsReviewModalOpen(true)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                  background: "rgba(217, 164, 65, 0.1)",
+                  border: "1px solid rgba(217, 164, 65, 0.35)",
+                  color: "#B47B2E",
+                  padding: "0.4rem 0.9rem",
+                  borderRadius: "100px",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "var(--font-body)",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(217, 164, 65, 0.2)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(217, 164, 65, 0.1)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                <MessageSquarePlus size={15} color="#C4883E" />
+                Add review
+              </button>
+            </div>
+
             {/* Price & Unit */}
             <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginTop: "0.25rem" }}>
               <span
@@ -310,6 +346,13 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
           </div>
         </div>
       </div>
+
+      {/* Interactive Review Modal */}
+      <AddReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        productName={product.name || "Kandhamal Turmeric"}
+      />
     </section>
   );
 }
