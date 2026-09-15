@@ -72,29 +72,49 @@ export default function AboutUsPage() {
             OUR STORY AND PURPOSE
           </span>
 
-          {/* Big Brand Logo */}
+          {/* Big Brand Logo with TM Trademark Badge */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.75rem" }}>
-            <div
-              style={{
-                position: "relative",
-                width: "120px",
-                height: "120px",
-                borderRadius: "50%",
-                background: "#FFFFFF",
-                overflow: "hidden",
-                border: "3px solid #D9A441",
-                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35)",
-              }}
-            >
-              <Image
-                src="/images/farmsmith_logo_v2.png"
-                alt="FarmSmith Logo"
-                fill
-                sizes="120px"
-                unoptimized
-                style={{ objectFit: "cover" }}
-                priority
-              />
+            <div style={{ position: "relative", width: "120px", height: "120px" }}>
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  background: "#FFFFFF",
+                  overflow: "hidden",
+                  border: "3px solid #D9A441",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35)",
+                }}
+              >
+                <Image
+                  src="/images/farmsmith_logo_v2.png"
+                  alt="FarmSmith Logo"
+                  fill
+                  sizes="120px"
+                  unoptimized
+                  style={{ objectFit: "cover" }}
+                  priority
+                />
+              </div>
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: "2px",
+                  right: "2px",
+                  background: "#162D21",
+                  color: "#D9A441",
+                  border: "1.5px solid #D9A441",
+                  fontSize: "0.65rem",
+                  fontWeight: 800,
+                  padding: "1px 5px",
+                  borderRadius: "100px",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.35)",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                TM
+              </span>
             </div>
           </div>
 

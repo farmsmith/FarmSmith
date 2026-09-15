@@ -57,14 +57,37 @@ export default function ResetPasswordClient() {
     >
       <div style={{ width: "100%", maxWidth: "420px" }}>
         <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <Link href="/">
-            <Image
-              src="/images/farmsmith_circle_logo.png"
-              alt="FarmSmith Foods"
-              width={56}
-              height={56}
-              style={{ borderRadius: "50%", margin: "0 auto 0.75rem" }}
-            />
+          <Link href="/" style={{ display: "inline-block", textDecoration: "none" }}>
+            <div style={{ position: "relative", width: "56px", height: "56px", margin: "0 auto 0.75rem" }}>
+              <Image
+                src="/images/farmsmith_logo_v2.png"
+                alt="FarmSmith Foods"
+                width={56}
+                height={56}
+                unoptimized
+                style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: "-2px",
+                  right: "-3px",
+                  background: "var(--color-primary, #1F3A2E)",
+                  color: "#D9A441",
+                  border: "1px solid #D9A441",
+                  fontSize: "0.58rem",
+                  fontWeight: 800,
+                  padding: "0.5px 4px",
+                  borderRadius: "100px",
+                  boxShadow: "0 1px 4px rgba(0, 0, 0, 0.25)",
+                  lineHeight: 1,
+                  letterSpacing: "0.02em",
+                  userSelect: "none",
+                }}
+              >
+                TM
+              </span>
+            </div>
           </Link>
           <h1
             style={{

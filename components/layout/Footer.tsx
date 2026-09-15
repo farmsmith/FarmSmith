@@ -102,14 +102,50 @@ export default function Footer() {
           {/* Left Side: FarmSmith Brand & Manifesto */}
           <div style={{ flex: "1 1 360px", maxWidth: "480px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
-              <Image
-                src="/images/farmsmith_logo_v2.png"
-                alt="FarmSmith Foods"
-                width={44}
-                height={44}
-                unoptimized
-                style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }}
-              />
+              <div style={{ position: "relative", width: "44px", height: "44px", flexShrink: 0 }}>
+                <div
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "50%",
+                    background: "#FFFFFF",
+                    padding: "2px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "1.5px solid #D9A441",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Image
+                    src="/images/farmsmith_logo_v2.png"
+                    alt="FarmSmith Foods"
+                    width={40}
+                    height={40}
+                    unoptimized
+                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                  />
+                </div>
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: "-2px",
+                    right: "-3px",
+                    background: "#FFFFFF",
+                    color: "#162D21",
+                    border: "1px solid #D9A441",
+                    fontSize: "0.55rem",
+                    fontWeight: 800,
+                    padding: "0.5px 3.5px",
+                    borderRadius: "100px",
+                    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.35)",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  TM
+                </span>
+              </div>
               <span
                 style={{
                   fontFamily: "var(--font-serif-brand)",
@@ -119,7 +155,7 @@ export default function Footer() {
                   letterSpacing: "0.02em",
                 }}
               >
-                FarmSmith Foods
+                FarmSmith Foods<sup style={{ fontSize: "0.7rem", marginLeft: "2px", color: "#D9A441", fontWeight: 700 }}>TM</sup>
               </span>
             </div>
 

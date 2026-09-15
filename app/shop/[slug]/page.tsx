@@ -4,6 +4,7 @@ import { formatPrice } from "@/lib/utils/cn";
 import ProductGallery from "@/components/product/ProductGallery";
 import TrustBadge, { TURMERIC_TRUST_BADGES } from "@/components/product/TrustBadge";
 import ProductFactsGrid from "@/components/product/ProductFactsGrid";
+import ProductReviewsList from "@/components/product/ProductReviewsList";
 import AddToCartButton from "@/components/product/AddToCartButton";
 import QuantitySelector from "@/components/product/QuantitySelector";
 import ProductDetailCompareTrigger from "@/components/product/ProductDetailCompareTrigger";
@@ -267,6 +268,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
           facts={facts}
           heading={`Know your ${product.name}`}
         />
+
+        {/* Customer Reviews Section */}
+        <ProductReviewsList productName={product.name} />
       </div>
     </div>
   );

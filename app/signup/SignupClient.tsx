@@ -157,14 +157,37 @@ function SignupForm() {
     >
       <div style={{ width: "100%", maxWidth: "440px" }}>
         <div style={{ textAlign: "center", marginBottom: "1rem" }}>
-          <Link href="/" aria-label="Go to Home">
-            <Image
-              src="/images/farmsmith_circle_logo.png"
-              alt="FarmSmith Foods"
-              width={48}
-              height={48}
-              style={{ borderRadius: "50%", margin: "0 auto 0.375rem" }}
-            />
+          <Link href="/" aria-label="Go to Home" style={{ display: "inline-block", textDecoration: "none" }}>
+            <div style={{ position: "relative", width: "48px", height: "48px", margin: "0 auto 0.375rem" }}>
+              <Image
+                src="/images/farmsmith_logo_v2.png"
+                alt="FarmSmith Foods"
+                width={48}
+                height={48}
+                unoptimized
+                style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover" }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  bottom: "-2px",
+                  right: "-3px",
+                  background: "var(--color-primary, #1F3A2E)",
+                  color: "#D9A441",
+                  border: "1px solid #D9A441",
+                  fontSize: "0.55rem",
+                  fontWeight: 800,
+                  padding: "0.5px 3.5px",
+                  borderRadius: "100px",
+                  boxShadow: "0 1px 4px rgba(0, 0, 0, 0.25)",
+                  lineHeight: 1,
+                  letterSpacing: "0.02em",
+                  userSelect: "none",
+                }}
+              >
+                TM
+              </span>
+            </div>
           </Link>
           <h1
             style={{

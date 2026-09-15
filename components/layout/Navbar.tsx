@@ -300,15 +300,35 @@ export default function Navbar() {
               aria-label="FarmSmith Foods — go to home"
               style={{ display: "flex", alignItems: "center", gap: "0.675rem", textDecoration: "none" }}
             >
-              <Image
-                src="/images/farmsmith_logo_v2.png"
-                alt="FarmSmith Foods"
-                width={44}
-                height={44}
-                priority
-                unoptimized
-                style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }}
-              />
+              <div style={{ position: "relative", width: "44px", height: "44px", flexShrink: 0 }}>
+                <Image
+                  src="/images/farmsmith_logo_v2.png"
+                  alt="FarmSmith Foods"
+                  width={44}
+                  height={44}
+                  priority
+                  unoptimized
+                  style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: "-2px",
+                    right: "-3px",
+                    background: "var(--color-primary, #1F3A2E)",
+                    color: "#D9A441",
+                    border: "1px solid #D9A441",
+                    fontSize: "0.55rem",
+                    fontWeight: 800,
+                    padding: "0.5px 3.5px",
+                    borderRadius: "100px",
+                    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.25)",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  TM
+                </span>
+              </div>
               <span
                 className="notranslate nav-brand-text"
                 translate="no"
@@ -320,7 +340,7 @@ export default function Navbar() {
                   letterSpacing: "0.02em",
                 }}
               >
-                FarmSmith
+                FarmSmith<sup style={{ fontSize: "0.65rem", marginLeft: "1px", color: "#C4883E", fontWeight: 700 }}>TM</sup>
               </span>
             </Link>
 

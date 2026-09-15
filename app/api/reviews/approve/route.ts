@@ -85,15 +85,18 @@ export async function GET(req: Request) {
     if (action === "approve") {
       return new NextResponse(
         `<!DOCTYPE html>
-        <html>
+        <html lang="en">
           <head>
+            <meta charset="UTF-8">
             <title>Review Approved — FarmSmith</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">
           </head>
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #FAFAF7;">
             <div style="background: #FFFFFF; padding: 2.75rem 2rem; border-radius: 16px; border: 1px solid rgba(217, 164, 65, 0.35); box-shadow: 0 12px 36px rgba(22, 45, 33, 0.12); text-align: center; max-width: 480px; width: 90%;">
-              <div style="width: 64px; height: 64px; background: rgba(5, 150, 105, 0.12); border: 2px solid #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; color: #059669; font-size: 32px; font-weight: bold;">
-                ✓
+              <div style="width: 64px; height: 64px; background: rgba(5, 150, 105, 0.12); border: 2px solid #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; color: #059669;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </div>
               <h2 style="color: #162D21; margin: 0 0 0.5rem; font-size: 1.6rem; font-weight: 700;">Review Approved!</h2>
               <p style="color: #4A5568; line-height: 1.6; margin: 0 0 1.75rem; font-size: 1rem;">
@@ -105,7 +108,7 @@ export async function GET(req: Request) {
             </div>
           </body>
         </html>`,
-        { status: 200, headers: { "Content-Type": "text/html" } }
+        { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
       );
     } else {
       return new NextResponse(

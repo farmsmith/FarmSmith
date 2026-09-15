@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, AlertTriangle, Check, Search, FileText, Sparkles, Award } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Check, CheckCircle2, Search, FileText, Sparkles, Award } from "lucide-react";
 
 interface SampleBatch {
   code: string;
@@ -303,61 +303,216 @@ export default function PurityShowcase() {
               </div>
             )}
 
-            {/* Batch Report Result Display */}
+            {/* Batch Report Result Display (Premium & Attractive Lab-Verification Styling) */}
             {activeBatch && (
               <div
                 className="batch-report-grid"
                 style={{
-                  background: "#FAF7EE",
-                  border: "1.5px solid #E4D5B7",
-                  borderRadius: "1rem",
-                  padding: "1.75rem 2rem",
+                  background: "linear-gradient(145deg, #FFFFFF 0%, #FAF8F2 100%)",
+                  border: "1.5px solid rgba(217, 164, 65, 0.45)",
+                  borderRadius: "1.25rem",
+                  padding: "1.5rem",
                   display: "grid",
-                  gridTemplateColumns: "1.4fr 1fr 1fr 1fr",
-                  gap: "1.5rem",
-                  alignItems: "start",
-                  boxShadow: "0 4px 16px rgba(196, 136, 62, 0.08)",
+                  gridTemplateColumns: "1.3fr 1fr 1fr 1fr",
+                  gap: "1rem",
+                  alignItems: "stretch",
+                  boxShadow: "0 12px 32px rgba(31, 58, 46, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
                   position: "relative",
                   animation: "fadeIn 0.3s ease-in-out",
                 }}
               >
-                <div style={{ textAlign: "center" }}>
-                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                {/* Tile 1: Product & Batch */}
+                <div
+                  style={{
+                    background: "rgba(31, 58, 46, 0.04)",
+                    border: "1px solid rgba(31, 58, 46, 0.1)",
+                    borderRadius: "0.875rem",
+                    padding: "1.25rem 1rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    gap: "0.35rem",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "#A06B28",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      fontWeight: 700,
+                      fontFamily: "var(--font-body)",
+                    }}
+                  >
                     PRODUCT & BATCH
                   </span>
-                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-primary)", margin: "0 0 0.25rem 0", whiteSpace: "nowrap" }}>
+                  <p
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "1.05rem",
+                      color: "var(--color-primary)",
+                      margin: 0,
+                      fontFamily: "var(--font-heading)",
+                      lineHeight: 1.3,
+                    }}
+                  >
                     Farmsmith Turmeric Powder
                   </p>
-                  <p style={{ fontSize: "0.8125rem", color: "var(--color-muted)", margin: 0, fontWeight: 600 }}>
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#4B5563",
+                      background: "rgba(217, 164, 65, 0.15)",
+                      border: "1px solid rgba(217, 164, 65, 0.3)",
+                      padding: "0.15rem 0.65rem",
+                      borderRadius: "100px",
+                      fontWeight: 600,
+                      fontFamily: "monospace",
+                      marginTop: "0.2rem",
+                    }}
+                  >
                     Batch no : {activeBatch.batchNo}
-                  </p>
+                  </span>
                 </div>
 
-                <div style={{ textAlign: "center" }}>
-                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                {/* Tile 2: Artificial colour/dyes */}
+                <div
+                  style={{
+                    background: "#FFFFFF",
+                    border: "1px solid rgba(217, 164, 65, 0.25)",
+                    borderRadius: "0.875rem",
+                    padding: "1.25rem 0.85rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    gap: "0.6rem",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "#6B7280",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      fontWeight: 700,
+                      lineHeight: 1.2,
+                    }}
+                  >
                     Artificial colour/dyes
                   </span>
-                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: 0 }}>
-                    {activeBatch.dyes}
-                  </p>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      background: "rgba(5, 150, 105, 0.08)",
+                      border: "1px solid rgba(5, 150, 105, 0.25)",
+                      padding: "0.35rem 0.85rem",
+                      borderRadius: "100px",
+                    }}
+                  >
+                    <CheckCircle2 size={15} style={{ color: "#059669", flexShrink: 0 }} />
+                    <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#065F46" }}>
+                      {activeBatch.dyes}
+                    </span>
+                  </div>
                 </div>
 
-                <div style={{ textAlign: "center" }}>
-                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                {/* Tile 3: Heavy metals */}
+                <div
+                  style={{
+                    background: "#FFFFFF",
+                    border: "1px solid rgba(217, 164, 65, 0.25)",
+                    borderRadius: "0.875rem",
+                    padding: "1.25rem 0.85rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    gap: "0.6rem",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "#6B7280",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      fontWeight: 700,
+                      lineHeight: 1.2,
+                    }}
+                  >
                     Heavy metals
                   </span>
-                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: 0 }}>
-                    {activeBatch.heavyMetals}
-                  </p>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      background: "rgba(5, 150, 105, 0.08)",
+                      border: "1px solid rgba(5, 150, 105, 0.25)",
+                      padding: "0.35rem 0.85rem",
+                      borderRadius: "100px",
+                    }}
+                  >
+                    <CheckCircle2 size={15} style={{ color: "#059669", flexShrink: 0 }} />
+                    <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#065F46" }}>
+                      {activeBatch.heavyMetals}
+                    </span>
+                  </div>
                 </div>
 
-                <div style={{ textAlign: "center" }}>
-                  <span style={{ fontSize: "0.75rem", color: "#8C7A6B", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: "0.4rem" }}>
+                {/* Tile 4: Pesticides */}
+                <div
+                  style={{
+                    background: "#FFFFFF",
+                    border: "1px solid rgba(217, 164, 65, 0.25)",
+                    borderRadius: "0.875rem",
+                    padding: "1.25rem 0.85rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    gap: "0.6rem",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "#6B7280",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      fontWeight: 700,
+                      lineHeight: 1.2,
+                    }}
+                  >
                     Pesticides
                   </span>
-                  <p style={{ fontWeight: 700, fontSize: "1rem", color: "#065F46", margin: 0 }}>
-                    {activeBatch.pesticides}
-                  </p>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      background: "rgba(5, 150, 105, 0.08)",
+                      border: "1px solid rgba(5, 150, 105, 0.25)",
+                      padding: "0.35rem 0.85rem",
+                      borderRadius: "100px",
+                    }}
+                  >
+                    <CheckCircle2 size={15} style={{ color: "#059669", flexShrink: 0 }} />
+                    <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#065F46" }}>
+                      {activeBatch.pesticides}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
