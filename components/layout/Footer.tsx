@@ -155,7 +155,7 @@ export default function Footer() {
                   letterSpacing: "0.02em",
                 }}
               >
-                FarmSmith Foods<sup style={{ fontSize: "0.7rem", marginLeft: "2px", color: "#D9A441", fontWeight: 700 }}>TM</sup>
+                FarmSmith Foods
               </span>
             </div>
 

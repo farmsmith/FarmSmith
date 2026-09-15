@@ -340,7 +340,7 @@ export default function Navbar() {
                   letterSpacing: "0.02em",
                 }}
               >
-                FarmSmith<sup style={{ fontSize: "0.65rem", marginLeft: "1px", color: "#C4883E", fontWeight: 700 }}>TM</sup>
+                FarmSmith
               </span>
             </Link>
 
