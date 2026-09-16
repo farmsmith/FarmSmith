@@ -9,6 +9,7 @@ import PurityShowcase from "@/components/home/PurityShowcase";
 import CustomerReviewsSection from "@/components/home/CustomerReviewsSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
 import FaqSection from "@/components/home/FaqSection";
+import IntroHeroAnimation from "@/components/home/IntroHeroAnimation";
 import { Sparkles, ArrowRight } from "lucide-react";
 
 export const revalidate = 60; // Incremental Static Regeneration every 60 seconds
@@ -31,6 +32,9 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* ───── 0. INTRO ENTRANCE ANIMATION (3s Brand Showcase) ───── */}
+      <IntroHeroAnimation />
+
       {/* ───── 1. HERO SECTION ───── */}
       <section
         aria-label="Hero"
