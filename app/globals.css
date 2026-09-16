@@ -80,6 +80,13 @@ html {
   padding: 0 !important;
 }
 
+html.farmsmith-intro-hidden #farmsmith-intro-overlay {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);

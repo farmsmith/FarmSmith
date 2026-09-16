@@ -300,7 +300,7 @@ export default function Navbar() {
               aria-label="FarmSmith Foods — go to home"
               style={{ display: "flex", alignItems: "center", gap: "0.675rem", textDecoration: "none" }}
             >
-              <div style={{ position: "relative", width: "44px", height: "44px", flexShrink: 0 }}>
+              <div id="nav-brand-logo" style={{ position: "relative", width: "44px", height: "44px", flexShrink: 0 }}>
                 <Image
                   src="/images/farmsmith_logo_v2.png"
                   alt="FarmSmith Foods"
@@ -330,6 +330,7 @@ export default function Navbar() {
                 </span>
               </div>
               <span
+                id="nav-brand-text"
                 className="notranslate nav-brand-text"
                 translate="no"
                 style={{
@@ -345,12 +346,13 @@ export default function Navbar() {
             </Link>
 
             {/* Center: Navigation Links */}
-            <div className="nav-center-links">
-              {NAV_LINKS.map((link) => {
+            <div id="nav-center-links" className="nav-center-links">
+              {NAV_LINKS.map((link, i) => {
                 const active = isActive(link.href);
                 return (
                   <Link
                     key={link.label}
+                    id={`nav-link-${i}`}
                     href={link.href}
                     onClick={(e) => handleNavLinkClick(link.href, e)}
                     className={`nav-link ${active ? "active" : ""}`}
