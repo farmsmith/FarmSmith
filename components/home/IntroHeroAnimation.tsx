@@ -51,17 +51,19 @@ export default function IntroHeroAnimation({
     }, 3000);
     timerRef.current.push(dockTimer);
 
-    // If user starts scrolling down, immediately dismiss intro completely
-    const handleScroll = () => {
+    // If user starts scrolling down or swiping, immediately dismiss intro completely
+    const handleScrollOrTouch = () => {
       if (window.scrollY > 10) {
         dismissImmediately();
       }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScrollOrTouch, { passive: true });
+    window.addEventListener("touchmove", handleScrollOrTouch, { passive: true });
 
     return () => {
       timerRef.current.forEach(clearTimeout);
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScrollOrTouch);
+      window.removeEventListener("touchmove", handleScrollOrTouch);
     };
   }, []);
 
@@ -161,12 +163,6 @@ export default function IntroHeroAnimation({
         style={{
           width: "100%",
           maxWidth: "1100px",
-          padding: "2rem 2rem",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "4rem",
           position: "relative",
           zIndex: 2,
         }}
@@ -190,8 +186,6 @@ export default function IntroHeroAnimation({
             ref={bigLogoRef}
             style={{
               position: "relative",
-              width: "clamp(140px, 18vw, 175px)",
-              height: "clamp(140px, 18vw, 175px)",
               borderRadius: "50%",
               background: "#FFFFFF",
               padding: "5px",
@@ -210,6 +204,7 @@ export default function IntroHeroAnimation({
               zIndex: 100,
               opacity: 1, // Remains 100% visible throughout flight!
             }}
+            className="intro-logo-disc"
           >
             <Image
               src="/images/farmsmith_logo_v2.png"
@@ -235,9 +230,9 @@ export default function IntroHeroAnimation({
                 background: "#162D21",
                 color: "#D9A441",
                 border: "1px solid #D9A441",
-                fontSize: "clamp(0.6rem, 0.9vw, 0.72rem)",
+                fontSize: "clamp(0.55rem, 0.9vw, 0.72rem)",
                 fontWeight: 700,
-                padding: "1.5px 6px",
+                padding: "1.5px 5px",
                 borderRadius: "100px",
                 boxShadow: "0 2px 6px rgba(0, 0, 0, 0.35)",
                 lineHeight: 1.2,
@@ -252,17 +247,18 @@ export default function IntroHeroAnimation({
           {/* Refined Brand Name underneath logo (fades out in place) */}
           <div
             style={{
-              marginTop: "1.25rem",
+              marginTop: "1rem",
               animation: "introFadeIn 0.8s ease 0.2s forwards",
               transition: "opacity 0.5s ease, transform 0.5s ease",
               opacity: isFlying ? 0 : 1,
               transform: isFlying ? "translateY(10px)" : "translateY(0)",
             }}
+            className="intro-logo-text-wrap"
           >
             <h2
               style={{
                 fontFamily: "var(--font-serif-brand)",
-                fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
+                fontSize: "clamp(1.4rem, 2.8vw, 2.25rem)",
                 fontWeight: 500, // Light & refined, not overly bold
                 color: "#FBFAF6",
                 margin: 0,
@@ -273,12 +269,12 @@ export default function IntroHeroAnimation({
             </h2>
             <p
               style={{
-                fontSize: "0.78rem",
+                fontSize: "clamp(0.68rem, 1.2vw, 0.78rem)",
                 color: "#D9A441",
                 fontWeight: 500,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                margin: "0.3rem 0 0",
+                margin: "0.25rem 0 0",
                 opacity: 0.9,
               }}
             >
@@ -287,7 +283,7 @@ export default function IntroHeroAnimation({
           </div>
         </div>
 
-        {/* Elegant Thin Divider Line (Desktop) */}
+        {/* Elegant Thin Divider Line (Desktop only) */}
         <div
           aria-hidden="true"
           style={{
@@ -309,7 +305,6 @@ export default function IntroHeroAnimation({
             flexDirection: "column",
             alignItems: "flex-start",
             justifyContent: "center",
-            paddingLeft: "1rem",
             position: "relative",
             transition: "opacity 0.6s ease, transform 0.6s ease",
             opacity: isFlying ? 0 : 1,
@@ -319,12 +314,12 @@ export default function IntroHeroAnimation({
         >
           <p
             style={{
-              fontSize: "0.75rem",
+              fontSize: "0.72rem",
               fontWeight: 600,
               color: "#D9A441",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              marginBottom: "1rem",
+              marginBottom: "0.75rem",
               animation: "introFadeIn 0.6s ease 0.15s forwards",
               opacity: 0.9,
             }}
@@ -336,10 +331,11 @@ export default function IntroHeroAnimation({
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "0.65rem",
+              gap: "0.55rem",
               width: "100%",
               maxWidth: "340px",
             }}
+            className="intro-nav-links-list"
           >
             {INTRO_NAV_LINKS.map((item, index) => {
               const animDelay = `${0.2 + index * 0.18}s`;
@@ -350,8 +346,8 @@ export default function IntroHeroAnimation({
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "1rem",
-                    padding: "0.55rem 0.9rem",
+                    gap: "0.85rem",
+                    padding: "0.5rem 0.85rem",
                     borderRadius: "8px",
                     background: "rgba(255, 255, 255, 0.03)",
                     border: "1px solid rgba(217, 164, 65, 0.15)",
@@ -366,11 +362,11 @@ export default function IntroHeroAnimation({
                   <span
                     style={{
                       fontFamily: "var(--font-serif-brand)",
-                      fontSize: "0.85rem",
+                      fontSize: "0.8rem",
                       fontWeight: 400,
                       color: "#D9A441",
                       opacity: 0.8,
-                      minWidth: "20px",
+                      minWidth: "18px",
                     }}
                   >
                     0{index + 1}
@@ -379,7 +375,7 @@ export default function IntroHeroAnimation({
                   <span
                     style={{
                       fontFamily: "var(--font-serif-brand)",
-                      fontSize: "clamp(1.15rem, 1.8vw, 1.45rem)",
+                      fontSize: "clamp(1rem, 2.2vw, 1.35rem)",
                       fontWeight: 400, // Refined regular weight, not bold
                       color: "#FBFAF6",
                       letterSpacing: "0.02em",
@@ -392,7 +388,7 @@ export default function IntroHeroAnimation({
                     style={{
                       marginLeft: "auto",
                       color: "#D9A441",
-                      fontSize: "1rem",
+                      fontSize: "0.95rem",
                       opacity: 0.5,
                       transition: "transform 0.2s ease, opacity 0.2s ease",
                     }}
@@ -413,21 +409,21 @@ export default function IntroHeroAnimation({
           onClick={startFlight}
           style={{
             position: "absolute",
-            bottom: "2rem",
-            right: "2rem",
+            bottom: "clamp(1rem, 3vw, 2rem)",
+            right: "clamp(1rem, 3vw, 2rem)",
             background: "rgba(255, 255, 255, 0.08)",
             border: "1px solid rgba(217, 164, 65, 0.3)",
             color: "#FBFAF6",
-            padding: "0.5rem 1.15rem",
+            padding: "0.45rem 1rem",
             borderRadius: "100px",
-            fontSize: "0.78rem",
+            fontSize: "0.75rem",
             fontWeight: 500,
             cursor: "pointer",
             backdropFilter: "blur(6px)",
             transition: "all 0.25s ease",
             display: "flex",
             alignItems: "center",
-            gap: "0.45rem",
+            gap: "0.4rem",
             zIndex: 10,
           }}
           onMouseEnter={(e) => {
@@ -446,6 +442,24 @@ export default function IntroHeroAnimation({
 
       {/* Inline styles for animations */}
       <style jsx global>{`
+        .intro-showcase-container {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justifyContent: space-between;
+          padding: 2rem 2rem;
+          gap: 4rem;
+        }
+
+        .intro-logo-disc {
+          width: clamp(140px, 18vw, 175px);
+          height: clamp(140px, 18vw, 175px);
+        }
+
+        .intro-right-nav-panel {
+          padding-left: 1rem;
+        }
+
         @keyframes introLogoPop {
           0% {
             transform: scale(0.7);
@@ -493,9 +507,18 @@ export default function IntroHeroAnimation({
         @media (max-width: 768px) {
           .intro-showcase-container {
             flex-direction: column !important;
-            gap: 2rem !important;
-            padding: 1.5rem 1rem !important;
+            gap: 1.25rem !important;
+            padding: 1.25rem 1rem env(safe-area-inset-bottom, 1rem) !important;
             justifyContent: center !important;
+            max-height: 96dvh !important;
+          }
+          .intro-logo-disc {
+            width: clamp(95px, 24vw, 125px) !important;
+            height: clamp(95px, 24vw, 125px) !important;
+            padding: 4px !important;
+          }
+          .intro-logo-text-wrap {
+            margin-top: 0.5rem !important;
           }
           .intro-divider {
             display: none !important;
@@ -505,8 +528,15 @@ export default function IntroHeroAnimation({
             align-items: center !important;
             width: 100% !important;
           }
-          .intro-right-nav-panel > div {
-            max-width: 100% !important;
+          .intro-right-nav-panel > p {
+            margin-bottom: 0.4rem !important;
+          }
+          .intro-nav-links-list {
+            max-width: 290px !important;
+            gap: 0.35rem !important;
+          }
+          .intro-nav-card {
+            padding: 0.35rem 0.75rem !important;
           }
         }
       `}</style>
