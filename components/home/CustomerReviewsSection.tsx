@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Star, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, CheckCircle2, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 
 interface ReviewItem {
   id?: string;
@@ -83,18 +83,21 @@ export default function CustomerReviewsSection() {
       ref={sectionRef}
       style={{
         background: "var(--color-background)",
-        paddingBlock: "5rem 6rem",
+        paddingBlock: "5.5rem 6.5rem",
         overflow: "hidden",
+        perspective: "1200px",
       }}
     >
       <div className="container" style={{ maxWidth: "860px", margin: "0 auto", paddingInline: "1rem" }}>
+        {/* Header - Soft blur & focus reveal */}
         <div
           style={{
             textAlign: "center",
             maxWidth: "650px",
-            margin: "0 auto 3rem",
+            margin: "0 auto 3.5rem",
             opacity: isAssembled ? 1 : 0,
-            transform: isAssembled ? "translateY(0)" : "translateY(30px)",
+            filter: isAssembled ? "blur(0px)" : "blur(8px)",
+            transform: isAssembled ? "scale(1)" : "scale(0.92)",
             transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
@@ -114,42 +117,62 @@ export default function CustomerReviewsSection() {
           </h2>
         </div>
 
-        {/* Featured Customer Review Card */}
+        {/* 3D Perspective Tilt-In Card */}
         <div
           style={{
             background: "var(--color-card, #FFFFFF)",
             border: "1.5px solid rgba(217, 164, 65, 0.35)",
-            borderRadius: "var(--radius-xl, 18px)",
-            padding: "clamp(2rem, 5vw, 3.5rem)",
+            borderRadius: "var(--radius-xl, 20px)",
+            padding: "clamp(2rem, 5vw, 3.75rem)",
             boxShadow: isAssembled
-              ? "0 20px 48px rgba(31, 58, 46, 0.1)"
-              : "0 4px 12px rgba(31, 58, 46, 0.03)",
+              ? "0 24px 50px -12px rgba(31, 58, 46, 0.14), 0 0 0 1px rgba(217, 164, 65, 0.15)"
+              : "0 6px 16px rgba(31, 58, 46, 0.02)",
             position: "relative",
             textAlign: "center",
             opacity: isAssembled ? 1 : 0,
             transform: isAssembled
-              ? "translateY(0) scale(1)"
-              : "translateY(40px) scale(0.94)",
+              ? "rotateX(0deg) translateY(0) scale(1)"
+              : "rotateX(18deg) translateY(60px) scale(0.92)",
+            transformOrigin: "bottom center",
             transition:
-              "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, box-shadow 1.6s ease",
+              "transform 1.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, opacity 1.4s ease 0.15s, box-shadow 1.7s ease",
           }}
         >
-          {/* Star Rating with Cascading Stagger */}
-          <div style={{ display: "flex", justifyContent: "center", gap: "0.4rem", marginBottom: "1.5rem" }}>
+          {/* Subtle Decorative Giant Quote Icon in Background */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: "1.5rem",
+              left: "2rem",
+              color: "rgba(217, 164, 65, 0.08)",
+              pointerEvents: "none",
+              transform: isAssembled ? "rotate(0deg) scale(1)" : "rotate(-20deg) scale(0.5)",
+              transition: "transform 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s",
+            }}
+          >
+            <Quote size={64} />
+          </div>
+
+          {/* Star Rating with Dynamic 3D Pop & Rotation Sparkle */}
+          <div style={{ display: "flex", justifyContent: "center", gap: "0.45rem", marginBottom: "1.5rem" }}>
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
                 style={{
                   opacity: isAssembled ? 1 : 0,
-                  transform: isAssembled ? "scale(1)" : "scale(0.4)",
-                  transition: `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.35 + i * 0.08}s`,
+                  transform: isAssembled
+                    ? "rotate(0deg) scale(1)"
+                    : `rotate(${i % 2 === 0 ? -45 : 45}deg) scale(0.2)`,
+                  transition: `transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.35 + i * 0.09}s, opacity 0.5s ease ${0.35 + i * 0.09}s`,
                 }}
               >
                 <Star
-                  size={22}
+                  size={24}
                   style={{
                     color: "#D9A441",
                     fill: i < currentReview.rating ? "#D9A441" : "none",
+                    filter: "drop-shadow(0 2px 4px rgba(217, 164, 65, 0.3))",
                   }}
                 />
               </div>
@@ -160,7 +183,7 @@ export default function CustomerReviewsSection() {
           <p
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "clamp(1.1rem, 2.5vw, 1.45rem)",
+              fontSize: "clamp(1.15rem, 2.6vw, 1.5rem)",
               lineHeight: 1.7,
               color: "var(--color-primary)",
               fontStyle: "normal",
@@ -168,8 +191,8 @@ export default function CustomerReviewsSection() {
               maxWidth: "700px",
               fontWeight: 500,
               opacity: isAssembled ? 1 : 0,
-              transform: isAssembled ? "translateY(0)" : "translateY(15px)",
-              transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s",
+              transform: isAssembled ? "translateY(0)" : "translateY(20px)",
+              transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.4s",
             }}
           >
             &ldquo;{currentReview.content}&rdquo;
@@ -183,8 +206,8 @@ export default function CustomerReviewsSection() {
               alignItems: "center",
               gap: "0.5rem",
               opacity: isAssembled ? 1 : 0,
-              transform: isAssembled ? "translateY(0)" : "translateY(15px)",
-              transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.45s",
+              transform: isAssembled ? "scale(1)" : "scale(0.85)",
+              transition: "all 1.3s cubic-bezier(0.34, 1.56, 0.64, 1) 0.55s",
             }}
           >
             <p style={{ margin: 0, fontWeight: 700, fontSize: "1.05rem", color: "var(--color-primary)" }}>

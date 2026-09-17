@@ -40,7 +40,10 @@ export default function PurityShowcase() {
   const [activeBatch, setActiveBatch] = useState<SampleBatch | null>(SAMPLE_BATCHES[0]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAssembled, setIsAssembled] = useState(false);
+  const [isReportVisible, setIsReportVisible] = useState(false);
+  const [verifyPulseKey, setVerifyPulseKey] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -53,6 +56,23 @@ export default function PurityShowcase() {
         }
       },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = reportRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsReportVisible(true);
+        }
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -40px 0px" }
     );
 
     observer.observe(el);
@@ -75,6 +95,8 @@ export default function PurityShowcase() {
       setActiveBatch(found);
       setSelectedBatchCode(found.code);
       setErrorMessage(null);
+      setVerifyPulseKey((prev) => prev + 1);
+      setIsReportVisible(true);
     } else {
       setErrorMessage("Invalid Batch Code. Please check the code printed on your packaging and try again.");
     }
@@ -96,6 +118,37 @@ export default function PurityShowcase() {
         @media (max-width: 480px) {
           .batch-report-grid {
             grid-template-columns: 1fr !important;
+          }
+        }
+        @keyframes labTileStampIn {
+          0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.88);
+          }
+          65% {
+            opacity: 1;
+            transform: translateY(-4px) scale(1.03);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        @keyframes greenCheckStamp {
+          0% {
+            transform: scale(0.2) rotate(-25deg);
+            opacity: 0;
+            box-shadow: 0 0 0 rgba(5, 150, 105, 0);
+          }
+          70% {
+            transform: scale(1.18) rotate(0deg);
+            opacity: 1;
+            box-shadow: 0 0 16px rgba(5, 150, 105, 0.45);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+            box-shadow: 0 0 0 rgba(5, 150, 105, 0);
           }
         }
       `}</style>
@@ -235,17 +288,20 @@ export default function PurityShowcase() {
 
         {/* 2. Batch Quality Check Report Verification (Premium & Trustworthy) */}
         <div
+          ref={reportRef}
           style={{
             background: "linear-gradient(180deg, #FFFFFF 0%, #FAF8F4 100%)",
             borderRadius: "var(--radius-xl)",
             padding: "clamp(2rem, 5vw, 3rem)",
-            border: "1px solid rgba(217, 164, 65, 0.35)",
-            boxShadow: "0 16px 40px rgba(31, 58, 46, 0.08), 0 2px 6px rgba(0,0,0,0.03)",
+            border: isReportVisible ? "1.5px solid rgba(217, 164, 65, 0.5)" : "1px solid rgba(217, 164, 65, 0.25)",
+            boxShadow: isReportVisible
+              ? "0 24px 54px rgba(31, 58, 46, 0.12), 0 2px 8px rgba(0,0,0,0.04)"
+              : "0 4px 12px rgba(31, 58, 46, 0.02)",
             position: "relative",
             overflow: "hidden",
-            opacity: isAssembled ? 1 : 0,
-            transform: isAssembled ? "translateY(0)" : "translateY(35px)",
-            transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s",
+            opacity: isReportVisible ? 1 : 0,
+            transform: isReportVisible ? "translateY(0) scale(1)" : "translateY(45px) scale(0.96)",
+            transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           {/* Subtle top accent ribbon */}
@@ -300,6 +356,7 @@ export default function PurityShowcase() {
                     boxShadow: "inset 0 1px 3px rgba(0,0,0,0.04)",
                     outline: "none",
                     fontWeight: 500,
+                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                   }}
                 />
                 <Search size={20} style={{ position: "absolute", left: "0.95rem", top: "50%", transform: "translateY(-50%)", color: "#C4883E" }} />
@@ -320,7 +377,7 @@ export default function PurityShowcase() {
                   alignItems: "center",
                   gap: "0.5rem",
                   boxShadow: "0 4px 14px rgba(31, 58, 46, 0.25)",
-                  transition: "background 0.2s ease",
+                  transition: "background 0.2s ease, transform 0.15s ease",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -352,6 +409,7 @@ export default function PurityShowcase() {
             {/* Batch Report Result Display (Premium & Attractive Lab-Verification Styling) */}
             {activeBatch && (
               <div
+                key={`${activeBatch.code}-${verifyPulseKey}`}
                 className="batch-report-grid"
                 style={{
                   background: "linear-gradient(145deg, #FFFFFF 0%, #FAF8F2 100%)",
@@ -364,7 +422,6 @@ export default function PurityShowcase() {
                   alignItems: "stretch",
                   boxShadow: "0 12px 32px rgba(31, 58, 46, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
                   position: "relative",
-                  animation: "fadeIn 0.3s ease-in-out",
                 }}
               >
                 {/* Tile 1: Product & Batch */}
@@ -380,6 +437,7 @@ export default function PurityShowcase() {
                     justifyContent: "center",
                     textAlign: "center",
                     gap: "0.35rem",
+                    animation: isReportVisible ? "labTileStampIn 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both" : "none",
                   }}
                 >
                   <span
@@ -437,6 +495,7 @@ export default function PurityShowcase() {
                     textAlign: "center",
                     gap: "0.6rem",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                    animation: isReportVisible ? "labTileStampIn 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.28s both" : "none",
                   }}
                 >
                   <span
@@ -460,6 +519,7 @@ export default function PurityShowcase() {
                       border: "1px solid rgba(5, 150, 105, 0.25)",
                       padding: "0.35rem 0.85rem",
                       borderRadius: "100px",
+                      animation: isReportVisible ? "greenCheckStamp 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both" : "none",
                     }}
                   >
                     <CheckCircle2 size={15} style={{ color: "#059669", flexShrink: 0 }} />
@@ -483,6 +543,7 @@ export default function PurityShowcase() {
                     textAlign: "center",
                     gap: "0.6rem",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                    animation: isReportVisible ? "labTileStampIn 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.44s both" : "none",
                   }}
                 >
                   <span
@@ -506,6 +567,7 @@ export default function PurityShowcase() {
                       border: "1px solid rgba(5, 150, 105, 0.25)",
                       padding: "0.35rem 0.85rem",
                       borderRadius: "100px",
+                      animation: isReportVisible ? "greenCheckStamp 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.56s both" : "none",
                     }}
                   >
                     <CheckCircle2 size={15} style={{ color: "#059669", flexShrink: 0 }} />
@@ -529,6 +591,7 @@ export default function PurityShowcase() {
                     textAlign: "center",
                     gap: "0.6rem",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                    animation: isReportVisible ? "labTileStampIn 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s both" : "none",
                   }}
                 >
                   <span
@@ -552,6 +615,7 @@ export default function PurityShowcase() {
                       border: "1px solid rgba(5, 150, 105, 0.25)",
                       padding: "0.35rem 0.85rem",
                       borderRadius: "100px",
+                      animation: isReportVisible ? "greenCheckStamp 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 0.72s both" : "none",
                     }}
                   >
                     <CheckCircle2 size={15} style={{ color: "#059669", flexShrink: 0 }} />

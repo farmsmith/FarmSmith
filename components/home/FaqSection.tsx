@@ -247,22 +247,30 @@ export default function FaqSection() {
           </h2>
         </div>
 
-        {/* Accordions with Staggered Entrance */}
+        {/* Accordions with Alternating Left/Right Zipper Cascade */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {FAQS.map((faq, idx) => {
             const isOpen = openIndex === idx;
+            const isEven = idx % 2 === 0;
             return (
               <div
                 key={idx}
                 style={{
                   background: "#FFFFFF",
                   borderRadius: "var(--radius-lg)",
-                  border: "1px solid var(--color-border)",
-                  boxShadow: isOpen ? "0 8px 25px rgba(31, 58, 46, 0.06)" : "0 2px 8px rgba(0, 0, 0, 0.02)",
+                  border: isOpen ? "1px solid rgba(217, 164, 65, 0.4)" : "1px solid var(--color-border)",
+                  borderLeft: isOpen ? "4px solid #D9A441" : "1px solid var(--color-border)",
+                  boxShadow: isOpen
+                    ? "0 10px 30px rgba(31, 58, 46, 0.08)"
+                    : "0 2px 8px rgba(0, 0, 0, 0.02)",
                   overflow: "hidden",
                   opacity: isAssembled ? 1 : 0,
-                  transform: isAssembled ? "translateY(0)" : "translateY(25px)",
-                  transition: `all 1.2s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(idx * 0.06, 0.6)}s`,
+                  transform: isAssembled
+                    ? "translateX(0)"
+                    : isEven
+                    ? "translateX(-65px)"
+                    : "translateX(65px)",
+                  transition: `transform 1.3s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(idx * 0.05, 0.5)}s, opacity 1.1s ease ${Math.min(idx * 0.05, 0.5)}s, border-color 0.25s ease, box-shadow 0.25s ease`,
                 }}
               >
                 <button
@@ -288,13 +296,23 @@ export default function FaqSection() {
                       fontFamily: "var(--font-subheading)",
                       fontSize: "1.0625rem",
                       fontWeight: 500,
-                      color: "var(--color-primary)",
+                      color: isOpen ? "var(--color-primary-dark)" : "var(--color-primary)",
                       lineHeight: 1.4,
                     }}
                   >
                     {faq.question}
                   </span>
-                  <span style={{ color: "#C4883E", flexShrink: 0 }}>
+                  <span
+                    style={{
+                      color: "#C4883E",
+                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    }}
+                  >
                     {isOpen ? <Minus size={20} /> : <Plus size={20} />}
                   </span>
                 </button>
@@ -310,6 +328,7 @@ export default function FaqSection() {
                       paddingTop: "1rem",
                       fontFamily: "var(--font-body)",
                       fontWeight: 400,
+                      animation: "fadeIn 0.3s ease-in-out",
                     }}
                   >
                     {faq.answer}

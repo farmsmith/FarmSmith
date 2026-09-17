@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -11,6 +11,33 @@ export default function ContactClient() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isHeroMounted, setIsHeroMounted] = useState(false);
+  const [isSectionVisible, setIsSectionVisible] = useState(false);
+
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsHeroMounted(true), 60);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsSectionVisible(true);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
     email?: string;
@@ -80,27 +107,47 @@ export default function ContactClient() {
 
 
   return (
-    <div style={{ background: "var(--color-background)", minHeight: "85vh" }}>
+    <div style={{ background: "var(--color-background)", minHeight: "85vh", overflow: "hidden" }}>
+      <style>{`
+        .contact-card-hover {
+          transition: transform 0.25s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .contact-card-hover:hover {
+          transform: translateY(-4px) scale(1.01);
+          box-shadow: 0 12px 28px rgba(31, 58, 46, 0.09);
+          border-color: rgba(217, 164, 65, 0.5) !important;
+        }
+        .contact-input-focus:focus {
+          border-color: #D9A441 !important;
+          box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.15) !important;
+        }
+      `}</style>
+
       {/* Hero Banner */}
       <section
         style={{
           background: "linear-gradient(135deg, #1C3121 0%, #2A4832 100%)",
           color: "#FBFAF6",
-          paddingBlock: "4rem 3.5rem",
+          paddingBlock: "4.5rem 4rem",
           textAlign: "center",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <div className="container" style={{ maxWidth: "800px" }}>
+        <div className="container" style={{ maxWidth: "800px", position: "relative", zIndex: 2 }}>
           <span
             style={{
               textTransform: "uppercase",
-              letterSpacing: "0.15em",
+              letterSpacing: isHeroMounted ? "0.15em" : "0.26em",
               fontSize: "0.8125rem",
               fontFamily: "var(--font-body)",
               fontWeight: 500,
               color: "var(--color-accent)",
               display: "block",
               marginBottom: "0.75rem",
+              opacity: isHeroMounted ? 1 : 0,
+              transform: isHeroMounted ? "translateY(0)" : "translateY(-15px)",
+              transition: "all 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
             }}
           >
             ALWAYS HAPPY TO HELP
@@ -113,6 +160,10 @@ export default function ContactClient() {
               marginBottom: "1rem",
               lineHeight: 1.15,
               color: "#FFFFFF",
+              opacity: isHeroMounted ? 1 : 0,
+              filter: isHeroMounted ? "blur(0px)" : "blur(8px)",
+              transform: isHeroMounted ? "translateY(0)" : "translateY(20px)",
+              transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.25s",
             }}
           >
             Contact FarmSmith
@@ -126,6 +177,9 @@ export default function ContactClient() {
               lineHeight: 1.7,
               maxWidth: "600px",
               margin: "0 auto",
+              opacity: isHeroMounted ? 1 : 0,
+              transform: isHeroMounted ? "translateY(0)" : "translateY(15px)",
+              transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.4s",
             }}
           >
             Have a question about our products, order status, or bulk/B2B inquiries? We&apos;re here to help.
@@ -134,7 +188,7 @@ export default function ContactClient() {
       </section>
 
       {/* Contact Section */}
-      <section className="container" style={{ paddingBlock: "4rem 5rem" }}>
+      <section ref={sectionRef} className="container" style={{ paddingBlock: "4.5rem 5.5rem" }}>
         <div
           style={{
             display: "grid",
@@ -143,8 +197,14 @@ export default function ContactClient() {
             alignItems: "start",
           }}
         >
-          {/* Contact Details Card */}
-          <div>
+          {/* Left: Contact Details Card with Cascading Slide-In */}
+          <div
+            style={{
+              opacity: isSectionVisible ? 1 : 0,
+              transform: isSectionVisible ? "translateX(0)" : "translateX(-65px)",
+              transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
+            }}
+          >
             <h2
               style={{
                 fontFamily: "var(--font-heading)",
@@ -160,7 +220,9 @@ export default function ContactClient() {
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              {/* Card 1: Email */}
               <div
+                className="contact-card-hover"
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
@@ -169,9 +231,13 @@ export default function ContactClient() {
                   padding: "1.25rem",
                   borderRadius: "var(--radius-lg)",
                   border: "1px solid var(--color-border)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
+                  opacity: isSectionVisible ? 1 : 0,
+                  transform: isSectionVisible ? "translateX(0)" : "translateX(-35px)",
+                  transition: "all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.25s",
                 }}
               >
-                <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)" }}>
+                <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)", flexShrink: 0 }}>
                   <Mail size={22} />
                 </div>
                 <div>
@@ -182,7 +248,9 @@ export default function ContactClient() {
                 </div>
               </div>
 
+              {/* Card 2: Phone */}
               <div
+                className="contact-card-hover"
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
@@ -191,9 +259,13 @@ export default function ContactClient() {
                   padding: "1.25rem",
                   borderRadius: "var(--radius-lg)",
                   border: "1px solid var(--color-border)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
+                  opacity: isSectionVisible ? 1 : 0,
+                  transform: isSectionVisible ? "translateX(0)" : "translateX(-35px)",
+                  transition: "all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s",
                 }}
               >
-                <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)" }}>
+                <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)", flexShrink: 0 }}>
                   <Phone size={22} />
                 </div>
                 <div>
@@ -204,7 +276,9 @@ export default function ContactClient() {
                 </div>
               </div>
 
+              {/* Card 3: Address */}
               <div
+                className="contact-card-hover"
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
@@ -213,9 +287,13 @@ export default function ContactClient() {
                   padding: "1.25rem",
                   borderRadius: "var(--radius-lg)",
                   border: "1px solid var(--color-border)",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
+                  opacity: isSectionVisible ? 1 : 0,
+                  transform: isSectionVisible ? "translateX(0)" : "translateX(-35px)",
+                  transition: "all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.55s",
                 }}
               >
-                <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)" }}>
+                <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)", flexShrink: 0 }}>
                   <MapPin size={22} />
                 </div>
                 <div>
@@ -228,14 +306,19 @@ export default function ContactClient() {
             </div>
           </div>
 
-          {/* Form Card */}
+          {/* Right: Form Card with Smooth 3D Slide-In */}
           <div
             style={{
               background: "var(--color-card)",
               borderRadius: "var(--radius-xl)",
               padding: "2.5rem 2rem",
               border: "1px solid var(--color-border)",
-              boxShadow: "var(--shadow-card)",
+              boxShadow: isSectionVisible
+                ? "0 20px 48px rgba(31, 58, 46, 0.09), 0 2px 8px rgba(0,0,0,0.02)"
+                : "0 4px 12px rgba(31, 58, 46, 0.02)",
+              opacity: isSectionVisible ? 1 : 0,
+              transform: isSectionVisible ? "translateX(0) scale(1)" : "translateX(65px) scale(0.95)",
+              transition: "all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s",
             }}
           >
             <h3
@@ -284,6 +367,7 @@ export default function ContactClient() {
                     }}
                     aria-invalid={Boolean(fieldErrors.name)}
                     aria-describedby={fieldErrors.name ? "contact-name-error" : undefined}
+                    className="contact-input-focus"
                     style={{
                       width: "100%",
                       padding: "0.75rem 1rem",
@@ -292,6 +376,7 @@ export default function ContactClient() {
                       background: "var(--color-surface)",
                       fontSize: "0.9375rem",
                       outline: "none",
+                      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                     }}
                   />
                   <FieldError id="contact-name-error" message={fieldErrors.name} />
@@ -313,6 +398,7 @@ export default function ContactClient() {
                     }}
                     aria-invalid={Boolean(fieldErrors.email)}
                     aria-describedby={fieldErrors.email ? "contact-email-error" : undefined}
+                    className="contact-input-focus"
                     style={{
                       width: "100%",
                       padding: "0.75rem 1rem",
@@ -321,6 +407,7 @@ export default function ContactClient() {
                       background: "var(--color-surface)",
                       fontSize: "0.9375rem",
                       outline: "none",
+                      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                     }}
                   />
                   <FieldError id="contact-email-error" message={fieldErrors.email} />
@@ -336,6 +423,7 @@ export default function ContactClient() {
                     placeholder="Product Inquiry / Order Help"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="contact-input-focus"
                     style={{
                       width: "100%",
                       padding: "0.75rem 1rem",
@@ -344,6 +432,7 @@ export default function ContactClient() {
                       background: "var(--color-surface)",
                       fontSize: "0.9375rem",
                       outline: "none",
+                      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                     }}
                   />
                 </div>
@@ -364,6 +453,7 @@ export default function ContactClient() {
                     }}
                     aria-invalid={Boolean(fieldErrors.message)}
                     aria-describedby={fieldErrors.message ? "contact-message-error" : undefined}
+                    className="contact-input-focus"
                     style={{
                       width: "100%",
                       padding: "0.75rem 1rem",
@@ -373,6 +463,7 @@ export default function ContactClient() {
                       fontSize: "0.9375rem",
                       outline: "none",
                       resize: "vertical",
+                      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                     }}
                   />
                   <FieldError id="contact-message-error" message={fieldErrors.message} />
@@ -402,6 +493,7 @@ export default function ContactClient() {
                     justifyContent: "center",
                     gap: "0.5rem",
                     width: "auto",
+                    transition: "transform 0.15s ease, box-shadow 0.15s ease",
                   }}
                   aria-label={submitting ? "Sending message..." : "Send Message"}
                 >
