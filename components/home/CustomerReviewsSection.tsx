@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Star, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ReviewItem {
@@ -23,6 +23,25 @@ const DEFAULT_FEATURED_REVIEW: ReviewItem = {
 export default function CustomerReviewsSection() {
   const [reviews, setReviews] = useState<ReviewItem[]>([DEFAULT_FEATURED_REVIEW]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAssembled, setIsAssembled] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsAssembled(true);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     async function loadApprovedReviews() {
@@ -60,9 +79,25 @@ export default function CustomerReviewsSection() {
   };
 
   return (
-    <section style={{ background: "var(--color-background)", paddingBlock: "5rem 6rem" }}>
+    <section
+      ref={sectionRef}
+      style={{
+        background: "var(--color-background)",
+        paddingBlock: "5rem 6rem",
+        overflow: "hidden",
+      }}
+    >
       <div className="container" style={{ maxWidth: "860px", margin: "0 auto", paddingInline: "1rem" }}>
-        <div style={{ textAlign: "center", maxWidth: "650px", margin: "0 auto 3rem" }}>
+        <div
+          style={{
+            textAlign: "center",
+            maxWidth: "650px",
+            margin: "0 auto 3rem",
+            opacity: isAssembled ? 1 : 0,
+            transform: isAssembled ? "translateY(0)" : "translateY(30px)",
+            transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
           <p className="eyebrow" style={{ color: "#C4883E", marginBottom: "0.5rem" }}>
             Real customers, Real words
           </p>
@@ -86,22 +121,38 @@ export default function CustomerReviewsSection() {
             border: "1.5px solid rgba(217, 164, 65, 0.35)",
             borderRadius: "var(--radius-xl, 18px)",
             padding: "clamp(2rem, 5vw, 3.5rem)",
-            boxShadow: "0 16px 40px rgba(31, 58, 46, 0.08)",
+            boxShadow: isAssembled
+              ? "0 20px 48px rgba(31, 58, 46, 0.1)"
+              : "0 4px 12px rgba(31, 58, 46, 0.03)",
             position: "relative",
             textAlign: "center",
+            opacity: isAssembled ? 1 : 0,
+            transform: isAssembled
+              ? "translateY(0) scale(1)"
+              : "translateY(40px) scale(0.94)",
+            transition:
+              "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.2s, box-shadow 1.6s ease",
           }}
         >
-          {/* Star Rating */}
-          <div style={{ display: "flex", justifyContent: "center", gap: "0.35rem", marginBottom: "1.5rem" }}>
+          {/* Star Rating with Cascading Stagger */}
+          <div style={{ display: "flex", justifyContent: "center", gap: "0.4rem", marginBottom: "1.5rem" }}>
             {[...Array(5)].map((_, i) => (
-              <Star
+              <div
                 key={i}
-                size={22}
                 style={{
-                  color: "#D9A441",
-                  fill: i < currentReview.rating ? "#D9A441" : "none",
+                  opacity: isAssembled ? 1 : 0,
+                  transform: isAssembled ? "scale(1)" : "scale(0.4)",
+                  transition: `all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.35 + i * 0.08}s`,
                 }}
-              />
+              >
+                <Star
+                  size={22}
+                  style={{
+                    color: "#D9A441",
+                    fill: i < currentReview.rating ? "#D9A441" : "none",
+                  }}
+                />
+              </div>
             ))}
           </div>
 
@@ -116,13 +167,26 @@ export default function CustomerReviewsSection() {
               margin: "0 auto 2rem",
               maxWidth: "700px",
               fontWeight: 500,
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled ? "translateY(0)" : "translateY(15px)",
+              transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s",
             }}
           >
             &ldquo;{currentReview.content}&rdquo;
           </p>
 
           {/* Customer Name & Verified Badge */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "0.5rem",
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled ? "translateY(0)" : "translateY(15px)",
+              transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.45s",
+            }}
+          >
             <p style={{ margin: 0, fontWeight: 700, fontSize: "1.05rem", color: "var(--color-primary)" }}>
               {currentReview.author_name}
             </p>

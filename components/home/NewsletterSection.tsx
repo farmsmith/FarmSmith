@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Heart, Send, CheckCircle2 } from "lucide-react";
 
 import { FieldError } from "@/components/ui/FieldError";
@@ -9,6 +8,25 @@ export default function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [subscribed, setSubscribed] = useState(false);
+  const [isAssembled, setIsAssembled] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsAssembled(true);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +44,7 @@ export default function NewsletterSection() {
 
   return (
     <section
+      ref={sectionRef}
       style={{
         background: "var(--color-primary-dark)",
         color: "#FFFFFF",
@@ -34,15 +53,34 @@ export default function NewsletterSection() {
         overflow: "hidden",
       }}
     >
-      <div className="container" style={{ maxWidth: "800px", margin: "0 auto", paddingInline: "1rem", textAlign: "center" }}>
+      {/* Ambient background glow */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "500px",
+          height: "500px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(217, 164, 65, 0.12) 0%, rgba(0,0,0,0) 70%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <div className="container" style={{ maxWidth: "800px", margin: "0 auto", paddingInline: "1rem", textAlign: "center", position: "relative", zIndex: 2 }}>
         <div
           style={{
             background: "rgba(255, 255, 255, 0.05)",
             border: "1px solid rgba(217, 164, 65, 0.3)",
             borderRadius: "var(--radius-xl)",
             padding: "clamp(2rem, 5vw, 3.5rem)",
-            boxShadow: "0 20px 50px rgba(0,0,0,0.3)",
+            boxShadow: isAssembled ? "0 24px 60px rgba(0,0,0,0.35)" : "0 8px 20px rgba(0,0,0,0.15)",
             backdropFilter: "blur(10px)",
+            opacity: isAssembled ? 1 : 0,
+            transform: isAssembled ? "translateY(0) scale(1)" : "translateY(40px) scale(0.95)",
+            transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1)",
           }}
         >
           <div

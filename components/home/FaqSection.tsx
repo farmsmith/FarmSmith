@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Minus } from "lucide-react";
 
 interface FaqItem {
@@ -181,17 +181,47 @@ const FAQS: FaqItem[] = [
 
 export default function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [isAssembled, setIsAssembled] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsAssembled(true);
+        }
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const toggleFaq = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
   };
 
   return (
-    <section style={{ background: "var(--color-surface)", paddingBlock: "5.5rem" }}>
+    <section
+      ref={sectionRef}
+      style={{ background: "var(--color-surface)", paddingBlock: "5.5rem", overflow: "hidden" }}
+    >
       <div className="container" style={{ maxWidth: "860px", margin: "0 auto", paddingInline: "1rem" }}>
         
         {/* Header - Cormorant Garamond 600 */}
-        <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "3.5rem",
+            opacity: isAssembled ? 1 : 0,
+            transform: isAssembled ? "translateY(0)" : "translateY(30px)",
+            transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
           <p
             className="eyebrow"
             style={{
@@ -217,7 +247,7 @@ export default function FaqSection() {
           </h2>
         </div>
 
-        {/* Accordions */}
+        {/* Accordions with Staggered Entrance */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {FAQS.map((faq, idx) => {
             const isOpen = openIndex === idx;
@@ -230,7 +260,9 @@ export default function FaqSection() {
                   border: "1px solid var(--color-border)",
                   boxShadow: isOpen ? "0 8px 25px rgba(31, 58, 46, 0.06)" : "0 2px 8px rgba(0, 0, 0, 0.02)",
                   overflow: "hidden",
-                  transition: "all 0.25s ease",
+                  opacity: isAssembled ? 1 : 0,
+                  transform: isAssembled ? "translateY(0)" : "translateY(25px)",
+                  transition: `all 1.2s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(idx * 0.06, 0.6)}s`,
                 }}
               >
                 <button
