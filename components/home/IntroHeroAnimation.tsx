@@ -21,14 +21,16 @@ export default function IntroHeroAnimation({
 }: {
   onIntroComplete?: () => void;
 }) {
-  // Animation stages: 'enter' (0-3s) -> 'flying' (3s-4.8s, logo-only slow flight) -> 'settled'
+  // Animation stages: 'enter' (0-3s) -> 'flying' (3s-4.8s, logo + text flight) -> 'settled'
   const [stage, setStage] = useState<"enter" | "flying" | "settled">("enter");
   const [showSkip, setShowSkip] = useState(false);
   
-  // Dynamic transform for the big logo's exact flight
+  // Dynamic transform for the big logo and FarmSmith text flight
   const [logoTransform, setLogoTransform] = useState<string>("translate3d(0, 0, 0) scale(1)");
+  const [textTransform, setTextTransform] = useState<string>("translate3d(0, 0, 0) scale(1)");
 
   const bigLogoRef = useRef<HTMLDivElement>(null);
+  const brandTextRef = useRef<HTMLHeadingElement>(null);
   const timerRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function IntroHeroAnimation({
     const skipTimer = setTimeout(() => setShowSkip(true), 800);
     timerRef.current.push(skipTimer);
 
-    // At 3.0s, initiate the exact flight of the logo
+    // At 3.0s, initiate the exact flight of the logo + text
     const dockTimer = setTimeout(() => {
       startFlight();
     }, 3000);
@@ -75,7 +77,7 @@ export default function IntroHeroAnimation({
   const startFlight = () => {
     sessionStorage.setItem("farmsmith_intro_seen", "true");
 
-    // Calculate exact flight coordinates to Navbar logo (#nav-brand-logo)
+    // 1. Calculate exact flight coordinates to Navbar logo (#nav-brand-logo)
     const navLogoEl = document.getElementById("nav-brand-logo");
     const bigLogoEl = bigLogoRef.current;
 
@@ -90,6 +92,23 @@ export default function IntroHeroAnimation({
       setLogoTransform(`translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scale})`);
     } else {
       setLogoTransform("translate3d(calc(-50vw + 60px), calc(-50vh + 35px), 0) scale(0.26)");
+    }
+
+    // 2. Calculate exact flight coordinates to Navbar text (#nav-brand-text)
+    const navTextEl = document.getElementById("nav-brand-text");
+    const brandTextEl = brandTextRef.current;
+
+    if (navTextEl && brandTextEl) {
+      const targetTextRect = navTextEl.getBoundingClientRect();
+      const currentTextRect = brandTextEl.getBoundingClientRect();
+
+      const textDeltaX = targetTextRect.left - currentTextRect.left;
+      const textDeltaY = targetTextRect.top - currentTextRect.top;
+      const textScale = targetTextRect.height / currentTextRect.height;
+
+      setTextTransform(`translate3d(${textDeltaX}px, ${textDeltaY}px, 0) scale(${textScale})`);
+    } else {
+      setTextTransform("translate3d(calc(-50vw + 115px), calc(-50vh + 35px), 0) scale(0.4)");
     }
 
     setStage("flying");
@@ -122,7 +141,7 @@ export default function IntroHeroAnimation({
         overflow: "hidden",
       }}
     >
-      {/* ───── 1. Dark Backdrop (Fades out smoothly over 1.8s while logo flies) ───── */}
+      {/* ───── 1. Dark Backdrop (Fades out smoothly over 1.8s while logo and text fly) ───── */}
       <div
         aria-hidden="true"
         style={{
@@ -172,7 +191,7 @@ export default function IntroHeroAnimation({
         }}
         className="intro-showcase-container"
       >
-        {/* ───── LEFT: Big Logo (ONLY THIS ELEMENT FLIES TO NAVBAR) ───── */}
+        {/* ───── LEFT: Big Logo & Big FarmSmith Text (BOTH FLY TO NAVBAR) ───── */}
         <div
           style={{
             flex: "1",
@@ -185,20 +204,20 @@ export default function IntroHeroAnimation({
           }}
           className="intro-left-logo-panel"
         >
-          {/* Circular Big Logo Container with TM badge — FLIES TO NAVBAR */}
+          {/* Circular Big Logo Container with TM badge — FLIES TO NAVBAR LOGO */}
           <div
             ref={bigLogoRef}
             style={{
               position: "relative",
-              width: "clamp(140px, 18vw, 175px)",
-              height: "clamp(140px, 18vw, 175px)",
+              width: "clamp(145px, 19vw, 185px)",
+              height: "clamp(145px, 19vw, 185px)",
               borderRadius: "50%",
               background: "#FFFFFF",
               padding: "5px",
-              border: isFlying ? "1.5px solid #D9A441" : "2.5px solid #D9A441",
+              border: isFlying ? "1.5px solid #D9A441" : "3px solid #D9A441",
               boxShadow: isFlying
                 ? "0 2px 8px rgba(0, 0, 0, 0.25)"
-                : "0 16px 40px rgba(0, 0, 0, 0.35), 0 0 35px rgba(217, 164, 65, 0.25)",
+                : "0 18px 45px rgba(0, 0, 0, 0.4), 0 0 40px rgba(217, 164, 65, 0.3)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -214,8 +233,8 @@ export default function IntroHeroAnimation({
             <Image
               src="/images/farmsmith_logo_v2.png"
               alt="FarmSmith Foods"
-              width={170}
-              height={170}
+              width={180}
+              height={180}
               priority
               unoptimized
               style={{
@@ -235,7 +254,7 @@ export default function IntroHeroAnimation({
                 background: "#162D21",
                 color: "#D9A441",
                 border: "1px solid #D9A441",
-                fontSize: "clamp(0.6rem, 0.9vw, 0.72rem)",
+                fontSize: "clamp(0.62rem, 0.9vw, 0.75rem)",
                 fontWeight: 700,
                 padding: "1.5px 6px",
                 borderRadius: "100px",
@@ -249,38 +268,45 @@ export default function IntroHeroAnimation({
             </span>
           </div>
 
-          {/* Refined Brand Name underneath logo (vanishes cleanly on flight like the right panel) */}
-          <div
-            style={{
-              marginTop: "1.25rem",
-              animation: !isFlying ? "introFadeIn 0.8s ease 0.2s forwards" : "none",
-              transition: "opacity 0.6s ease, transform 0.6s ease",
-              opacity: isFlying ? 0 : 1,
-              transform: isFlying ? "translateY(12px)" : "translateY(0)",
-              pointerEvents: isFlying ? "none" : "auto",
-            }}
-          >
+          {/* Big FarmSmith Text (FLIES TO NAVBAR TEXT) */}
+          <div style={{ marginTop: "1.25rem", position: "relative" }}>
             <h2
+              ref={brandTextRef}
               style={{
                 fontFamily: "var(--font-serif-brand)",
-                fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
-                fontWeight: 500,
+                fontSize: "clamp(2.4rem, 4.8vw, 3.6rem)", // BIG prominent size as requested
+                fontWeight: 600,
                 color: "#FBFAF6",
                 margin: 0,
                 letterSpacing: "0.03em",
+                lineHeight: 1.15,
+                animation: !isFlying ? "introFadeIn 0.8s ease 0.2s forwards" : "none",
+                transition: "transform 1.8s cubic-bezier(0.25, 1, 0.35, 1)",
+                transform: textTransform,
+                transformOrigin: "top left",
+                zIndex: 100,
+                opacity: 1, // Remains 100% visible throughout flight!
+                display: "inline-block",
+                whiteSpace: "nowrap",
               }}
             >
               FarmSmith
             </h2>
+
+            {/* Subtitle (vanishes cleanly on flight) */}
             <p
               style={{
-                fontSize: "0.78rem",
+                fontSize: "0.82rem",
                 color: "#D9A441",
                 fontWeight: 500,
-                letterSpacing: "0.14em",
+                letterSpacing: "0.15em",
                 textTransform: "uppercase",
-                margin: "0.3rem 0 0",
-                opacity: 0.9,
+                margin: "0.4rem 0 0",
+                animation: !isFlying ? "introFadeIn 0.8s ease 0.3s forwards" : "none",
+                transition: "opacity 0.6s ease, transform 0.6s ease",
+                opacity: isFlying ? 0 : 0.9,
+                transform: isFlying ? "translateY(12px)" : "translateY(0)",
+                pointerEvents: isFlying ? "none" : "auto",
               }}
             >
               Single Origin &bull; Batch Tested
@@ -293,7 +319,7 @@ export default function IntroHeroAnimation({
           aria-hidden="true"
           style={{
             width: "1px",
-            height: "260px",
+            height: "280px",
             background:
               "linear-gradient(180deg, transparent 0%, rgba(217, 164, 65, 0.35) 50%, transparent 100%)",
             opacity: isFlying ? 0 : 0.6,
@@ -302,7 +328,7 @@ export default function IntroHeroAnimation({
           className="intro-divider"
         />
 
-        {/* ───── RIGHT: Staggered Navbar Pages (FADES OUT IN PLACE — NO FLYING) ───── */}
+        {/* ───── RIGHT: Staggered Navbar Pages (FADES OUT IN PLACE) ───── */}
         <div
           style={{
             flex: "1",
@@ -381,7 +407,7 @@ export default function IntroHeroAnimation({
                     style={{
                       fontFamily: "var(--font-serif-brand)",
                       fontSize: "clamp(1.15rem, 1.8vw, 1.45rem)",
-                      fontWeight: 400, // Refined regular weight, not bold
+                      fontWeight: 400,
                       color: "#FBFAF6",
                       letterSpacing: "0.02em",
                     }}

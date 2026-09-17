@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ShieldCheck, AlertTriangle, Check, CheckCircle2, Search, FileText, Sparkles, Award } from "lucide-react";
 
 interface SampleBatch {
@@ -39,6 +39,25 @@ export default function PurityShowcase() {
   const [inputCode, setInputCode] = useState("");
   const [activeBatch, setActiveBatch] = useState<SampleBatch | null>(SAMPLE_BATCHES[0]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAssembled, setIsAssembled] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsAssembled(true);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +81,11 @@ export default function PurityShowcase() {
   };
 
   return (
-    <section id="standards" style={{ background: "var(--color-surface)", paddingBlock: "0 6rem", scrollMarginTop: "5rem" }}>
+    <section
+      ref={sectionRef}
+      id="standards"
+      style={{ background: "var(--color-surface)", paddingBlock: "0 6rem", scrollMarginTop: "5rem", overflow: "hidden" }}
+    >
       <style>{`
         @media (max-width: 768px) {
           .batch-report-grid {
@@ -90,7 +113,17 @@ export default function PurityShowcase() {
         }}
       >
         {/* Section Header */}
-        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 4rem", paddingInline: "1.5rem" }}>
+        <div
+          style={{
+            textAlign: "center",
+            maxWidth: "720px",
+            margin: "0 auto 4rem",
+            paddingInline: "1.5rem",
+            opacity: isAssembled ? 1 : 0,
+            transform: isAssembled ? "translateY(0)" : "translateY(30px)",
+            transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
+          }}
+        >
           <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.12em" }}>
             OUR STANDARD: BATCH TRANSPARENCY
           </p>
@@ -112,7 +145,7 @@ export default function PurityShowcase() {
           </p>
         </div>
 
-        {/* Know the Origin Grid */}
+        {/* Know the Origin Grid: Converging Assemble (Text from Left, Image from Right) */}
         <div
           className="container"
           style={{
@@ -125,7 +158,14 @@ export default function PurityShowcase() {
             alignItems: "center",
           }}
         >
-          <div>
+          {/* Left Text Block - Slides in slowly from Left to Right */}
+          <div
+            style={{
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled ? "translateX(0)" : "translateX(-85px)",
+              transition: "all 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s",
+            }}
+          >
             <h3
               style={{
                 fontFamily: "var(--font-heading)",
@@ -163,15 +203,18 @@ export default function PurityShowcase() {
             </div>
           </div>
 
-          {/* Kandhamal Landscape & Turmeric Harvest Image */}
+          {/* Right Landscape Image - Slides in slowly from Right to Left */}
           <div
             style={{
               position: "relative",
               borderRadius: "var(--radius-lg)",
               overflow: "hidden",
               aspectRatio: "16/10",
-              boxShadow: "0 12px 28px rgba(0,0,0,0.4)",
+              boxShadow: isAssembled ? "0 16px 36px rgba(0,0,0,0.45)" : "0 4px 12px rgba(0,0,0,0.2)",
               border: "1px solid rgba(217, 164, 65, 0.2)",
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled ? "translateX(0) scale(1)" : "translateX(85px) scale(0.92)",
+              transition: "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, box-shadow 1.6s ease",
             }}
           >
             <img
@@ -200,6 +243,9 @@ export default function PurityShowcase() {
             boxShadow: "0 16px 40px rgba(31, 58, 46, 0.08), 0 2px 6px rgba(0,0,0,0.03)",
             position: "relative",
             overflow: "hidden",
+            opacity: isAssembled ? 1 : 0,
+            transform: isAssembled ? "translateY(0)" : "translateY(35px)",
+            transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s",
           }}
         >
           {/* Subtle top accent ribbon */}

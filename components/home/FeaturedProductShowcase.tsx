@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Heart, ArrowRight, MessageSquarePlus } from "lucide-react";
@@ -31,6 +31,25 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isAssembled, setIsAssembled] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsAssembled(true);
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const slides =
     product.images && product.images.length > 1
@@ -54,6 +73,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
 
   return (
     <section
+      ref={sectionRef}
       id="featured-harvest"
       className="section"
       aria-labelledby="featured-heading"
@@ -69,7 +89,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
             alignItems: "center",
           }}
         >
-          {/* LEFT: Standalone Product Image Box */}
+          {/* LEFT: Standalone Product Image Box (Assembles sliding in slowly from Left to Right) */}
           <div
             style={{
               position: "relative",
@@ -81,7 +101,15 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
               overflow: "hidden",
               background: "#F4EFE6",
               border: "1px solid var(--color-border)",
-              boxShadow: "0 12px 36px rgba(31, 58, 46, 0.08)",
+              boxShadow: isAssembled
+                ? "0 16px 40px rgba(31, 58, 46, 0.12)"
+                : "0 4px 12px rgba(31, 58, 46, 0.04)",
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled
+                ? "translateX(0) scale(1)"
+                : "translateX(-85px) scale(0.92)",
+              transition:
+                "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 1.6s ease",
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -196,17 +224,26 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
             )}
           </div>
 
-          {/* RIGHT: Standalone Content Block with Attached Header */}
+          {/* RIGHT: Standalone Content Block with Staggered Text Sliding in slowly from Right */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               gap: "1.25rem",
               paddingInline: "clamp(0rem, 2vw, 1rem)",
+              overflow: "visible",
             }}
           >
             {/* Attached Section Header - Centered */}
-            <div style={{ textAlign: "center", marginBottom: "0.25rem" }}>
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "0.25rem",
+                opacity: isAssembled ? 1 : 0,
+                transform: isAssembled ? "translateX(0)" : "translateX(95px)",
+                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s",
+              }}
+            >
               <p
                 className="eyebrow"
                 style={{
@@ -237,7 +274,13 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
             </div>
 
             {/* Product Title */}
-            <div>
+            <div
+              style={{
+                opacity: isAssembled ? 1 : 0,
+                transform: isAssembled ? "translateX(0)" : "translateX(90px)",
+                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s",
+              }}
+            >
               <Link href={`/shop/${product.slug}`} style={{ textDecoration: "none" }}>
                 <h3
                   style={{
@@ -264,6 +307,9 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                 color: "var(--color-muted)",
                 margin: 0,
                 maxWidth: "520px",
+                opacity: isAssembled ? 1 : 0,
+                transform: isAssembled ? "translateX(0)" : "translateX(85px)",
+                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.5s",
               }}
             >
               Single origin turmeric from kandhamal, Odisha— Thoughtfully selected, packed and presented with the information behind the batch.
@@ -280,16 +326,26 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                 fontFamily: "var(--font-body)",
                 fontWeight: 400,
                 lineHeight: 1.5,
+                opacity: isAssembled ? 1 : 0,
+                transform: isAssembled ? "translateX(0)" : "translateX(80px)",
+                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.65s",
               }}
             >
               <div>• Batch tested for Purity</div>
               <div>• GI-registered Origin</div>
             </div>
 
-
-
             {/* Add Review Trigger */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                opacity: isAssembled ? 1 : 0,
+                transform: isAssembled ? "translateX(0)" : "translateX(75px)",
+                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.78s",
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setIsReviewModalOpen(true)}
@@ -323,7 +379,17 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
             </div>
 
             {/* Price & Unit */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem", marginTop: "0.25rem" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: "0.5rem",
+                marginTop: "0.25rem",
+                opacity: isAssembled ? 1 : 0,
+                transform: isAssembled ? "translateX(0)" : "translateX(70px)",
+                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.9s",
+              }}
+            >
               <span
                 style={{
                   fontFamily: "var(--font-heading)",
@@ -340,7 +406,15 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
             </div>
 
             {/* Add to Cart Button */}
-            <div style={{ maxWidth: "300px", marginTop: "0.5rem" }}>
+            <div
+              style={{
+                maxWidth: "300px",
+                marginTop: "0.5rem",
+                opacity: isAssembled ? 1 : 0,
+                transform: isAssembled ? "translateX(0)" : "translateX(65px)",
+                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 1.05s",
+              }}
+            >
               <AddToCartButton product={product} size="lg" />
             </div>
           </div>
