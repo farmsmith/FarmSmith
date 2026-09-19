@@ -29,28 +29,8 @@ export default function NotFound() {
           width={64}
           height={64}
           unoptimized
-          style={{ width: "64px", height: "64px", borderRadius: "50%", opacity: 0.85, objectFit: "cover" }}
+          style={{ width: "64px", height: "64px", opacity: 0.85, objectFit: "contain" }}
         />
-        <span
-          style={{
-            position: "absolute",
-            bottom: "-2px",
-            right: "-3px",
-            background: "var(--color-primary, #1F3A2E)",
-            color: "#D9A441",
-            border: "1px solid #D9A441",
-            fontSize: "0.6rem",
-            fontWeight: 800,
-            padding: "0.5px 4.5px",
-            borderRadius: "100px",
-            boxShadow: "0 1px 4px rgba(0, 0, 0, 0.25)",
-            lineHeight: 1,
-            letterSpacing: "0.02em",
-            userSelect: "none",
-          }}
-        >
-          TM
-        </span>
       </div>
       <div>
         <p className="eyebrow" style={{ marginBottom: "0.5rem" }}>404</p>

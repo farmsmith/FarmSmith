@@ -21,16 +21,20 @@ export default function IntroHeroAnimation({
 }: {
   onIntroComplete?: () => void;
 }) {
-  // Animation stages: 'enter' (0-3s) -> 'flying' (3s-4.8s, logo + text flight) -> 'settled'
+  // Animation stages: 'enter' (0-2.2s) -> 'flying' (2.2s-5.8s, slow graceful logo + text flight) -> 'settled'
   const [stage, setStage] = useState<"enter" | "flying" | "settled">("enter");
   const [showSkip, setShowSkip] = useState(false);
-  
-  // Dynamic transform for the big logo and FarmSmith text flight
+
+  // Dynamic transforms for the big logo, FarmSmith text, and 5 navbar pills flight
   const [logoTransform, setLogoTransform] = useState<string>("translate3d(0, 0, 0) scale(1)");
   const [textTransform, setTextTransform] = useState<string>("translate3d(0, 0, 0) scale(1)");
+  const [navTransforms, setNavTransforms] = useState<string[]>(
+    INTRO_NAV_LINKS.map(() => "translate3d(0, 0, 0) scale(1)")
+  );
 
   const bigLogoRef = useRef<HTMLDivElement>(null);
   const brandTextRef = useRef<HTMLHeadingElement>(null);
+  const navPillLabelRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const timerRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
@@ -43,14 +47,14 @@ export default function IntroHeroAnimation({
       return;
     }
 
-    // Reveal skip button after 0.8s
-    const skipTimer = setTimeout(() => setShowSkip(true), 800);
+    // Reveal skip button after 0.6s
+    const skipTimer = setTimeout(() => setShowSkip(true), 600);
     timerRef.current.push(skipTimer);
 
-    // At 3.0s, initiate the exact flight of the logo + text
+    // At 2.2s, initiate the slow, majestic logo, text, and navbar pages flight
     const dockTimer = setTimeout(() => {
       startFlight();
-    }, 3000);
+    }, 2200);
     timerRef.current.push(dockTimer);
 
     // If user starts scrolling down, immediately dismiss intro completely
@@ -77,7 +81,7 @@ export default function IntroHeroAnimation({
   const startFlight = () => {
     sessionStorage.setItem("farmsmith_intro_seen", "true");
 
-    // 1. Calculate exact flight coordinates to Navbar logo (#nav-brand-logo)
+    // 1. Calculate exact center-to-center flight coordinates for Logo to Navbar logo (#nav-brand-logo)
     const navLogoEl = document.getElementById("nav-brand-logo");
     const bigLogoEl = bigLogoRef.current;
 
@@ -85,16 +89,21 @@ export default function IntroHeroAnimation({
       const targetRect = navLogoEl.getBoundingClientRect();
       const currentRect = bigLogoEl.getBoundingClientRect();
 
-      const deltaX = targetRect.left - currentRect.left;
-      const deltaY = targetRect.top - currentRect.top;
+      const currentCenterX = currentRect.left + currentRect.width / 2;
+      const currentCenterY = currentRect.top + currentRect.height / 2;
+      const targetCenterX = targetRect.left + targetRect.width / 2;
+      const targetCenterY = targetRect.top + targetRect.height / 2;
+
+      const deltaX = targetCenterX - currentCenterX;
+      const deltaY = targetCenterY - currentCenterY;
       const scale = targetRect.width / currentRect.width;
 
       setLogoTransform(`translate3d(${deltaX}px, ${deltaY}px, 0) scale(${scale})`);
     } else {
-      setLogoTransform("translate3d(calc(-50vw + 60px), calc(-50vh + 35px), 0) scale(0.26)");
+      setLogoTransform("translate3d(calc(-50vw + 60px), calc(-50vh + 35px), 0) scale(0.24)");
     }
 
-    // 2. Calculate exact flight coordinates to Navbar text (#nav-brand-text)
+    // 2. Calculate exact center-to-center flight coordinates for FarmSmith text to Navbar text (#nav-brand-text)
     const navTextEl = document.getElementById("nav-brand-text");
     const brandTextEl = brandTextRef.current;
 
@@ -102,23 +111,55 @@ export default function IntroHeroAnimation({
       const targetTextRect = navTextEl.getBoundingClientRect();
       const currentTextRect = brandTextEl.getBoundingClientRect();
 
-      const textDeltaX = targetTextRect.left - currentTextRect.left;
-      const textDeltaY = targetTextRect.top - currentTextRect.top;
-      const textScale = targetTextRect.height / currentTextRect.height;
+      const currentTextCenterX = currentTextRect.left + currentTextRect.width / 2;
+      const currentTextCenterY = currentTextRect.top + currentTextRect.height / 2;
+      const targetTextCenterX = targetTextRect.left + targetTextRect.width / 2;
+      const targetTextCenterY = targetTextRect.top + targetTextRect.height / 2;
+
+      const textDeltaX = targetTextCenterX - currentTextCenterX;
+      const textDeltaY = targetTextCenterY - currentTextCenterY;
+      const textScale = targetTextRect.width / currentTextRect.width;
 
       setTextTransform(`translate3d(${textDeltaX}px, ${textDeltaY}px, 0) scale(${textScale})`);
     } else {
-      setTextTransform("translate3d(calc(-50vw + 115px), calc(-50vh + 35px), 0) scale(0.4)");
+      setTextTransform("translate3d(calc(-50vw + 120px), calc(-50vh + 35px), 0) scale(0.38)");
     }
+
+    // 3. Calculate exact center-to-center flight coordinates for all 5 navbar pages to navbar links (#nav-link-0..4)
+    const nextNavTransforms: string[] = [];
+    for (let i = 0; i < INTRO_NAV_LINKS.length; i++) {
+      const targetLinkEl = document.getElementById(`nav-link-${i}`);
+      const labelEl = navPillLabelRefs.current[i];
+
+      if (targetLinkEl && labelEl && targetLinkEl.offsetParent !== null) {
+        const targetLinkRect = targetLinkEl.getBoundingClientRect();
+        const currentLabelRect = labelEl.getBoundingClientRect();
+
+        const currentLabelCenterX = currentLabelRect.left + currentLabelRect.width / 2;
+        const currentLabelCenterY = currentLabelRect.top + currentLabelRect.height / 2;
+        const targetLinkCenterX = targetLinkRect.left + targetLinkRect.width / 2;
+        const targetLinkCenterY = targetLinkRect.top + targetLinkRect.height / 2;
+
+        const pillDeltaX = targetLinkCenterX - currentLabelCenterX;
+        const pillDeltaY = targetLinkCenterY - currentLabelCenterY;
+        const pillScale = targetLinkRect.width / currentLabelRect.width;
+
+        nextNavTransforms.push(`translate3d(${pillDeltaX}px, ${pillDeltaY}px, 0) scale(${pillScale})`);
+      } else {
+        // Fallback for mobile / narrow viewports where center links are hidden
+        nextNavTransforms.push("translate3d(0, -35px, 0) scale(0.85)");
+      }
+    }
+    setNavTransforms(nextNavTransforms);
 
     setStage("flying");
 
-    // Flight takes 1.8s
+    // Flight takes 3.6s for slow, graceful docking
     const settledTimer = setTimeout(() => {
       document.documentElement.classList.add("farmsmith-intro-hidden");
       setStage("settled");
       onIntroComplete?.();
-    }, 1850);
+    }, 3650);
     timerRef.current.push(settledTimer);
   };
 
@@ -141,296 +182,244 @@ export default function IntroHeroAnimation({
         overflow: "hidden",
       }}
     >
-      {/* ───── 1. Dark Backdrop (Fades out smoothly over 1.8s while logo and text fly) ───── */}
+      {/* ───── 1. Dark Forest Green Backdrop (Fades out gently over 3.4s during logo & text flight) ───── */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "#162D21",
+          backgroundColor: "#172D23",
           backgroundImage:
-            "radial-gradient(circle at 20% 30%, rgba(31, 58, 46, 0.98) 0%, rgba(22, 45, 33, 0.98) 70%, rgba(16, 32, 24, 0.98) 100%)",
-          transition: "opacity 1.8s cubic-bezier(0.25, 1, 0.35, 1)",
+            "linear-gradient(135deg, rgba(23, 45, 35, 0.98) 0%, rgba(31, 58, 46, 0.96) 55%, rgba(16, 32, 24, 0.98) 100%)",
+          transition: "opacity 3.4s cubic-bezier(0.35, 0, 0.25, 1)",
           opacity: isFlying ? 0 : 1,
           zIndex: 1,
         }}
       />
 
-      {/* Subtle Ambient Glow */}
+      {/* Soft Ambient Gold/Green Glow */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
-          top: "20%",
-          left: "15%",
-          width: "360px",
-          height: "360px",
+          top: "25%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "550px",
+          height: "550px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(217,164,65,0.18) 0%, transparent 70%)",
-          filter: "blur(60px)",
+          background: "radial-gradient(circle, rgba(217, 164, 65, 0.2) 0%, rgba(31, 58, 46, 0.15) 50%, transparent 70%)",
+          filter: "blur(50px)",
           pointerEvents: "none",
-          transition: "opacity 1.2s ease",
+          transition: "opacity 1.8s ease",
           opacity: isFlying ? 0 : 1,
           zIndex: 1,
         }}
       />
 
-      {/* ───── 2. Main Intro Container ───── */}
+      {/* ───── 2. Centered Intro Showcase Container ───── */}
       <div
         style={{
           width: "100%",
-          maxWidth: "1100px",
-          padding: "2rem 2rem",
+          maxWidth: "1050px",
+          padding: "2rem 1.5rem",
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: "4rem",
+          justifyContent: "center",
+          textAlign: "center",
           position: "relative",
           zIndex: 2,
         }}
         className="intro-showcase-container"
       >
-        {/* ───── LEFT: Big Logo & Big FarmSmith Text (BOTH FLY TO NAVBAR) ───── */}
+        {/* ───── TOP: Big Logo (FLIES SLOWLY ACROSS SCREEN TO NAVBAR LOGO) ───── */}
         <div
+          ref={bigLogoRef}
           style={{
-            flex: "1",
+            position: "relative",
+            width: "clamp(160px, 22vw, 210px)",
+            height: "clamp(160px, 22vw, 210px)",
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            textAlign: "center",
-            position: "relative",
+            background: "transparent",
+            border: "none",
+            boxShadow: "none",
+            transform: logoTransform,
+            transformOrigin: "center center",
+            transition: isFlying
+              ? "transform 3.6s cubic-bezier(0.35, 0, 0.2, 1)"
+              : "none",
+            zIndex: 100,
+            opacity: 1,
           }}
-          className="intro-left-logo-panel"
         >
-          {/* Circular Big Logo Container with TM badge — FLIES TO NAVBAR LOGO */}
-          <div
-            ref={bigLogoRef}
+          <Image
+            src="/images/farmsmith_logo_white_tm.png"
+            alt="FarmSmith Foods"
+            width={210}
+            height={210}
+            priority
+            unoptimized
             style={{
-              position: "relative",
-              width: "clamp(145px, 19vw, 185px)",
-              height: "clamp(145px, 19vw, 185px)",
-              borderRadius: "50%",
-              background: "#FFFFFF",
-              padding: "5px",
-              border: isFlying ? "1.5px solid #D9A441" : "3px solid #D9A441",
-              boxShadow: isFlying
-                ? "0 2px 8px rgba(0, 0, 0, 0.25)"
-                : "0 18px 45px rgba(0, 0, 0, 0.4), 0 0 40px rgba(217, 164, 65, 0.3)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              animation: !isFlying ? "introLogoPop 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards" : "none",
-              transition:
-                "transform 1.8s cubic-bezier(0.25, 1, 0.35, 1), box-shadow 1.8s ease, border-width 1.8s ease",
-              transform: logoTransform,
-              transformOrigin: "top left",
-              zIndex: 100,
-              opacity: 1, // Remains 100% visible throughout flight!
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
             }}
-          >
-            <Image
-              src="/images/farmsmith_logo_v2.png"
-              alt="FarmSmith Foods"
-              width={180}
-              height={180}
-              priority
-              unoptimized
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
-
-            {/* Gold TM Badge */}
-            <span
-              style={{
-                position: "absolute",
-                bottom: "3px",
-                right: "3px",
-                background: "#162D21",
-                color: "#D9A441",
-                border: "1px solid #D9A441",
-                fontSize: "clamp(0.62rem, 0.9vw, 0.75rem)",
-                fontWeight: 700,
-                padding: "1.5px 6px",
-                borderRadius: "100px",
-                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.35)",
-                lineHeight: 1.2,
-                letterSpacing: "0.03em",
-                userSelect: "none",
-              }}
-            >
-              TM
-            </span>
-          </div>
-
-          {/* Big FarmSmith Text (FLIES TO NAVBAR TEXT) */}
-          <div style={{ marginTop: "1.25rem", position: "relative" }}>
-            <h2
-              ref={brandTextRef}
-              style={{
-                fontFamily: "var(--font-serif-brand)",
-                fontSize: "clamp(2.4rem, 4.8vw, 3.6rem)", // BIG prominent size as requested
-                fontWeight: 600,
-                color: "#FBFAF6",
-                margin: 0,
-                letterSpacing: "0.03em",
-                lineHeight: 1.15,
-                animation: !isFlying ? "introFadeIn 0.8s ease 0.2s forwards" : "none",
-                transition: "transform 1.8s cubic-bezier(0.25, 1, 0.35, 1)",
-                transform: textTransform,
-                transformOrigin: "top left",
-                zIndex: 100,
-                opacity: 1, // Remains 100% visible throughout flight!
-                display: "inline-block",
-                whiteSpace: "nowrap",
-              }}
-            >
-              FarmSmith
-            </h2>
-
-            {/* Subtitle (vanishes cleanly on flight) */}
-            <p
-              style={{
-                fontSize: "0.82rem",
-                color: "#D9A441",
-                fontWeight: 500,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                margin: "0.4rem 0 0",
-                animation: !isFlying ? "introFadeIn 0.8s ease 0.3s forwards" : "none",
-                transition: "opacity 0.6s ease, transform 0.6s ease",
-                opacity: isFlying ? 0 : 0.9,
-                transform: isFlying ? "translateY(12px)" : "translateY(0)",
-                pointerEvents: isFlying ? "none" : "auto",
-              }}
-            >
-              Single Origin &bull; Batch Tested
-            </p>
-          </div>
+          />
         </div>
 
-        {/* Elegant Thin Divider Line (Desktop) */}
-        <div
-          aria-hidden="true"
-          style={{
-            width: "1px",
-            height: "280px",
-            background:
-              "linear-gradient(180deg, transparent 0%, rgba(217, 164, 65, 0.35) 50%, transparent 100%)",
-            opacity: isFlying ? 0 : 0.6,
-            transition: "opacity 0.5s ease",
-          }}
-          className="intro-divider"
-        />
-
-        {/* ───── RIGHT: Staggered Navbar Pages (FADES OUT IN PLACE) ───── */}
+        {/* ───── MIDDLE: Brand Title & Subtitle (FARMSMITH TEXT FLIES TO NAVBAR TEXT) ───── */}
         <div
           style={{
-            flex: "1",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            paddingLeft: "1rem",
+            marginTop: "1rem",
             position: "relative",
-            transition: "opacity 0.6s ease, transform 0.6s ease",
-            opacity: isFlying ? 0 : 1,
-            transform: isFlying ? "translateY(12px)" : "translateY(0)",
+            zIndex: 100,
           }}
-          className="intro-right-nav-panel"
         >
+          <h2
+            ref={brandTextRef}
+            className="notranslate"
+            translate="no"
+            style={{
+              fontFamily: "var(--font-serif-brand)",
+              fontSize: "clamp(2.5rem, 5vw, 3.8rem)",
+              fontWeight: 700,
+              color: isFlying ? "var(--color-primary, #1F3A2E)" : "#FBFAF6",
+              margin: 0,
+              letterSpacing: "0.02em",
+              lineHeight: 1.15,
+              display: "inline-block",
+              whiteSpace: "nowrap",
+              transform: textTransform,
+              transformOrigin: "center center",
+              transition: isFlying
+                ? "transform 3.6s cubic-bezier(0.35, 0, 0.2, 1), color 3.6s cubic-bezier(0.35, 0, 0.2, 1)"
+                : "none",
+              opacity: 1,
+            }}
+          >
+            FarmSmith
+          </h2>
+
+          {/* Subtitle (Fades Out Gently In Place) */}
           <p
             style={{
-              fontSize: "0.75rem",
-              fontWeight: 600,
+              fontSize: "0.85rem",
               color: "#D9A441",
-              letterSpacing: "0.16em",
+              fontWeight: 600,
+              letterSpacing: "0.14em",
               textTransform: "uppercase",
-              marginBottom: "1rem",
-              animation: "introFadeIn 0.6s ease 0.15s forwards",
-              opacity: 0.9,
+              margin: "0.35rem 0 0",
+              transition: "opacity 1.6s ease, transform 1.6s ease",
+              opacity: isFlying ? 0 : 1,
+              transform: isFlying ? "translateY(12px)" : "translateY(0)",
+              pointerEvents: isFlying ? "none" : "auto",
             }}
           >
-            Explore FarmSmith
+            Organic Food Crafted with a Mother's Care
           </p>
+        </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.65rem",
-              width: "100%",
-              maxWidth: "340px",
-            }}
-          >
-            {INTRO_NAV_LINKS.map((item, index) => {
-              const animDelay = `${0.2 + index * 0.18}s`;
-              return (
+        {/* ───── BOTTOM: Navbar Pages Down Below the Logo (FLIES TO NAVBAR LINKS) ───── */}
+        <div
+          style={{
+            marginTop: "2.25rem",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.85rem clamp(0.75rem, 1.8vw, 1.25rem)",
+            width: "100%",
+            maxWidth: "820px",
+            position: "relative",
+            zIndex: 10,
+            pointerEvents: isFlying ? "none" : "auto",
+          }}
+        >
+          {INTRO_NAV_LINKS.map((item, index) => {
+            return (
+              <div
+                key={item.label}
+                onClick={startFlight}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.55rem",
+                  padding: "0.6rem 1.2rem",
+                  position: "relative",
+                  cursor: "pointer",
+                  zIndex: 100,
+                }}
+                className="intro-nav-pill"
+              >
+                {/* Pill Glass Background & Border (Gently dissolves away in place) */}
                 <div
-                  key={item.label}
-                  onClick={() => startFlight()}
+                  aria-hidden="true"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
-                    padding: "0.55rem 0.9rem",
-                    borderRadius: "8px",
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(217, 164, 65, 0.15)",
-                    cursor: "pointer",
-                    animation: !isFlying
-                      ? `introItemSlideIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) ${animDelay} forwards`
-                      : "none",
-                    transition: "all 0.25s ease",
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "100px",
+                    background: "rgba(255, 255, 255, 0.06)",
+                    border: "1px solid rgba(217, 164, 65, 0.35)",
+                    backdropFilter: "blur(8px)",
+                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
+                    transition: "opacity 1.8s ease, background 0.2s ease, border-color 0.2s ease",
+                    opacity: isFlying ? 0 : 1,
+                    pointerEvents: "none",
                   }}
-                  className="intro-nav-card"
+                  className="intro-nav-pill-bg"
+                />
+
+                {/* Number index indicator (Gently dissolves away in place) */}
+                <span
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    color: "#D9A441",
+                    transition: "opacity 1.4s ease",
+                    opacity: isFlying ? 0 : 0.9,
+                    pointerEvents: "none",
+                  }}
                 >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-serif-brand)",
-                      fontSize: "0.85rem",
-                      fontWeight: 400,
-                      color: "#D9A441",
-                      opacity: 0.8,
-                      minWidth: "20px",
-                    }}
-                  >
-                    0{index + 1}
-                  </span>
+                  0{index + 1}
+                </span>
 
-                  <span
-                    style={{
-                      fontFamily: "var(--font-serif-brand)",
-                      fontSize: "clamp(1.15rem, 1.8vw, 1.45rem)",
-                      fontWeight: 400,
-                      color: "#FBFAF6",
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    {item.label}
-                  </span>
-
-                  <span
-                    style={{
-                      marginLeft: "auto",
-                      color: "#D9A441",
-                      fontSize: "1rem",
-                      opacity: 0.5,
-                      transition: "transform 0.2s ease, opacity 0.2s ease",
-                    }}
-                    className="intro-nav-arrow"
-                  >
-                    &rarr;
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+                {/* Navigation Text Label (FLIES PRECISELY TO THE EXACT NAVBAR LINK) */}
+                <span
+                  ref={(el) => {
+                    navPillLabelRefs.current[index] = el;
+                  }}
+                  style={{
+                    position: "relative",
+                    zIndex: 2,
+                    fontFamily: "var(--font-body, system-ui)",
+                    fontSize: "0.9375rem",
+                    fontWeight: 500,
+                    color: isFlying
+                      ? index === 0
+                        ? "var(--color-primary, #1F3A2E)"
+                        : "var(--color-muted, #736E65)"
+                      : "#FBFAF6",
+                    letterSpacing: "normal",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
+                    transform: navTransforms[index] || "translate3d(0, 0, 0) scale(1)",
+                    transformOrigin: "center center",
+                    transition: isFlying
+                      ? "transform 3.6s cubic-bezier(0.35, 0, 0.2, 1), color 3.6s cubic-bezier(0.35, 0, 0.2, 1)"
+                      : "none",
+                  }}
+                >
+                  {item.label}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -443,12 +432,12 @@ export default function IntroHeroAnimation({
             bottom: "2rem",
             right: "2rem",
             background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(217, 164, 65, 0.3)",
+            border: "1px solid rgba(217, 164, 65, 0.4)",
             color: "#FBFAF6",
             padding: "0.5rem 1.15rem",
             borderRadius: "100px",
             fontSize: "0.78rem",
-            fontWeight: 500,
+            fontWeight: 600,
             cursor: "pointer",
             backdropFilter: "blur(6px)",
             transition: "all 0.25s ease",
@@ -463,7 +452,7 @@ export default function IntroHeroAnimation({
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-            e.currentTarget.style.borderColor = "rgba(217, 164, 65, 0.3)";
+            e.currentTarget.style.borderColor = "rgba(217, 164, 65, 0.4)";
           }}
         >
           <span>Skip</span>
@@ -471,69 +460,17 @@ export default function IntroHeroAnimation({
         </button>
       )}
 
-      {/* Inline styles for animations */}
+      {/* Inline styles */}
       <style jsx global>{`
-        @keyframes introLogoPop {
-          0% {
-            transform: scale(0.7);
-            opacity: 0;
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-
-        @keyframes introFadeIn {
-          0% {
-            transform: translateY(10px);
-            opacity: 0;
-          }
-          100% {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-
-        @keyframes introItemSlideIn {
-          0% {
-            transform: translateX(30px);
-            opacity: 0;
-          }
-          100% {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-
-        .intro-nav-card:hover {
-          background: rgba(217, 164, 65, 0.15) !important;
-          border-color: rgba(217, 164, 65, 0.4) !important;
-          transform: translateX(4px) !important;
-        }
-
-        .intro-nav-card:hover .intro-nav-arrow {
-          transform: translateX(3px);
-          opacity: 0.9 !important;
+        .intro-nav-pill:hover {
+          background: rgba(217, 164, 65, 0.2) !important;
+          border-color: #D9A441 !important;
+          transform: translateY(-2px) !important;
         }
 
         @media (max-width: 768px) {
           .intro-showcase-container {
-            flex-direction: column !important;
-            gap: 2rem !important;
             padding: 1.5rem 1rem !important;
-            justifyContent: center !important;
-          }
-          .intro-divider {
-            display: none !important;
-          }
-          .intro-right-nav-panel {
-            padding-left: 0 !important;
-            align-items: center !important;
-            width: 100% !important;
-          }
-          .intro-right-nav-panel > div {
-            max-width: 100% !important;
           }
         }
       `}</style>

@@ -65,28 +65,8 @@ export default function ResetPasswordClient() {
                 width={56}
                 height={56}
                 unoptimized
-                style={{ width: "56px", height: "56px", borderRadius: "50%", objectFit: "cover" }}
+                style={{ width: "56px", height: "56px", objectFit: "contain" }}
               />
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: "-2px",
-                  right: "-3px",
-                  background: "var(--color-primary, #1F3A2E)",
-                  color: "#D9A441",
-                  border: "1px solid #D9A441",
-                  fontSize: "0.58rem",
-                  fontWeight: 800,
-                  padding: "0.5px 4px",
-                  borderRadius: "100px",
-                  boxShadow: "0 1px 4px rgba(0, 0, 0, 0.25)",
-                  lineHeight: 1,
-                  letterSpacing: "0.02em",
-                  userSelect: "none",
-                }}
-              >
-                TM
-              </span>
             </div>
           </Link>
           <h1

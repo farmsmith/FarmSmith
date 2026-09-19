@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, ArrowRight } from "lucide-react";
 
@@ -29,26 +30,28 @@ export default function GrowingSection() {
     <section
       ref={sectionRef}
       style={{
-        background: "linear-gradient(140deg, #0E1E16 0%, #162E22 50%, #224434 100%)",
+        background: "linear-gradient(140deg, #0A1711 0%, #12281D 45%, #1B3829 100%)",
         color: "#FBFAF6",
-        paddingBlock: "6rem",
+        paddingBlock: "5.5rem 6rem",
         position: "relative",
         overflow: "hidden",
         borderTop: "1px solid rgba(217, 164, 65, 0.25)",
         borderBottom: "1px solid rgba(217, 164, 65, 0.25)",
       }}
     >
-      {/* Subtle Ambient Radial Glow */}
+      {/* Subtle Ambient Radial Glow Behind Right Image Area */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
-          top: "-30%",
-          right: "-10%",
-          width: "600px",
-          height: "600px",
+          top: "10%",
+          right: "-5%",
+          width: "650px",
+          height: "650px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(217, 164, 65, 0.12) 0%, rgba(0,0,0,0) 70%)",
+          background:
+            "radial-gradient(circle, rgba(217, 164, 65, 0.16) 0%, rgba(31, 58, 46, 0.12) 50%, rgba(0,0,0,0) 70%)",
+          filter: "blur(40px)",
           pointerEvents: "none",
         }}
       />
@@ -56,24 +59,24 @@ export default function GrowingSection() {
       <div
         className="container"
         style={{
-          maxWidth: "1150px",
+          maxWidth: "1180px",
           margin: "0 auto",
-          paddingInline: "1rem",
+          paddingInline: "1.25rem",
           position: "relative",
           zIndex: 2,
         }}
       >
+        {/* Top 2-Column Section: Text Content Left, Botanical Tree Illustration Right */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "3.5rem",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "clamp(2.5rem, 5vw, 4.5rem)",
             alignItems: "center",
           }}
-          className="lg:grid-cols-12"
         >
           {/* Text Left - Slides in slowly from Left to Right */}
-          <div className="lg:col-span-7">
+          <div>
             {/* Pill Eyebrow */}
             <div
               style={{
@@ -109,7 +112,7 @@ export default function GrowingSection() {
             <h2
               style={{
                 fontFamily: "var(--font-heading)",
-                fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
+                fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)",
                 fontWeight: 700,
                 color: "#FBFAF6",
                 marginBottom: "1.25rem",
@@ -131,7 +134,7 @@ export default function GrowingSection() {
                 lineHeight: 1.75,
                 color: "rgba(251, 250, 246, 0.88)",
                 marginBottom: "2.25rem",
-                maxWidth: "540px",
+                maxWidth: "520px",
                 opacity: isAssembled ? 1 : 0,
                 transform: isAssembled ? "translateX(0)" : "translateX(-80px)",
                 transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s",
@@ -194,122 +197,159 @@ export default function GrowingSection() {
             </div>
           </div>
 
-          {/* Teaser Graphics Right - Slides in slowly from Right to Left */}
-          <div className="lg:col-span-5 block">
-            <div
+          {/* Right: Botanical Tree Illustration Card (Scaled to align nicely with left content) */}
+          <div
+            style={{
+              position: "relative",
+              borderRadius: "var(--radius-2xl, 22px)",
+              overflow: "hidden",
+              background: "#FAF7F0",
+              border: "1.5px solid rgba(217, 164, 65, 0.4)",
+              boxShadow: isAssembled
+                ? "0 20px 50px rgba(0, 0, 0, 0.38), 0 0 25px rgba(217, 164, 65, 0.15)"
+                : "0 6px 18px rgba(0, 0, 0, 0.15)",
+              maxWidth: "340px",
+              width: "100%",
+              margin: "0 auto",
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled
+                ? "translateX(0) scale(1)"
+                : "translateX(80px) scale(0.94)",
+              transition:
+                "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, box-shadow 1.6s ease",
+            }}
+          >
+            <div style={{ position: "relative", width: "100%", aspectRatio: "4/5", maxHeight: "420px" }}>
+              <Image
+                src="/images/farmsmith_growing_tree.jpg"
+                alt="Everyday grocery staples but cleaner — FarmSmith organic staples growing"
+                fill
+                sizes="(max-width: 768px) 100vw, 340px"
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "center center",
+                }}
+                priority
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Row: Upcoming Teaser Cards (Placed below the split section) */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "1.5rem",
+            marginTop: "3.75rem",
+          }}
+        >
+          {/* Card 1: Cold-Pressed Oils */}
+          <div
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(217, 164, 65, 0.3)",
+              borderRadius: "var(--radius-xl)",
+              padding: "2rem 1.75rem",
+              textAlign: "center",
+              boxShadow: isAssembled
+                ? "0 16px 36px rgba(0, 0, 0, 0.25)"
+                : "0 4px 12px rgba(0, 0, 0, 0.1)",
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled
+                ? "translateY(0) scale(1)"
+                : "translateY(40px) scale(0.95)",
+              transition:
+                "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.35s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s, box-shadow 1.6s ease",
+            }}
+          >
+            <span
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                gap: "1rem",
+                fontSize: "0.6875rem",
+                color: "#D9A441",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                background: "rgba(217, 164, 65, 0.12)",
+                padding: "0.25rem 0.65rem",
+                borderRadius: "100px",
+                display: "inline-block",
+                marginBottom: "0.75rem",
               }}
             >
-              {/* Card 1 */}
-              <div
-                style={{
-                  background: "rgba(255, 255, 255, 0.06)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(217, 164, 65, 0.3)",
-                  borderRadius: "var(--radius-xl)",
-                  padding: "2.25rem 1.35rem",
-                  textAlign: "center",
-                  boxShadow: isAssembled
-                    ? "0 16px 36px rgba(0, 0, 0, 0.28)"
-                    : "0 4px 12px rgba(0, 0, 0, 0.1)",
-                  opacity: isAssembled ? 1 : 0,
-                  transform: isAssembled
-                    ? "translateX(0) scale(1)"
-                    : "translateX(90px) scale(0.92)",
-                  transition:
-                    "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, box-shadow 1.6s ease",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.6875rem",
-                    color: "#D9A441",
-                    fontWeight: 800,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    background: "rgba(217, 164, 65, 0.12)",
-                    padding: "0.25rem 0.65rem",
-                    borderRadius: "100px",
-                    display: "inline-block",
-                    marginBottom: "0.75rem",
-                  }}
-                >
-                  UPCOMING
-                </span>
-                <h4
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.2rem",
-                    color: "#FFFFFF",
-                    marginBottom: "0.35rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  Cold-Pressed Oils
-                </h4>
-                <p style={{ fontSize: "0.8125rem", color: "rgba(251,250,246,0.7)", margin: 0 }}>
-                  Wood-milled purity
-                </p>
-              </div>
+              UPCOMING
+            </span>
+            <h4
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "1.3rem",
+                color: "#FFFFFF",
+                marginBottom: "0.35rem",
+                fontWeight: 700,
+              }}
+            >
+              Cold-Pressed Oils
+            </h4>
+            <p style={{ fontSize: "0.875rem", color: "rgba(251,250,246,0.7)", margin: 0 }}>
+              Wood-milled purity
+            </p>
+          </div>
 
-              {/* Card 2 */}
-              <div
-                style={{
-                  background: "rgba(255, 255, 255, 0.06)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid rgba(217, 164, 65, 0.3)",
-                  borderRadius: "var(--radius-xl)",
-                  padding: "2.25rem 1.35rem",
-                  textAlign: "center",
-                  boxShadow: isAssembled
-                    ? "0 16px 36px rgba(0, 0, 0, 0.28)"
-                    : "0 4px 12px rgba(0, 0, 0, 0.1)",
-                  opacity: isAssembled ? 1 : 0,
-                  transform: isAssembled
-                    ? "translateX(0) scale(1)"
-                    : "translateX(90px) scale(0.92)",
-                  transition:
-                    "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.4s, box-shadow 1.6s ease",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.6875rem",
-                    color: "#D9A441",
-                    fontWeight: 800,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    background: "rgba(217, 164, 65, 0.12)",
-                    padding: "0.25rem 0.65rem",
-                    borderRadius: "100px",
-                    display: "inline-block",
-                    marginBottom: "0.75rem",
-                  }}
-                >
-                  UPCOMING
-                </span>
-                <h4
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.2rem",
-                    color: "#FFFFFF",
-                    marginBottom: "0.35rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  Grains and pulses
-                </h4>
-                <p style={{ fontSize: "0.8125rem", color: "rgba(251,250,246,0.7)", margin: 0 }}>
-                  From where it grows best
-                </p>
-              </div>
-            </div>
+          {/* Card 2: Grains and pulses */}
+          <div
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(217, 164, 65, 0.3)",
+              borderRadius: "var(--radius-xl)",
+              padding: "2rem 1.75rem",
+              textAlign: "center",
+              boxShadow: isAssembled
+                ? "0 16px 36px rgba(0, 0, 0, 0.25)"
+                : "0 4px 12px rgba(0, 0, 0, 0.1)",
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled
+                ? "translateY(0) scale(1)"
+                : "translateY(40px) scale(0.95)",
+              transition:
+                "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.45s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.45s, box-shadow 1.6s ease",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.6875rem",
+                color: "#D9A441",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                background: "rgba(217, 164, 65, 0.12)",
+                padding: "0.25rem 0.65rem",
+                borderRadius: "100px",
+                display: "inline-block",
+                marginBottom: "0.75rem",
+              }}
+            >
+              UPCOMING
+            </span>
+            <h4
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "1.3rem",
+                color: "#FFFFFF",
+                marginBottom: "0.35rem",
+                fontWeight: 700,
+              }}
+            >
+              Grains and pulses
+            </h4>
+            <p style={{ fontSize: "0.875rem", color: "rgba(251,250,246,0.7)", margin: 0 }}>
+              From where it grows best
+            </p>
           </div>
         </div>
       </div>
     </section>
   );
 }
+

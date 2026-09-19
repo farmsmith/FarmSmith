@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { X, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart/context";
@@ -15,9 +15,14 @@ interface CartDrawerProps {
 }
 
 export default function CartDrawer({ open, onClose }: CartDrawerProps) {
+  const [mounted, setMounted] = useState(false);
   const { items } = useCart();
   const drawerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Focus management — focus close button when drawer opens
   useEffect(() => {
@@ -42,8 +47,10 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
+  if (!mounted || !open) return null;
+
   return (
-    <div style={{ display: open ? "block" : "none" }}>
+    <div suppressHydrationWarning>
       {/* Overlay */}
       <div
         className="cart-overlay"
@@ -58,6 +65,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
+        suppressHydrationWarning
       >
         {/* Header */}
         <div

@@ -145,33 +145,15 @@ export default function AboutUsClient() {
                 }}
               >
                 <Image
-                  src="/images/farmsmith_logo_v2.png"
+                  src="/images/farmsmith_logo_white_tm.png"
                   alt="FarmSmith Logo"
                   fill
                   sizes="120px"
                   unoptimized
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: "contain" }}
                   priority
                 />
               </div>
-              <span
-                style={{
-                  position: "absolute",
-                  bottom: "2px",
-                  right: "2px",
-                  background: "#162D21",
-                  color: "#D9A441",
-                  border: "1.5px solid #D9A441",
-                  fontSize: "0.65rem",
-                  fontWeight: 800,
-                  padding: "1px 5px",
-                  borderRadius: "100px",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.35)",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                TM
-              </span>
             </div>
           </div>
 

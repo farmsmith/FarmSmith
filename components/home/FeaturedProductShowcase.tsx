@@ -335,7 +335,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
               <div>• GI-registered Origin</div>
             </div>
 
-            {/* Add Review Trigger */}
+            {/* Review Product Trigger */}
             <div
               style={{
                 display: "flex",
@@ -374,7 +374,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                 }}
               >
                 <MessageSquarePlus size={15} color="#C4883E" />
-                Add review
+                Review the product
               </button>
             </div>
 

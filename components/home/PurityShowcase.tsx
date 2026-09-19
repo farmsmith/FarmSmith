@@ -193,7 +193,6 @@ export default function PurityShowcase() {
             YOU check the quality of YOUR product
           </h2>
           <p style={{ color: "#D4C7B5", fontSize: "1.0625rem", fontFamily: "var(--font-body)", fontWeight: 400, lineHeight: 1.75 }}>
-            Commercial spices often rely on synthetic yellow dyes and unchecked sourcing. 
             Here is how FarmSmith redefines purity with batch-specific third-party testing.
           </p>
         </div>
@@ -250,7 +249,7 @@ export default function PurityShowcase() {
                 <span style={{ fontSize: "0.8125rem", color: "#B8ADA0" }}>Kandhamal, Odisha</span>
               </div>
               <div style={{ borderLeft: "2px solid #D9A441", paddingLeft: "0.85rem" }}>
-                <span style={{ display: "block", fontSize: "1.125rem", fontWeight: 700, color: "#D9A441" }}>100% Organic</span>
+                <span style={{ display: "block", fontSize: "1.125rem", fontWeight: 700, color: "#D9A441" }}>Traditionally cultivated on</span>
                 <span style={{ fontSize: "0.8125rem", color: "#B8ADA0" }}>Generational Soil</span>
               </div>
             </div>

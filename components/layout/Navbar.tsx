@@ -300,34 +300,16 @@ export default function Navbar() {
               aria-label="FarmSmith Foods — go to home"
               style={{ display: "flex", alignItems: "center", gap: "0.675rem", textDecoration: "none" }}
             >
-              <div id="nav-brand-logo" style={{ position: "relative", width: "44px", height: "44px", flexShrink: 0 }}>
+              <div id="nav-brand-logo" style={{ position: "relative", width: "46px", height: "46px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Image
                   src="/images/farmsmith_logo_v2.png"
                   alt="FarmSmith Foods"
-                  width={44}
-                  height={44}
+                  width={46}
+                  height={46}
                   priority
                   unoptimized
-                  style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover" }}
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
                 />
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: "-2px",
-                    right: "-3px",
-                    background: "var(--color-primary, #1F3A2E)",
-                    color: "#D9A441",
-                    border: "1px solid #D9A441",
-                    fontSize: "0.55rem",
-                    fontWeight: 800,
-                    padding: "0.5px 3.5px",
-                    borderRadius: "100px",
-                    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.25)",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  TM
-                </span>
               </div>
               <span
                 id="nav-brand-text"

@@ -105,46 +105,23 @@ export default function Footer() {
               <div style={{ position: "relative", width: "44px", height: "44px", flexShrink: 0 }}>
                 <div
                   style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "50%",
-                    background: "#FFFFFF",
-                    padding: "2px",
+                    position: "relative",
+                    width: "48px",
+                    height: "48px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    border: "1.5px solid #D9A441",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)",
-                    overflow: "hidden",
                   }}
                 >
                   <Image
-                    src="/images/farmsmith_logo_v2.png"
+                    src="/images/farmsmith_logo_white_tm.png"
                     alt="FarmSmith Foods"
-                    width={40}
-                    height={40}
+                    width={48}
+                    height={48}
                     unoptimized
-                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
                   />
                 </div>
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: "-2px",
-                    right: "-3px",
-                    background: "#FFFFFF",
-                    color: "#162D21",
-                    border: "1px solid #D9A441",
-                    fontSize: "0.55rem",
-                    fontWeight: 800,
-                    padding: "0.5px 3.5px",
-                    borderRadius: "100px",
-                    boxShadow: "0 1px 4px rgba(0, 0, 0, 0.35)",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  TM
-                </span>
               </div>
               <span
                 style={{
