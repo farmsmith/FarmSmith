@@ -38,6 +38,7 @@ export default async function HomePage() {
 
       {/* ───── 1. HERO SECTION ───── */}
       <section
+        id="home-hero-section"
         aria-label="Hero"
         style={{
           position: "relative",

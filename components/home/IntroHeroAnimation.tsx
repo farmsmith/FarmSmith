@@ -73,6 +73,7 @@ export default function IntroHeroAnimation({
 
   const dismissImmediately = () => {
     sessionStorage.setItem("farmsmith_intro_seen", "true");
+    document.documentElement.classList.add("farmsmith-hero-fadein");
     document.documentElement.classList.add("farmsmith-intro-hidden");
     setStage("settled");
     onIntroComplete?.();
@@ -80,6 +81,7 @@ export default function IntroHeroAnimation({
 
   const startFlight = () => {
     sessionStorage.setItem("farmsmith_intro_seen", "true");
+    document.documentElement.classList.add("farmsmith-hero-fadein");
 
     // 1. Calculate exact center-to-center flight coordinates for Logo to Navbar logo (#nav-brand-logo)
     const navLogoEl = document.getElementById("nav-brand-logo");
@@ -154,12 +156,12 @@ export default function IntroHeroAnimation({
 
     setStage("flying");
 
-    // Flight takes 3.6s for slow, graceful docking
+    // Flight takes 4.6s for slow, graceful docking and hero reveal
     const settledTimer = setTimeout(() => {
       document.documentElement.classList.add("farmsmith-intro-hidden");
       setStage("settled");
       onIntroComplete?.();
-    }, 3650);
+    }, 4700);
     timerRef.current.push(settledTimer);
   };
 
@@ -182,7 +184,7 @@ export default function IntroHeroAnimation({
         overflow: "hidden",
       }}
     >
-      {/* ───── 1. Dark Forest Green Backdrop (Fades out gently over 3.4s during logo & text flight) ───── */}
+      {/* ───── 1. Dark Forest Green Backdrop (Fades out gently over 4.4s during logo & text flight) ───── */}
       <div
         aria-hidden="true"
         style={{
@@ -191,7 +193,7 @@ export default function IntroHeroAnimation({
           backgroundColor: "#172D23",
           backgroundImage:
             "linear-gradient(135deg, rgba(23, 45, 35, 0.98) 0%, rgba(31, 58, 46, 0.96) 55%, rgba(16, 32, 24, 0.98) 100%)",
-          transition: "opacity 3.4s cubic-bezier(0.35, 0, 0.25, 1)",
+          transition: "opacity 4.4s cubic-bezier(0.35, 0, 0.25, 1)",
           opacity: isFlying ? 0 : 1,
           zIndex: 1,
         }}
@@ -249,7 +251,7 @@ export default function IntroHeroAnimation({
             transform: logoTransform,
             transformOrigin: "center center",
             transition: isFlying
-              ? "transform 3.6s cubic-bezier(0.35, 0, 0.2, 1)"
+              ? "transform 4.6s cubic-bezier(0.35, 0, 0.2, 1)"
               : "none",
             zIndex: 100,
             opacity: 1,
@@ -295,7 +297,7 @@ export default function IntroHeroAnimation({
               transform: textTransform,
               transformOrigin: "center center",
               transition: isFlying
-                ? "transform 3.6s cubic-bezier(0.35, 0, 0.2, 1), color 3.6s cubic-bezier(0.35, 0, 0.2, 1)"
+                ? "transform 4.6s cubic-bezier(0.35, 0, 0.2, 1), color 4.6s cubic-bezier(0.35, 0, 0.2, 1)"
                 : "none",
               opacity: 1,
             }}
@@ -411,7 +413,7 @@ export default function IntroHeroAnimation({
                     transform: navTransforms[index] || "translate3d(0, 0, 0) scale(1)",
                     transformOrigin: "center center",
                     transition: isFlying
-                      ? "transform 3.6s cubic-bezier(0.35, 0, 0.2, 1), color 3.6s cubic-bezier(0.35, 0, 0.2, 1)"
+                      ? "transform 4.6s cubic-bezier(0.35, 0, 0.2, 1), color 4.6s cubic-bezier(0.35, 0, 0.2, 1)"
                       : "none",
                   }}
                 >
