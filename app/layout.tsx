@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   },
   description:
     "FarmSmith Foods creates carefully crafted foods built around a mother's quest for transparency, food awareness, batch testing, and GI-tagged turmeric.",
+  icons: {
+    icon: "/images/farmsmith_org_logo.jpeg",
+    shortcut: "/images/farmsmith_org_logo.jpeg",
+    apple: "/images/farmsmith_org_logo.jpeg",
+  },
   openGraph: {
     title: "FarmSmith Foods — Organic Food Crafted with a Mother's Care",
     description:
@@ -26,10 +31,10 @@ export const metadata: Metadata = {
     siteName: "FarmSmith Foods",
     images: [
       {
-        url: "/images/hero_turmeric.png",
-        width: 1200,
-        height: 630,
-        alt: "FarmSmith Foods Organic GI-Tagged Turmeric",
+        url: "/images/farmsmith_org_logo.jpeg",
+        width: 512,
+        height: 512,
+        alt: "FarmSmith Foods Logo",
       },
     ],
     locale: "en_IN",
@@ -40,7 +45,7 @@ export const metadata: Metadata = {
     title: "FarmSmith Foods — Organic Food Crafted with a Mother's Care",
     description:
       "100% GI-tagged, batch lab-tested Kandhamal turmeric and organic foods made with complete transparency.",
-    images: ["/images/hero_turmeric.png"],
+    images: ["/images/farmsmith_org_logo.jpeg"],
   },
 };
 
