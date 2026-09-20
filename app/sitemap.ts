@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const baseUrl = "https://farmsmithfoods.com";
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -57,17 +57,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createAdminSupabaseClient();
+
     const { data: products } = await supabase
       .from("products")
       .select("id, slug, updated_at")
       .eq("is_active", true);
 
-    const productRoutes: MetadataRoute.Sitemap = (products ?? []).map((product) => ({
-      url: `${baseUrl}/shop/${product.slug || product.id}`,
-      lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
+    const productRoutes: MetadataRoute.Sitemap = (products ?? []).map(
+      (product) => ({
+        url: `${baseUrl}/shop/${product.slug || product.id}`,
+        lastModified: product.updated_at
+          ? new Date(product.updated_at)
+          : new Date(),
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }),
+    );
 
     return [...staticRoutes, ...productRoutes];
   } catch (err) {
