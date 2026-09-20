@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ShieldCheck, AlertTriangle, Check, CheckCircle2, Search, FileText, Sparkles, Award } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Check, CheckCircle2, Search, FileText, Sparkles, Award, ChevronLeft, ChevronRight } from "lucide-react";
+
+const ORIGIN_SLIDES = [
+  { src: "/images/Know the origin 0.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 0" },
+  { src: "/images/Know the origin 1.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 1" },
+  { src: "/images/Know the origin 2.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 2" },
+  { src: "/images/Know the Origin 3.jpg", alt: "Know the origin - Kandhamal Turmeric Heritage 3" },
+];
 
 interface SampleBatch {
   code: string;
@@ -42,20 +49,40 @@ export default function PurityShowcase() {
   const [isAssembled, setIsAssembled] = useState(false);
   const [isReportVisible, setIsReportVisible] = useState(false);
   const [verifyPulseKey, setVerifyPulseKey] = useState(0);
-  const sectionRef = useRef<HTMLElement>(null);
+
+  // Know the origin slideshow state
+  const [originSlideIdx, setOriginSlideIdx] = useState(0);
+
+  const originRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
+  // Auto-slide origin images every 4.0 seconds
   useEffect(() => {
-    const el = sectionRef.current;
+    const timer = setInterval(() => {
+      setOriginSlideIdx((prev) => (prev + 1) % ORIGIN_SLIDES.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const prevOriginSlide = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    setOriginSlideIdx((prev) => (prev - 1 + ORIGIN_SLIDES.length) % ORIGIN_SLIDES.length);
+  };
+
+  const nextOriginSlide = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    setOriginSlideIdx((prev) => (prev + 1) % ORIGIN_SLIDES.length);
+  };
+
+  useEffect(() => {
+    const el = originRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsAssembled(true);
-        }
+        setIsAssembled(entry.isIntersecting);
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -20px 0px" }
     );
 
     observer.observe(el);
@@ -68,11 +95,9 @@ export default function PurityShowcase() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsReportVisible(true);
-        }
+        setIsReportVisible(entry.isIntersecting);
       },
-      { threshold: 0.2, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -20px 0px" }
     );
 
     observer.observe(el);
@@ -104,7 +129,6 @@ export default function PurityShowcase() {
 
   return (
     <section
-      ref={sectionRef}
       id="standards"
       style={{ background: "var(--color-surface)", paddingBlock: "0 6rem", scrollMarginTop: "5rem", overflow: "hidden" }}
     >
@@ -137,17 +161,13 @@ export default function PurityShowcase() {
         @keyframes greenCheckStamp {
           0% {
             transform: scale(0.2) rotate(-25deg);
-            opacity: 0;
-            box-shadow: 0 0 0 rgba(5, 150, 105, 0);
           }
           70% {
             transform: scale(1.18) rotate(0deg);
-            opacity: 1;
             box-shadow: 0 0 16px rgba(5, 150, 105, 0.45);
           }
           100% {
             transform: scale(1) rotate(0deg);
-            opacity: 1;
             box-shadow: 0 0 0 rgba(5, 150, 105, 0);
           }
         }
@@ -155,6 +175,7 @@ export default function PurityShowcase() {
       
       {/* 1. Full-width Dark Earthy Brown Section (Header + Know the Origin) */}
       <div
+        ref={originRef}
         style={{
           background: "linear-gradient(145deg, #2D1E12 0%, #1E140C 100%)",
           color: "#FAF6EE",
@@ -174,7 +195,7 @@ export default function PurityShowcase() {
             paddingInline: "1.5rem",
             opacity: isAssembled ? 1 : 0,
             transform: isAssembled ? "translateY(0)" : "translateY(30px)",
-            transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
+            transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
           }}
         >
           <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.12em" }}>
@@ -215,7 +236,7 @@ export default function PurityShowcase() {
             style={{
               opacity: isAssembled ? 1 : 0,
               transform: isAssembled ? "translateX(0)" : "translateX(-85px)",
-              transition: "all 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s",
+              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
             }}
           >
             <h3
@@ -255,30 +276,148 @@ export default function PurityShowcase() {
             </div>
           </div>
 
-          {/* Right Landscape Image - Slides in slowly from Right to Left */}
+          {/* Right Landscape Image Slideshow - Know the origin 0 to 3 with Arrow Controls */}
           <div
             style={{
               position: "relative",
-              borderRadius: "var(--radius-lg)",
+              borderRadius: "var(--radius-lg, 16px)",
               overflow: "hidden",
               aspectRatio: "16/10",
               boxShadow: isAssembled ? "0 16px 36px rgba(0,0,0,0.45)" : "0 4px 12px rgba(0,0,0,0.2)",
-              border: "1px solid rgba(217, 164, 65, 0.2)",
+              border: "1.5px solid rgba(217, 164, 65, 0.35)",
               opacity: isAssembled ? 1 : 0,
               transform: isAssembled ? "translateX(0) scale(1)" : "translateX(85px) scale(0.92)",
-              transition: "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, box-shadow 1.6s ease",
+              transition: "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, box-shadow 2.75s ease",
             }}
           >
-            <img
-              src="/images/kandhamal_turmeric_hills.jpg"
-              alt="Picturesque hills and golden turmeric fields of Kandhamal, Odisha"
+            {/* Sliding Track */}
+            <div
               style={{
+                display: "flex",
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
-                display: "block",
+                transform: `translateX(-${originSlideIdx * 100}%)`,
+                transition: "transform 0.75s cubic-bezier(0.25, 1, 0.5, 1)",
               }}
-            />
+            >
+              {ORIGIN_SLIDES.map((slide, idx) => (
+                <div
+                  key={slide.src}
+                  style={{
+                    flex: "0 0 100%",
+                    width: "100%",
+                    height: "100%",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    src={slide.src}
+                    alt={slide.alt}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: idx === 0 ? "top center" : "center",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Counter Badge (Top-right) */}
+            <div
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                zIndex: 10,
+                background: "rgba(23, 45, 35, 0.8)",
+                backdropFilter: "blur(6px)",
+                color: "#FBFAF6",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                padding: "0.2rem 0.6rem",
+                borderRadius: "100px",
+                border: "1px solid rgba(217, 164, 65, 0.4)",
+                letterSpacing: "0.05em",
+                userSelect: "none",
+              }}
+            >
+              <span style={{ color: "#D9A441" }}>{originSlideIdx + 1}</span> / {ORIGIN_SLIDES.length}
+            </div>
+
+            {/* Left Arrow Button */}
+            <button
+              onClick={prevOriginSlide}
+              aria-label="Previous origin image"
+              style={{
+                position: "absolute",
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                background: "rgba(23, 45, 35, 0.75)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(217, 164, 65, 0.4)",
+                color: "#FBFAF6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                zIndex: 10,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#D9A441";
+                e.currentTarget.style.color = "#1F3A2E";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(23, 45, 35, 0.75)";
+                e.currentTarget.style.color = "#FBFAF6";
+              }}
+            >
+              <ChevronLeft size={20} aria-hidden="true" />
+            </button>
+
+            {/* Right Arrow Button */}
+            <button
+              onClick={nextOriginSlide}
+              aria-label="Next origin image"
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                background: "rgba(23, 45, 35, 0.75)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(217, 164, 65, 0.4)",
+                color: "#FBFAF6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                zIndex: 10,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#D9A441";
+                e.currentTarget.style.color = "#1F3A2E";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(23, 45, 35, 0.75)";
+                e.currentTarget.style.color = "#FBFAF6";
+              }}
+            >
+              <ChevronRight size={20} aria-hidden="true" />
+            </button>
           </div>
         </div>
       </div>
@@ -300,7 +439,7 @@ export default function PurityShowcase() {
             overflow: "hidden",
             opacity: isReportVisible ? 1 : 0,
             transform: isReportVisible ? "translateY(0) scale(1)" : "translateY(45px) scale(0.96)",
-            transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
+            transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           {/* Subtle top accent ribbon */}

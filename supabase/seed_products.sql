@@ -45,7 +45,7 @@ INSERT INTO products (
   '100g',
   100,
   5.0,
-  '/images/product_turmeric.png',
+  '/images/Product 1.PNG',
   92,
   true
 ),

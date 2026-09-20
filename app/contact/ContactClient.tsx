@@ -27,9 +27,7 @@ export default function ContactClient() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsSectionVisible(true);
-        }
+        setIsSectionVisible(entry.isIntersecting);
       },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
@@ -202,7 +200,7 @@ export default function ContactClient() {
             style={{
               opacity: isSectionVisible ? 1 : 0,
               transform: isSectionVisible ? "translateX(0)" : "translateX(-65px)",
-              transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
+              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
             }}
           >
             <h2
@@ -234,7 +232,7 @@ export default function ContactClient() {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
                   opacity: isSectionVisible ? 1 : 0,
                   transform: isSectionVisible ? "translateX(0)" : "translateX(-35px)",
-                  transition: "all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.25s",
+                  transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
                 }}
               >
                 <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)", flexShrink: 0 }}>
@@ -262,7 +260,7 @@ export default function ContactClient() {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
                   opacity: isSectionVisible ? 1 : 0,
                   transform: isSectionVisible ? "translateX(0)" : "translateX(-35px)",
-                  transition: "all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s",
+                  transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s",
                 }}
               >
                 <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)", flexShrink: 0 }}>
@@ -290,7 +288,7 @@ export default function ContactClient() {
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
                   opacity: isSectionVisible ? 1 : 0,
                   transform: isSectionVisible ? "translateX(0)" : "translateX(-35px)",
-                  transition: "all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.55s",
+                  transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s",
                 }}
               >
                 <div style={{ padding: "0.5rem", borderRadius: "50%", background: "rgba(196,136,62,0.15)", color: "var(--color-accent)", flexShrink: 0 }}>
@@ -318,7 +316,7 @@ export default function ContactClient() {
                 : "0 4px 12px rgba(31, 58, 46, 0.02)",
               opacity: isSectionVisible ? 1 : 0,
               transform: isSectionVisible ? "translateX(0) scale(1)" : "translateX(65px) scale(0.95)",
-              transition: "all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s",
+              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
             }}
           >
             <h3

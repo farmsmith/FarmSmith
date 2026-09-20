@@ -54,13 +54,20 @@ export default function ProductCard({ product }: ProductCardProps) {
     product.slug?.includes("turmeric") ||
     product.name?.toLowerCase().includes("turmeric");
 
-  const slides =
-    product.images && product.images.length > 1
+  const slides = isTurmeric
+    ? [
+        "/images/Product 1.PNG",
+        "/images/Product 2.PNG",
+        "/images/Product 3.PNG",
+        "/images/Product 4.PNG",
+      ]
+    : product.images && product.images.length > 1
       ? product.images.map((img) => img.image_url)
       : [
-          product.image_url ?? "/images/product_turmeric.png",
-          "/images/origin_story.png",
-          "/images/recipe_golden_milk.png",
+          product.image_url ?? "/images/Product 1.PNG",
+          "/images/Product 2.PNG",
+          "/images/Product 3.PNG",
+          "/images/Product 4.PNG",
         ];
 
   // Auto-slide on hover pause

@@ -15,9 +15,7 @@ export default function GrowingSection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsAssembled(true);
-        }
+        setIsAssembled(entry.isIntersecting);
       },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
@@ -91,7 +89,7 @@ export default function GrowingSection() {
                 backdropFilter: "blur(6px)",
                 opacity: isAssembled ? 1 : 0,
                 transform: isAssembled ? "translateX(0)" : "translateX(-75px)",
-                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
+                transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
               }}
             >
               <Sparkles size={15} style={{ color: "#D9A441" }} />
@@ -120,7 +118,7 @@ export default function GrowingSection() {
                 letterSpacing: "-0.02em",
                 opacity: isAssembled ? 1 : 0,
                 transform: isAssembled ? "translateX(0)" : "translateX(-85px)",
-                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s",
+                transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
               }}
             >
               From one origin <br />
@@ -137,7 +135,7 @@ export default function GrowingSection() {
                 maxWidth: "520px",
                 opacity: isAssembled ? 1 : 0,
                 transform: isAssembled ? "translateX(0)" : "translateX(-80px)",
-                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s",
+                transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s",
               }}
             >
               Kandhamal turmeric is where farmsmith begins. We are building a considered range of
@@ -152,7 +150,7 @@ export default function GrowingSection() {
                 gap: "1rem",
                 opacity: isAssembled ? 1 : 0,
                 transform: isAssembled ? "translateX(0)" : "translateX(-75px)",
-                transition: "all 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s",
+                transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s",
               }}
             >
               <Link
@@ -216,7 +214,7 @@ export default function GrowingSection() {
                 ? "translateX(0) scale(1)"
                 : "translateX(80px) scale(0.94)",
               transition:
-                "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s, box-shadow 1.6s ease",
+                "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, box-shadow 2.75s ease",
             }}
           >
             <div style={{ position: "relative", width: "100%", aspectRatio: "4/5", maxHeight: "420px" }}>
@@ -261,7 +259,7 @@ export default function GrowingSection() {
                 ? "translateY(0) scale(1)"
                 : "translateY(40px) scale(0.95)",
               transition:
-                "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.35s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.35s, box-shadow 1.6s ease",
+                "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, box-shadow 2.75s ease",
             }}
           >
             <span
@@ -313,7 +311,7 @@ export default function GrowingSection() {
                 ? "translateY(0) scale(1)"
                 : "translateY(40px) scale(0.95)",
               transition:
-                "transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.45s, opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.45s, box-shadow 1.6s ease",
+                "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s, box-shadow 2.75s ease",
             }}
           >
             <span

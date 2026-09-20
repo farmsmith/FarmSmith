@@ -32,9 +32,7 @@ export default function CustomerReviewsSection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsAssembled(true);
-        }
+        setIsAssembled(entry.isIntersecting);
       },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
@@ -98,7 +96,7 @@ export default function CustomerReviewsSection() {
             opacity: isAssembled ? 1 : 0,
             filter: isAssembled ? "blur(0px)" : "blur(8px)",
             transform: isAssembled ? "scale(1)" : "scale(0.92)",
-            transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1)",
+            transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           <p className="eyebrow" style={{ color: "#C4883E", marginBottom: "0.5rem" }}>
@@ -135,7 +133,7 @@ export default function CustomerReviewsSection() {
               : "rotateX(18deg) translateY(60px) scale(0.92)",
             transformOrigin: "bottom center",
             transition:
-              "transform 1.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, opacity 1.4s ease 0.15s, box-shadow 1.7s ease",
+              "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, opacity 2.75s ease 0.1s, box-shadow 2.75s ease",
           }}
         >
           {/* Subtle Decorative Giant Quote Icon in Background */}

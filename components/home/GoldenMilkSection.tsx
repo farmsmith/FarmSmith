@@ -1,15 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, ArrowRight, CheckCircle } from "lucide-react";
 
 export default function GoldenMilkSection() {
   const [servings, setServings] = useState<number>(2);
+  const [isAssembled, setIsAssembled] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsAssembled(entry.isIntersecting);
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section style={{ background: "var(--color-surface)", paddingBlock: "5rem" }}>
+    <section
+      ref={sectionRef}
+      style={{
+        background: "var(--color-surface)",
+        paddingBlock: "5rem",
+        overflow: "hidden",
+      }}
+    >
       <div className="container" style={{ maxWidth: "1100px", margin: "0 auto", paddingInline: "1rem" }}>
         
         <div
@@ -22,7 +46,14 @@ export default function GoldenMilkSection() {
           className="lg:grid-cols-2"
         >
           {/* Left Column: Image with Floating Recipe Card */}
-          <div style={{ position: "relative" }}>
+          <div
+            style={{
+              position: "relative",
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled ? "translateX(0) scale(1)" : "translateX(-60px) scale(0.95)",
+              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
+            }}
+          >
             <div
               style={{
                 position: "relative",
@@ -69,7 +100,13 @@ export default function GoldenMilkSection() {
           </div>
 
           {/* Right Column: Recipe Interactive Guide */}
-          <div>
+          <div
+            style={{
+              opacity: isAssembled ? 1 : 0,
+              transform: isAssembled ? "translateX(0) scale(1)" : "translateX(60px) scale(0.95)",
+              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
+            }}
+          >
             <p className="eyebrow" style={{ color: "#C4883E", marginBottom: "0.5rem" }}>
               In Your Kitchen
             </p>

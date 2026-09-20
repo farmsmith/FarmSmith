@@ -3,7 +3,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Apple } from "lucide-react";
+import { ArrowRight, Apple, ChevronLeft, ChevronRight } from "lucide-react";
+
+const STORY_SLIDES = [
+  { src: "/images/Our story 1.PNG", alt: "FarmSmith Story - 1: The Origin" },
+  { src: "/images/Our story 2.PNG", alt: "FarmSmith Story - 2: Sourcing with Care" },
+  { src: "/images/Our story 3.PNG", alt: "FarmSmith Story - 3: Working with Farmers" },
+  { src: "/images/Our story 4.PNG", alt: "FarmSmith Story - 4: Batch Testing & Purity" },
+  { src: "/images/Our story 5.PNG", alt: "FarmSmith Story - 5: Wholesome Harvest" },
+];
 
 const JOURNEY_STEPS = [
   {
@@ -40,6 +48,9 @@ export default function AboutUsClient() {
   const [isJourneyVisible, setIsJourneyVisible] = useState(false);
   const [isCtaVisible, setIsCtaVisible] = useState(false);
 
+  // Slideshow state for Our Story 1 to 5 (Automatic continuous motion)
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   const storyRef = useRef<HTMLElement>(null);
   const bandRef = useRef<HTMLElement>(null);
   const journeyRef = useRef<HTMLElement>(null);
@@ -51,14 +62,29 @@ export default function AboutUsClient() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Automatically cycle through the 5 story slides continuously every 3.5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % STORY_SLIDES.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + STORY_SLIDES.length) % STORY_SLIDES.length);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % STORY_SLIDES.length);
+  };
+
   useEffect(() => {
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        if (entry.target === storyRef.current) setIsStoryVisible(true);
-        if (entry.target === bandRef.current) setIsBandVisible(true);
-        if (entry.target === journeyRef.current) setIsJourneyVisible(true);
-        if (entry.target === ctaRef.current) setIsCtaVisible(true);
+        if (entry.target === storyRef.current) setIsStoryVisible(entry.isIntersecting);
+        if (entry.target === bandRef.current) setIsBandVisible(entry.isIntersecting);
+        if (entry.target === journeyRef.current) setIsJourneyVisible(entry.isIntersecting);
+        if (entry.target === ctaRef.current) setIsCtaVisible(entry.isIntersecting);
       });
     };
 
@@ -77,17 +103,6 @@ export default function AboutUsClient() {
 
   return (
     <div style={{ background: "var(--color-background)", minHeight: "85vh", overflow: "hidden" }}>
-      <style>{`
-        @keyframes logoHaloPulse {
-          0%, 100% {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 0 rgba(217, 164, 65, 0.4);
-          }
-          50% {
-            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 24px 6px rgba(217, 164, 65, 0.3);
-          }
-        }
-      `}</style>
-
       {/* Hero Banner */}
       <section
         style={{
@@ -119,7 +134,7 @@ export default function AboutUsClient() {
             OUR STORY AND PURPOSE
           </span>
 
-          {/* Big Brand Logo with TM Trademark Badge */}
+          {/* Big Brand Logo (Clean transparent logo without golden outline) */}
           <div
             style={{
               display: "flex",
@@ -130,30 +145,25 @@ export default function AboutUsClient() {
               transition: "all 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s",
             }}
           >
-            <div style={{ position: "relative", width: "120px", height: "120px" }}>
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  background: "#FFFFFF",
-                  overflow: "hidden",
-                  border: "3px solid #D9A441",
-                  animation: isHeroMounted ? "logoHaloPulse 4s ease-in-out infinite" : "none",
-                  transition: "box-shadow 1s ease",
-                }}
-              >
-                <Image
-                  src="/images/farmsmith_logo_white_tm.png"
-                  alt="FarmSmith Logo"
-                  fill
-                  sizes="120px"
-                  unoptimized
-                  style={{ objectFit: "contain" }}
-                  priority
-                />
-              </div>
+            <div
+              style={{
+                position: "relative",
+                width: "clamp(120px, 16vw, 150px)",
+                height: "clamp(120px, 16vw, 150px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                src="/images/farmsmith_logo_white_tm.png"
+                alt="FarmSmith Logo"
+                width={150}
+                height={150}
+                unoptimized
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                priority
+              />
             </div>
           </div>
 
@@ -194,7 +204,7 @@ export default function AboutUsClient() {
             style={{
               opacity: isStoryVisible ? 1 : 0,
               transform: isStoryVisible ? "translateX(0)" : "translateX(-75px)",
-              transition: "all 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
+              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
             }}
           >
             <h2
@@ -282,32 +292,204 @@ export default function AboutUsClient() {
             </div>
           </div>
 
-          {/* Right Image - Slides in from Right */}
+          {/* Right Slideshow (Our Story 1 to 5) - Slides in from Right */}
           <div
             style={{
               position: "relative",
               borderRadius: "var(--radius-xl)",
               overflow: "hidden",
               aspectRatio: "4/3",
-              maxWidth: "500px",
+              maxWidth: "520px",
               width: "100%",
               margin: "0 auto",
+              border: "1.5px solid rgba(217, 164, 65, 0.35)",
               boxShadow: isStoryVisible
                 ? "0 20px 48px rgba(31, 58, 46, 0.18)"
                 : "0 6px 16px rgba(31, 58, 46, 0.04)",
               opacity: isStoryVisible ? 1 : 0,
               transform: isStoryVisible ? "translateX(0) scale(1)" : "translateX(75px) scale(0.92)",
               transition:
-                "transform 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s, opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.25s, box-shadow 1.6s ease",
+                "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, box-shadow 2.75s ease",
             }}
           >
-            <Image
-              src="/images/origin_story.png"
-              alt="FarmSmith heritage turmeric farming"
-              fill
-              sizes="(max-width: 768px) 100vw, 500px"
-              style={{ objectFit: "cover" }}
+            {/* Sliding Track for Our Story 1 to 5 */}
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                height: "100%",
+                transform: `translateX(-${currentSlide * 100}%)`,
+                transition: "transform 0.75s cubic-bezier(0.25, 1, 0.5, 1)",
+              }}
+            >
+              {STORY_SLIDES.map((slide) => {
+                return (
+                  <div
+                    key={slide.src}
+                    style={{
+                      flex: "0 0 100%",
+                      width: "100%",
+                      height: "100%",
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={slide.src}
+                      alt={slide.alt}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Subtle Gradient Shadow at bottom for dot contrast */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: "75px",
+                background: "linear-gradient(to top, rgba(23, 45, 35, 0.8) 0%, transparent 100%)",
+                zIndex: 5,
+                pointerEvents: "none",
+              }}
             />
+
+            {/* Slide Index Counter Badge (Top Right) */}
+            <div
+              style={{
+                position: "absolute",
+                top: "12px",
+                right: "12px",
+                zIndex: 6,
+                background: "rgba(23, 45, 35, 0.8)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(217, 164, 65, 0.4)",
+                color: "#FBFAF6",
+                borderRadius: "100px",
+                padding: "0.25rem 0.65rem",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+                userSelect: "none",
+              }}
+            >
+              <span style={{ color: "#D9A441" }}>{currentSlide + 1}</span> / {STORY_SLIDES.length}
+            </div>
+
+            {/* Previous Slide Button */}
+            <button
+              onClick={prevSlide}
+              aria-label="Previous slide"
+              style={{
+                position: "absolute",
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                zIndex: 6,
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                background: "rgba(23, 45, 35, 0.7)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(217, 164, 65, 0.4)",
+                color: "#FBFAF6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(217, 164, 65, 0.35)";
+                e.currentTarget.style.borderColor = "#D9A441";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(23, 45, 35, 0.7)";
+                e.currentTarget.style.borderColor = "rgba(217, 164, 65, 0.4)";
+              }}
+            >
+              <ChevronLeft size={20} aria-hidden="true" />
+            </button>
+
+            {/* Next Slide Button */}
+            <button
+              onClick={nextSlide}
+              aria-label="Next slide"
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                zIndex: 6,
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                background: "rgba(23, 45, 35, 0.7)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(217, 164, 65, 0.4)",
+                color: "#FBFAF6",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(217, 164, 65, 0.35)";
+                e.currentTarget.style.borderColor = "#D9A441";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(23, 45, 35, 0.7)";
+                e.currentTarget.style.borderColor = "rgba(217, 164, 65, 0.4)";
+              }}
+            >
+              <ChevronRight size={20} aria-hidden="true" />
+            </button>
+
+            {/* Bottom Dots Indicator */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: "12px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              {STORY_SLIDES.map((_, index) => {
+                const isActive = index === currentSlide;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                    style={{
+                      width: isActive ? "22px" : "7px",
+                      height: "7px",
+                      borderRadius: "100px",
+                      background: isActive ? "#D9A441" : "rgba(255, 255, 255, 0.5)",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      transition: "all 0.3s ease",
+                      boxShadow: isActive ? "0 0 8px rgba(217, 164, 65, 0.6)" : "none",
+                    }}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -330,7 +512,7 @@ export default function AboutUsClient() {
           marginBlock: "4.75rem",
           opacity: isBandVisible ? 1 : 0,
           transform: isBandVisible ? "scale(1)" : "scale(0.96)",
-          transition: "all 1.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         {/* Subtle Ambient Dots Pattern */}
@@ -510,7 +692,7 @@ export default function AboutUsClient() {
               margin: "0 auto 4rem",
               opacity: isJourneyVisible ? 1 : 0,
               transform: isJourneyVisible ? "translateY(0)" : "translateY(30px)",
-              transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
+              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1)",
             }}
           >
             <p
@@ -576,7 +758,7 @@ export default function AboutUsClient() {
                   flexDirection: "column",
                   opacity: isJourneyVisible ? 1 : 0,
                   transform: isJourneyVisible ? "translateY(0) scale(1)" : "translateY(35px) scale(0.94)",
-                  transition: `transform 1.3s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.12}s, opacity 1.2s ease ${index * 0.12}s, box-shadow 1.3s ease`,
+                  transition: `transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.1}s, opacity 2.75s ease ${index * 0.1}s, box-shadow 2.75s ease`,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
@@ -646,7 +828,7 @@ export default function AboutUsClient() {
             border: "1.5px solid rgba(217, 164, 65, 0.35)",
             opacity: isCtaVisible ? 1 : 0,
             transform: isCtaVisible ? "scale(1) translateY(0)" : "scale(0.94) translateY(30px)",
-            transition: "all 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
+            transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           <h2

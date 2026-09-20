@@ -17,9 +17,7 @@ export default function NewsletterSection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsAssembled(true);
-        }
+        setIsAssembled(entry.isIntersecting);
       },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
     );
@@ -109,7 +107,7 @@ export default function NewsletterSection() {
               ? "inset(0% 0% round 24px)"
               : "inset(20% 15% round 32px)",
             transition:
-              "transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), clip-path 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.3s ease, box-shadow 1.6s ease",
+              "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1), clip-path 2.75s cubic-bezier(0.16, 1, 0.3, 1), opacity 2.75s ease, box-shadow 2.75s ease",
           }}
         >
           {/* Animated Heartbeat Icon */}

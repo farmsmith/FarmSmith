@@ -21,13 +21,57 @@ export default function ProductGallery({
 
   // Build gallery: use DB images if available (>1), or supplement with product-specific extra views for full multi-image gallery
   const displayImages: ProductImage[] = useMemo(() => {
-    if (images.length > 1) return images;
+    const isTurmeric =
+      productName.toLowerCase().includes("turmeric") ||
+      (images[0]?.image_url && images[0].image_url.includes("turmeric")) ||
+      (fallbackUrl && fallbackUrl.includes("turmeric"));
 
-    const primaryUrl = images[0]?.image_url ?? fallbackUrl ?? "/images/product_turmeric.png";
+    if (isTurmeric) {
+      return [
+        {
+          id: "prod-1",
+          product_id: "",
+          image_url: "/images/Product 1.PNG",
+          alt_text: `${productName} - View 1`,
+          sort_order: 0,
+          is_primary: true,
+          created_at: "",
+        },
+        {
+          id: "prod-2",
+          product_id: "",
+          image_url: "/images/Product 2.PNG",
+          alt_text: `${productName} - View 2`,
+          sort_order: 1,
+          is_primary: false,
+          created_at: "",
+        },
+        {
+          id: "prod-3",
+          product_id: "",
+          image_url: "/images/Product 3.PNG",
+          alt_text: `${productName} - View 3`,
+          sort_order: 2,
+          is_primary: false,
+          created_at: "",
+        },
+        {
+          id: "prod-4",
+          product_id: "",
+          image_url: "/images/Product 4.PNG",
+          alt_text: `${productName} - View 4`,
+          sort_order: 3,
+          is_primary: false,
+          created_at: "",
+        },
+      ];
+    }
 
-    let farmUrl = "/images/origin_story.png";
-    let useUrl = "/images/recipe_golden_milk.png";
-    let testUrl = "/images/awareness_spices.png";
+    const primaryUrl = images[0]?.image_url ?? fallbackUrl ?? "/images/Product 1.PNG";
+
+    let farmUrl = "/images/Product 2.PNG";
+    let useUrl = "/images/Product 3.PNG";
+    let testUrl = "/images/Product 4.PNG";
 
     if (primaryUrl.includes("mustard_oil")) {
       farmUrl = "/images/product_mustard_oil_farm.png";
@@ -61,7 +105,7 @@ export default function ProductGallery({
         id: "farm-origin",
         product_id: "",
         image_url: farmUrl,
-        alt_text: `${productName} - GI Certified Farm Sourcing`,
+        alt_text: `${productName} - Farm Sourcing`,
         sort_order: 1,
         is_primary: false,
         created_at: "",
@@ -70,7 +114,7 @@ export default function ProductGallery({
         id: "usage-recipe",
         product_id: "",
         image_url: useUrl,
-        alt_text: `${productName} - Culinary Preparation`,
+        alt_text: `${productName} - Preparation & Use`,
         sort_order: 2,
         is_primary: false,
         created_at: "",

@@ -87,27 +87,26 @@ html.farmsmith-intro-hidden #farmsmith-intro-overlay {
   pointer-events: none !important;
 }
 
-/* ─── Hero Section Cinematic Fade-in During Flight ─── */
+/* ─── Hero Section Cinematic Fade-in During Flight (2.5s) ─── */
 html:not(.farmsmith-intro-hidden):not(.farmsmith-hero-fadein) #home-hero-section {
   opacity: 0;
-  filter: blur(10px);
-  transform: translateY(40px) scale(0.97);
+  filter: blur(8px);
+  transform: translateY(30px) scale(0.98);
 }
 
 html.farmsmith-hero-fadein #home-hero-section {
   opacity: 1;
   filter: blur(0px);
   transform: translateY(0) scale(1);
-  transition: opacity 4.5s cubic-bezier(0.2, 0.7, 0.2, 1),
-              transform 4.5s cubic-bezier(0.2, 0.7, 0.2, 1),
-              filter 4.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: opacity 2.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 2.5s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 2.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html.farmsmith-intro-hidden #home-hero-section {
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
-  transition: none !important;
+  opacity: 1;
+  filter: none;
+  transform: none;
 }
 
 body {

@@ -33,7 +33,7 @@ const FALLBACK_LAUNCH_PRODUCTS: Product[] = [
     unit: "100g",
     weight_grams: 100,
     gst_rate: 5,
-    image_url: "/images/product_turmeric.png",
+    image_url: "/images/Product 1.PNG",
     stock_quantity: 100,
     is_active: true,
     created_at: new Date().toISOString(),

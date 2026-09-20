@@ -190,9 +190,7 @@ export default function FaqSection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsAssembled(true);
-        }
+        setIsAssembled(entry.isIntersecting);
       },
       { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
     );
@@ -219,7 +217,7 @@ export default function FaqSection() {
             marginBottom: "3.5rem",
             opacity: isAssembled ? 1 : 0,
             transform: isAssembled ? "translateY(0)" : "translateY(30px)",
-            transition: "all 1.4s cubic-bezier(0.22, 1, 0.36, 1)",
+            transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           <p
@@ -270,7 +268,7 @@ export default function FaqSection() {
                     : isEven
                     ? "translateX(-65px)"
                     : "translateX(65px)",
-                  transition: `transform 1.3s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(idx * 0.05, 0.5)}s, opacity 1.1s ease ${Math.min(idx * 0.05, 0.5)}s, border-color 0.25s ease, box-shadow 0.25s ease`,
+                  transition: `transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) ${Math.min(idx * 0.06, 0.45)}s, opacity 2.75s ease ${Math.min(idx * 0.06, 0.45)}s, border-color 0.25s ease, box-shadow 0.25s ease`,
                 }}
               >
                 <button

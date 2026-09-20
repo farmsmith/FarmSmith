@@ -44,7 +44,7 @@ const targetProducts = [
     unit: '100g',
     weight_grams: 100,
     gst_rate: 5.0,
-    image_url: '/images/product_turmeric.png',
+    image_url: '/images/Product 1.PNG',
     stock_quantity: 100,
     is_active: true
   },
@@ -145,10 +145,10 @@ async function syncCatalog() {
     console.log(`✓ Preserved/Saved: ${item.name} (₹${item.price} / ${item.unit})`);
 
     // Gallery images per product
-    const primaryUrl = item.image_url;
-    let farmUrl = "/images/origin_story.png";
-    let useUrl = "/images/recipe_golden_milk.png";
-    let testUrl = "/images/awareness_spices.png";
+    let primaryUrl = item.image_url;
+    let farmUrl = "/images/Product 2.PNG";
+    let useUrl = "/images/Product 3.PNG";
+    let testUrl = "/images/Product 4.PNG";
 
     if (primaryUrl.includes("mustard_oil")) {
       farmUrl = "/images/product_mustard_oil_farm.png";
