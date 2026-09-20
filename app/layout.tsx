@@ -31,10 +31,10 @@ export const metadata: Metadata = {
     siteName: "FarmSmith Foods",
     images: [
       {
-        url: "/images/farmsmith_org_logo.jpeg",
-        width: 512,
-        height: 512,
-        alt: "FarmSmith Foods Logo",
+        url: "/images/hero_turmeric.png",
+        width: 1200,
+        height: 630,
+        alt: "FarmSmith Foods Organic GI-Tagged Turmeric",
       },
     ],
     locale: "en_IN",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     title: "FarmSmith Foods — Organic Food Crafted with a Mother's Care",
     description:
       "100% GI-tagged, batch lab-tested Kandhamal turmeric and organic foods made with complete transparency.",
-    images: ["/images/farmsmith_org_logo.jpeg"],
+    images: ["/images/hero_turmeric.png"],
   },
 };
 
