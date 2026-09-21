@@ -287,7 +287,6 @@ export default function AccountOrderDetailPage() {
                 #{order.order_number}
               </code>
             </h1>
-            <CopyButton text={order.order_number} label="Copy Order ID" />
           </div>
 
           <div
@@ -371,7 +370,6 @@ export default function AccountOrderDetailPage() {
                 >
                   {order.awb_code}
                 </code>
-                <CopyButton text={order.awb_code} label="Copy AWB" />
               </div>
             )}
           </div>
@@ -608,7 +606,6 @@ export default function AccountOrderDetailPage() {
                   >
                     {order.awb_code}
                   </code>
-                  <CopyButton text={order.awb_code || ""} label="Copy AWB" />
                 </div>
               </div>
 

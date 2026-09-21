@@ -572,6 +572,27 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          <div style={{ height: "1px", background: "var(--color-border)", margin: "0.5rem 0" }} />
+
+          <Link
+            href={userName ? "/account/orders" : "/track"}
+            onClick={closeAllMenus}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.625rem 0.875rem",
+              fontSize: "0.9375rem",
+              fontWeight: 500,
+              color: "var(--color-primary)",
+              borderRadius: "var(--radius-sm)",
+              textDecoration: "none",
+            }}
+          >
+            <Package size={17} color="var(--color-accent)" />
+            <span>{userName ? "My Orders" : "Track Order"}</span>
+          </Link>
         </div>
       </header>
 

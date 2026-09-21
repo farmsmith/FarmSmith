@@ -28,16 +28,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400, headers });
   }
 
+  const rawIdentifier = (parsed.data.identifier || parsed.data.phoneOrEmail || parsed.data.trackingToken || "").trim();
+
   const supabase = createAdminSupabaseClient();
 
   const { data: rawOrder, error } = await supabase
     .from("orders")
-    .select("id, order_number, tracking_token, status, created_at, updated_at, total_amount, subtotal_amount, shipping_amount, tax_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id, customer_name, customer_phone, shipping_address")
+    .select("id, order_number, tracking_token, status, customer_email, customer_name, customer_phone, shipping_address, subtotal_amount, shipping_amount, tax_amount, total_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id, created_at, updated_at")
     .eq("order_number", parsed.data.orderNumber)
-    .eq("tracking_token", parsed.data.trackingToken)
     .maybeSingle();
 
   if (error || !rawOrder) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404, headers });
+  }
+
+  // Verify identifier against tracking_token, customer_email, or customer_phone
+  const cleanInput = rawIdentifier.toLowerCase();
+  const tokenMatch = Boolean(rawOrder.tracking_token && rawOrder.tracking_token === rawIdentifier);
+  const emailMatch = Boolean(rawOrder.customer_email && rawOrder.customer_email.trim().toLowerCase() === cleanInput);
+
+  // Phone match: strip all non-digits, compare last 10 digits
+  const inputDigits = rawIdentifier.replace(/\D/g, "");
+  const orderPhoneDigits = (rawOrder.customer_phone || "").replace(/\D/g, "");
+  const phoneMatch = Boolean(
+    inputDigits.length >= 10 &&
+    orderPhoneDigits.length >= 10 &&
+    (orderPhoneDigits.endsWith(inputDigits.slice(-10)) || inputDigits.endsWith(orderPhoneDigits.slice(-10)))
+  );
+
+  if (!tokenMatch && !emailMatch && !phoneMatch) {
     return NextResponse.json({ error: "Order not found" }, { status: 404, headers });
   }
 

@@ -47,7 +47,12 @@ export default function OrderConfirmationClient() {
   const { isOnline } = useNetworkStatus();
   const params = useParams<{ orderNumber: string }>();
   const searchParams = useSearchParams();
-  const trackingToken = searchParams.get("token") ?? "";
+  const identifier =
+    searchParams.get("identifier") ||
+    searchParams.get("token") ||
+    searchParams.get("phone") ||
+    searchParams.get("email") ||
+    "";
   const { orderNumber } = params;
 
   const [order, setOrder] = useState<PublicOrderStatus | null>(null);
@@ -57,8 +62,8 @@ export default function OrderConfirmationClient() {
 
   const fetchOrder = useCallback(
     async (isRefresh = false) => {
-      if (!trackingToken) {
-        setError("Missing tracking token. Please check your confirmation email.");
+      if (!identifier) {
+        setError("Missing order verification details. Please track using your mobile number, email, or tracking link.");
         setLoading(false);
         return;
       }
@@ -72,12 +77,12 @@ export default function OrderConfirmationClient() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderNumber,
-            trackingToken,
+            identifier,
           }),
         });
 
         if (res.status === 404) {
-          setError("Order not found. Please verify your order number and tracking key.");
+          setError("Order not found. Please verify your order number and mobile number / email.");
           return;
         }
 
@@ -95,7 +100,7 @@ export default function OrderConfirmationClient() {
         setRefreshing(false);
       }
     },
-    [orderNumber, trackingToken]
+    [orderNumber, identifier]
   );
 
   useEffect(() => {
@@ -307,7 +312,6 @@ export default function OrderConfirmationClient() {
                     #{order.order_number}
                   </code>
                 </h1>
-                <CopyButton text={order.order_number} label="Copy Order ID" />
               </div>
 
               <div
@@ -391,7 +395,6 @@ export default function OrderConfirmationClient() {
                     >
                       {order.awb_code}
                     </code>
-                    <CopyButton text={order.awb_code} label="Copy AWB" />
                   </div>
                 )}
               </div>
@@ -628,7 +631,6 @@ export default function OrderConfirmationClient() {
                       >
                         {order.awb_code}
                       </code>
-                      <CopyButton text={order.awb_code || ""} label="Copy AWB" />
                     </div>
                   </div>
 

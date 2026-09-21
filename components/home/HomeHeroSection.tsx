@@ -3,12 +3,29 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Package } from "lucide-react";
 import TrustTicker from "@/components/home/TrustTicker";
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export default function HomeHeroSection() {
   const [isHeroVisible, setIsHeroVisible] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const supabase = createBrowserSupabaseClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(Boolean(session?.user));
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(Boolean(session?.user));
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     const el = heroRef.current;
@@ -165,7 +182,7 @@ export default function HomeHeroSection() {
             </Link>
 
             <Link
-              href="/track"
+              href={isLoggedIn ? "/account/orders" : "/track"}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -181,7 +198,13 @@ export default function HomeHeroSection() {
                 transition: "background 0.15s ease",
               }}
             >
-              Track Your Order
+              {isLoggedIn ? (
+                <>
+                  <Package size={17} /> My Orders
+                </>
+              ) : (
+                "Track Your Order"
+              )}
             </Link>
           </div>
         </div>
