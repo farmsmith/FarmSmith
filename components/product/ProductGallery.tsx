@@ -131,12 +131,12 @@ export default function ProductGallery({
     ];
   }, [images, fallbackUrl, productName]);
 
-  // Auto-slide every 3.5s (pauses on hover)
+  // Auto-slide every 5.5s (pauses on hover)
   useEffect(() => {
     if (isHovered || displayImages.length <= 1) return;
     const timer = setInterval(() => {
       setActiveIdx((prev) => (prev + 1) % displayImages.length);
-    }, 3500);
+    }, 5500);
     return () => clearInterval(timer);
   }, [isHovered, displayImages.length]);
 
@@ -163,15 +163,34 @@ export default function ProductGallery({
           border: "1px solid var(--color-border)",
         }}
       >
-        <Image
-          key={active.image_url}
-          src={active.image_url}
-          alt={active.alt_text ?? productName}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          priority
-          style={{ objectFit: "cover", transition: "opacity 0.2s ease" }}
-        />
+        {displayImages.map((img, idx) => {
+          const isActive = idx === activeIdx;
+          return (
+            <div
+              key={img.id || img.image_url}
+              style={{
+                position: "absolute",
+                inset: 0,
+                opacity: isActive ? 1 : 0,
+                pointerEvents: isActive ? "auto" : "none",
+                transition: "opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1), transform 2.8s cubic-bezier(0.25, 1, 0.5, 1)",
+                transform: isActive
+                  ? (isHovered ? "scale(1.05)" : "scale(1)")
+                  : "scale(1.03)",
+                zIndex: isActive ? 2 : 1,
+              }}
+            >
+              <Image
+                src={img.image_url}
+                alt={img.alt_text ?? `${productName} view ${idx + 1}`}
+                fill
+                sizes="(max-width: 768px) 100vw, 500px"
+                priority={idx === 0}
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+          );
+        })}
 
         {/* Counter Badge */}
         {displayImages.length > 1 && (

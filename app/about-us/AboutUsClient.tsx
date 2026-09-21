@@ -62,11 +62,11 @@ export default function AboutUsClient() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Automatically cycle through the 5 story slides continuously every 3.5 seconds
+  // Automatically cycle through the 5 story slides continuously every 5.5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % STORY_SLIDES.length);
-    }, 3500);
+    }, 5500);
     return () => clearInterval(interval);
   }, []);
 
@@ -312,25 +312,27 @@ export default function AboutUsClient() {
                 "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, box-shadow 2.75s ease",
             }}
           >
-            {/* Sliding Track for Our Story 1 to 5 */}
+            {/* Stacked Images for Our Story 1 to 5 with 2.5s Fade-In Crossfade Motion */}
             <div
               style={{
-                display: "flex",
+                position: "relative",
                 width: "100%",
                 height: "100%",
-                transform: `translateX(-${currentSlide * 100}%)`,
-                transition: "transform 0.75s cubic-bezier(0.25, 1, 0.5, 1)",
               }}
             >
-              {STORY_SLIDES.map((slide) => {
+              {STORY_SLIDES.map((slide, index) => {
+                const isActive = index === currentSlide;
                 return (
                   <div
                     key={slide.src}
                     style={{
-                      flex: "0 0 100%",
-                      width: "100%",
-                      height: "100%",
-                      position: "relative",
+                      position: "absolute",
+                      inset: 0,
+                      opacity: isActive ? 1 : 0,
+                      pointerEvents: isActive ? "auto" : "none",
+                      transition: "opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1), transform 2.8s cubic-bezier(0.25, 1, 0.5, 1)",
+                      transform: isActive ? "scale(1)" : "scale(1.03)",
+                      zIndex: isActive ? 2 : 1,
                     }}
                   >
                     <img

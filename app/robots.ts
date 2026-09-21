@@ -1,22 +1,11 @@
 import type { MetadataRoute } from "next";
 
-export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const baseUrl = "https://www.farmsmithfoods.com";
 
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: [
-        "/",
-        "/shop",
-        "/shop/*",
-        "/why-us",
-        "/about-us",
-        "/contact",
-        "/track",
-        "/privacy-policy",
-        "/terms",
-      ],
       disallow: [
         "/account",
         "/account/*",

@@ -184,22 +184,22 @@ export default function IntroHeroAnimation({
         overflow: "hidden",
       }}
     >
-      {/* ───── 1. Dark Forest Green Backdrop (Fades out gently over 4.4s during logo & text flight) ───── */}
+      {/* ───── 1. Crisp White / Light Backdrop (Fades out gently during logo & text flight) ───── */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "#172D23",
+          backgroundColor: "#FFFFFF",
           backgroundImage:
-            "linear-gradient(135deg, rgba(23, 45, 35, 0.98) 0%, rgba(31, 58, 46, 0.96) 55%, rgba(16, 32, 24, 0.98) 100%)",
+            "linear-gradient(135deg, #FFFFFF 0%, #FAF7F2 100%)",
           transition: "opacity 2.5s cubic-bezier(0.35, 0, 0.25, 1)",
           opacity: isFlying ? 0 : 1,
           zIndex: 1,
         }}
       />
 
-      {/* Soft Ambient Gold/Green Glow */}
+      {/* Soft Ambient Gold/Warm Glow */}
       <div
         aria-hidden="true"
         style={{
@@ -210,7 +210,7 @@ export default function IntroHeroAnimation({
           width: "550px",
           height: "550px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(217, 164, 65, 0.2) 0%, rgba(31, 58, 46, 0.15) 50%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(217, 164, 65, 0.12) 0%, rgba(31, 58, 46, 0.05) 50%, transparent 70%)",
           filter: "blur(50px)",
           pointerEvents: "none",
           transition: "opacity 1.8s ease",
@@ -240,8 +240,8 @@ export default function IntroHeroAnimation({
           ref={bigLogoRef}
           style={{
             position: "relative",
-            width: "clamp(160px, 22vw, 210px)",
-            height: "clamp(160px, 22vw, 210px)",
+            width: "clamp(190px, 28vw, 255px)",
+            height: "clamp(190px, 28vw, 255px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -258,10 +258,10 @@ export default function IntroHeroAnimation({
           }}
         >
           <Image
-            src="/images/farmsmith_logo_white_tm.png"
+            src="/images/farmsmith_logo_v2.png"
             alt="FarmSmith Foods"
-            width={210}
-            height={210}
+            width={255}
+            height={255}
             priority
             unoptimized
             style={{
@@ -275,7 +275,7 @@ export default function IntroHeroAnimation({
         {/* ───── MIDDLE: Brand Title & Subtitle (FARMSMITH TEXT FLIES TO NAVBAR TEXT) ───── */}
         <div
           style={{
-            marginTop: "1rem",
+            marginTop: "1.1rem",
             position: "relative",
             zIndex: 100,
           }}
@@ -286,9 +286,9 @@ export default function IntroHeroAnimation({
             translate="no"
             style={{
               fontFamily: "var(--font-serif-brand)",
-              fontSize: "clamp(2.5rem, 5vw, 3.8rem)",
+              fontSize: "clamp(2.6rem, 5.2vw, 4rem)",
               fontWeight: 700,
-              color: isFlying ? "var(--color-primary, #1F3A2E)" : "#FBFAF6",
+              color: "var(--color-primary, #1F3A2E)",
               margin: 0,
               letterSpacing: "0.02em",
               lineHeight: 1.15,
@@ -308,12 +308,12 @@ export default function IntroHeroAnimation({
           {/* Subtitle (Fades Out Gently In Place) */}
           <p
             style={{
-              fontSize: "0.85rem",
-              color: "#D9A441",
+              fontSize: "0.875rem",
+              color: "#B37D28",
               fontWeight: 600,
               letterSpacing: "0.14em",
               textTransform: "uppercase",
-              margin: "0.35rem 0 0",
+              margin: "0.4rem 0 0",
               transition: "opacity 1.6s ease, transform 1.6s ease",
               opacity: isFlying ? 0 : 1,
               transform: isFlying ? "translateY(12px)" : "translateY(0)",
@@ -332,9 +332,9 @@ export default function IntroHeroAnimation({
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "center",
-            gap: "0.85rem clamp(0.75rem, 1.8vw, 1.25rem)",
+            gap: "0.85rem clamp(1.25rem, 3vw, 2.5rem)",
             width: "100%",
-            maxWidth: "820px",
+            maxWidth: "850px",
             position: "relative",
             zIndex: 10,
             pointerEvents: isFlying ? "none" : "auto",
@@ -349,48 +349,13 @@ export default function IntroHeroAnimation({
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: "0.55rem",
-                  padding: "0.6rem 1.2rem",
+                  padding: "0.4rem 0.6rem",
                   position: "relative",
                   cursor: "pointer",
                   zIndex: 100,
                 }}
-                className="intro-nav-pill"
+                className="intro-nav-item"
               >
-                {/* Pill Glass Background & Border (Gently dissolves away in place) */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "100px",
-                    background: "rgba(255, 255, 255, 0.06)",
-                    border: "1px solid rgba(217, 164, 65, 0.35)",
-                    backdropFilter: "blur(8px)",
-                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
-                    transition: "opacity 1.8s ease, background 0.2s ease, border-color 0.2s ease",
-                    opacity: isFlying ? 0 : 1,
-                    pointerEvents: "none",
-                  }}
-                  className="intro-nav-pill-bg"
-                />
-
-                {/* Number index indicator (Gently dissolves away in place) */}
-                <span
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    color: "#D9A441",
-                    transition: "opacity 1.4s ease",
-                    opacity: isFlying ? 0 : 0.9,
-                    pointerEvents: "none",
-                  }}
-                >
-                  0{index + 1}
-                </span>
-
                 {/* Navigation Text Label (FLIES PRECISELY TO THE EXACT NAVBAR LINK) */}
                 <span
                   ref={(el) => {
@@ -400,21 +365,21 @@ export default function IntroHeroAnimation({
                     position: "relative",
                     zIndex: 2,
                     fontFamily: "var(--font-body, system-ui)",
-                    fontSize: "0.9375rem",
+                    fontSize: "1rem",
                     fontWeight: 500,
                     color: isFlying
                       ? index === 0
                         ? "var(--color-primary, #1F3A2E)"
                         : "var(--color-muted, #736E65)"
-                      : "#FBFAF6",
-                    letterSpacing: "normal",
+                      : "var(--color-primary, #1F3A2E)",
+                    letterSpacing: "0.01em",
                     whiteSpace: "nowrap",
                     display: "inline-block",
                     transform: navTransforms[index] || "translate3d(0, 0, 0) scale(1)",
                     transformOrigin: "center center",
                     transition: isFlying
                       ? "transform 2.5s cubic-bezier(0.35, 0, 0.2, 1), color 2.5s cubic-bezier(0.35, 0, 0.2, 1)"
-                      : "none",
+                      : "color 0.2s ease",
                   }}
                 >
                   {item.label}
@@ -433,9 +398,9 @@ export default function IntroHeroAnimation({
             position: "absolute",
             bottom: "2rem",
             right: "2rem",
-            background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(217, 164, 65, 0.4)",
-            color: "#FBFAF6",
+            background: "rgba(31, 58, 46, 0.05)",
+            border: "1px solid rgba(31, 58, 46, 0.15)",
+            color: "#1F3A2E",
             padding: "0.5rem 1.15rem",
             borderRadius: "100px",
             fontSize: "0.78rem",
@@ -449,25 +414,25 @@ export default function IntroHeroAnimation({
             zIndex: 10,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(217, 164, 65, 0.2)";
+            e.currentTarget.style.background = "rgba(217, 164, 65, 0.15)";
             e.currentTarget.style.borderColor = "#D9A441";
+            e.currentTarget.style.color = "#1F3A2E";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-            e.currentTarget.style.borderColor = "rgba(217, 164, 65, 0.4)";
+            e.currentTarget.style.background = "rgba(31, 58, 46, 0.05)";
+            e.currentTarget.style.borderColor = "rgba(31, 58, 46, 0.15)";
+            e.currentTarget.style.color = "#1F3A2E";
           }}
         >
           <span>Skip</span>
-          <span style={{ color: "#D9A441" }}>&rarr;</span>
+          <span style={{ color: "#B37D28" }}>&rarr;</span>
         </button>
       )}
 
       {/* Inline styles */}
       <style jsx global>{`
-        .intro-nav-pill:hover {
-          background: rgba(217, 164, 65, 0.2) !important;
-          border-color: #D9A441 !important;
-          transform: translateY(-2px) !important;
+        .intro-nav-item:hover span {
+          color: #B37D28 !important;
         }
 
         @media (max-width: 768px) {

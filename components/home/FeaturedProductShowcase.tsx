@@ -73,7 +73,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
     if (isHovered || slides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % slides.length);
-    }, 4000);
+    }, 5500);
     return () => clearInterval(timer);
   }, [isHovered, slides.length]);
 
@@ -175,26 +175,41 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                 />
               </button>
 
-              {/* Main Carousel Image Link */}
+              {/* Main Carousel Image Link with Slow Fade-in Crossfade */}
               <Link
                 href={`/shop/${product.slug}`}
                 aria-label={`View details of ${product.name}`}
                 style={{ display: "block", width: "100%", height: "100%", position: "relative" }}
               >
-                {currentImageUrl ? (
-                  <Image
-                    key={currentImageUrl}
-                    src={currentImageUrl}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 480px"
-                    style={{
-                      objectFit: "cover",
-                      transition: "transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                      transform: isHovered ? "scale(1.05)" : "scale(1)",
-                    }}
-                    priority
-                  />
+                {slides.length > 0 ? (
+                  slides.map((imgUrl, idx) => {
+                    const isActive = idx === currentIdx;
+                    return (
+                      <div
+                        key={imgUrl}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          opacity: isActive ? 1 : 0,
+                          pointerEvents: isActive ? "auto" : "none",
+                          transition: "opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1), transform 2.8s cubic-bezier(0.25, 1, 0.5, 1)",
+                          transform: isActive
+                            ? (isHovered ? "scale(1.05)" : "scale(1)")
+                            : "scale(1.03)",
+                          zIndex: isActive ? 2 : 1,
+                        }}
+                      >
+                        <Image
+                          src={imgUrl}
+                          alt={`${product.name} - View ${idx + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 480px"
+                          style={{ objectFit: "cover" }}
+                          priority={idx === 0}
+                        />
+                      </div>
+                    );
+                  })
                 ) : (
                   <div
                     style={{

@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://farmsmithfoods.com";
+const baseUrl = "https://www.farmsmithfoods.com";
 
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -36,12 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/track`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
       url: `${baseUrl}/privacy-policy`,
       lastModified: new Date(),
       changeFrequency: "monthly",
@@ -58,25 +52,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createAdminSupabaseClient();
 
-    const { data: products } = await supabase
+    const { data: products, error } = await supabase
       .from("products")
       .select("id, slug, updated_at")
       .eq("is_active", true);
 
-    const productRoutes: MetadataRoute.Sitemap = (products ?? []).map(
-      (product) => ({
+    if (error) {
+      console.error(
+        "Failed to fetch products for sitemap:",
+        error.message
+      );
+
+      return staticRoutes;
+    }
+
+    const productRoutes: MetadataRoute.Sitemap = (products ?? [])
+      .filter((product) => product.slug || product.id)
+      .map((product) => ({
         url: `${baseUrl}/shop/${product.slug || product.id}`,
         lastModified: product.updated_at
           ? new Date(product.updated_at)
           : new Date(),
         changeFrequency: "weekly",
         priority: 0.8,
-      }),
-    );
+      }));
 
     return [...staticRoutes, ...productRoutes];
-  } catch (err) {
-    console.error("Failed to generate sitemap product routes:", err);
+  } catch (error) {
+    console.error("Failed to generate sitemap:", error);
+
     return staticRoutes;
   }
 }

@@ -56,11 +56,11 @@ export default function PurityShowcase() {
   const originRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
-  // Auto-slide origin images every 4.0 seconds
+  // Auto-slide origin images every 5.5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setOriginSlideIdx((prev) => (prev + 1) % ORIGIN_SLIDES.length);
-    }, 4000);
+    }, 5500);
     return () => clearInterval(timer);
   }, []);
 
@@ -290,39 +290,43 @@ export default function PurityShowcase() {
               transition: "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s, box-shadow 2.75s ease",
             }}
           >
-            {/* Sliding Track */}
+            {/* Stacked Images with 2.5s Slow Fade-In Crossfade Motion */}
             <div
               style={{
-                display: "flex",
+                position: "relative",
                 width: "100%",
                 height: "100%",
-                transform: `translateX(-${originSlideIdx * 100}%)`,
-                transition: "transform 0.75s cubic-bezier(0.25, 1, 0.5, 1)",
               }}
             >
-              {ORIGIN_SLIDES.map((slide, idx) => (
-                <div
-                  key={slide.src}
-                  style={{
-                    flex: "0 0 100%",
-                    width: "100%",
-                    height: "100%",
-                    position: "relative",
-                  }}
-                >
-                  <img
-                    src={slide.src}
-                    alt={slide.alt}
+              {ORIGIN_SLIDES.map((slide, idx) => {
+                const isActive = idx === originSlideIdx;
+                return (
+                  <div
+                    key={slide.src}
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      objectPosition: idx === 0 ? "top center" : "center",
-                      display: "block",
+                      position: "absolute",
+                      inset: 0,
+                      opacity: isActive ? 1 : 0,
+                      pointerEvents: isActive ? "auto" : "none",
+                      transition: "opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1), transform 2.8s cubic-bezier(0.25, 1, 0.5, 1)",
+                      transform: isActive ? "scale(1)" : "scale(1.03)",
+                      zIndex: isActive ? 2 : 1,
                     }}
-                  />
-                </div>
-              ))}
+                  >
+                    <img
+                      src={slide.src}
+                      alt={slide.alt}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        objectPosition: idx === 0 ? "top center" : "center",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
 
             {/* Counter Badge (Top-right) */}
