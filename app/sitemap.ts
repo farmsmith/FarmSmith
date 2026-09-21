@@ -68,14 +68,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const productRoutes: MetadataRoute.Sitemap = (products ?? [])
       .filter((product) => product.slug || product.id)
-      .map((product) => ({
-        url: `${baseUrl}/shop/${product.slug || product.id}`,
-        lastModified: product.updated_at
-          ? new Date(product.updated_at)
-          : new Date(),
+      .map((product) => {
+        const rawSlug = product.slug || product.id;
+        const finalSlug = rawSlug === "kandhamal-turmeric-powder" ? "turmeric-powder" : rawSlug;
+        return {
+          url: `${baseUrl}/shop/${finalSlug}`,
+          lastModified: product.updated_at
+            ? new Date(product.updated_at)
+            : new Date(),
+          changeFrequency: "weekly",
+          priority: 0.8,
+        };
+      });
+
+    if (productRoutes.length === 0) {
+      productRoutes.push({
+        url: `${baseUrl}/shop/turmeric-powder`,
+        lastModified: new Date(),
         changeFrequency: "weekly",
         priority: 0.8,
-      }));
+      });
+    }
 
     return [...staticRoutes, ...productRoutes];
   } catch (error) {

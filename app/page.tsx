@@ -26,8 +26,8 @@ export default async function HomePage() {
 
   // Prioritize the flagship GI-Tagged Kandhamal Turmeric Powder product
   const featuredProduct =
-    products.find((p) => p.slug === "kandhamal-turmeric-powder" || p.name.toLowerCase().includes("turmeric")) ??
-    products.find((p) => !p.is_upcoming && (p.stock_quantity ?? 0) > 0) ??
+    products.find((p) => p.slug === "turmeric-powder" || p.slug === "kandhamal-turmeric-powder" || p.name.toLowerCase().includes("turmeric")) ??
+    products.find((p) => (p.stock_quantity ?? 0) > 0) ??
     products[0] ??
     null;
 

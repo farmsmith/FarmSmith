@@ -19,7 +19,7 @@ const FALLBACK_LAUNCH_PRODUCTS: Product[] = [
   {
     id: "turmeric-001",
     name: "Farmsmith Turmeric Powder",
-    slug: "kandhamal-turmeric-powder",
+    slug: "turmeric-powder",
     sku: "FS-TURMERIC-001",
     short_description: "Pure GI-tagged Kandhamal turmeric powder with high curcumin content and batch test reports.",
     description: "Sourced directly from Kandhamal organic farming clusters in Odisha.",

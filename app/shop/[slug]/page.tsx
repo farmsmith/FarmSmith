@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { formatPrice } from "@/lib/utils/cn";
 import ProductGallery from "@/components/product/ProductGallery";
 import TrustBadge, { TURMERIC_TRUST_BADGES } from "@/components/product/TrustBadge";
@@ -7,7 +7,6 @@ import ProductFactsGrid from "@/components/product/ProductFactsGrid";
 import ProductReviewsList from "@/components/product/ProductReviewsList";
 import AddToCartButton from "@/components/product/AddToCartButton";
 import QuantitySelector from "@/components/product/QuantitySelector";
-import ProductDetailCompareTrigger from "@/components/product/ProductDetailCompareTrigger";
 import type { Product } from "@/types/product";
 import { getProductBySlug } from "@/lib/data/products";
 
@@ -62,10 +61,6 @@ function buildProductFacts(product: Product) {
   if (product.category) {
     facts.push({ label: "Category", value: product.category, detail: "GI-tagged sourcing region" });
   }
-  const weight = getProductNetWeight(product);
-  if (weight && weight !== "Standard Pack") {
-    facts.push({ label: "Net Quantity", value: weight, detail: "Net contents as packaged" });
-  }
   facts.push({ label: "Testing", value: "Lab Certified", detail: "Third-party batch testing. Zero lead chromate, zero synthetic dyes." });
   facts.push({ label: "Sourcing", value: "GI-Tagged Origin", detail: "Traceable to the GI-registered growing region in India." });
   facts.push({ label: "Processing", value: "No Additives", detail: "No bleaching agents, no flow agents, no artificial colour." });
@@ -74,6 +69,9 @@ function buildProductFacts(product: Product) {
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
+  if (slug === "kandhamal-turmeric-powder") {
+    redirect("/shop/turmeric-powder");
+  }
   const product = await getProductBySlug(slug);
 
   if (!product) notFound();
@@ -210,9 +208,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
             {/* Quantity + Add to cart / Launching Soon button */}
             <QuantitySelector product={product} />
-
-            {/* Why Farmsmith vs. Market Comparison Trigger */}
-            <ProductDetailCompareTrigger product={product} />
 
             {/* Full description */}
             {product.description && (
