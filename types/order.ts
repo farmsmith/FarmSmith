@@ -80,4 +80,7 @@ export interface PublicOrderStatus {
   currency: string;
   awb_code?: string | null;
   courier_name?: string | null;
+  customer_name?: string;
+  customer_phone?: string;
+  shipping_address?: ShippingAddress;
 }

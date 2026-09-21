@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   // Fetch orders strictly using the authenticated user's immutable customer_id
   const { data: rawOrders, error } = await supabase
     .from("orders")
-    .select("id, order_number, tracking_token, status, subtotal_amount, shipping_amount, tax_amount, total_amount, currency, shiprocket_order_id, shiprocket_shipment_id, created_at, updated_at, order_items(id, product_name, quantity, unit_price, subtotal)")
+    .select("id, order_number, tracking_token, status, subtotal_amount, shipping_amount, tax_amount, total_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id, created_at, updated_at, order_items(id, product_name, quantity, unit_price, subtotal)")
     .eq("customer_id", user.id)
     .order("created_at", { ascending: false });
 

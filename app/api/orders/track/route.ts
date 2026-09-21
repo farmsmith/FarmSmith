@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   const { data: rawOrder, error } = await supabase
     .from("orders")
-    .select("id, order_number, tracking_token, status, created_at, updated_at, total_amount, subtotal_amount, shipping_amount, tax_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id")
+    .select("id, order_number, tracking_token, status, created_at, updated_at, total_amount, subtotal_amount, shipping_amount, tax_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id, customer_name, customer_phone, shipping_address")
     .eq("order_number", parsed.data.orderNumber)
     .eq("tracking_token", parsed.data.trackingToken)
     .maybeSingle();
@@ -71,6 +71,9 @@ export async function POST(request: Request) {
     currency: order.currency ?? "INR",
     awb_code: order.awb_code || null,
     courier_name: order.courier_name || null,
+    customer_name: order.customer_name,
+    customer_phone: order.customer_phone,
+    shipping_address: order.shipping_address,
     items,
   };
 

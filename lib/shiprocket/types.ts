@@ -63,11 +63,16 @@ export interface ShiprocketCreateOrderResponse {
 export interface ShiprocketSearchOrderItem {
   id: number;
   channel_order_id: string;
+  last_mile_awb?: string | null;
+  last_mile_courier_name?: string | null;
   shipments?: Array<{
     id: number;
+    awb?: string | null;
     awb_code?: string | null;
+    courier?: string | null;
     courier_name?: string | null;
-    status?: string | null;
+    sr_courier_name?: string | null;
+    status?: string | number | null;
   }>;
   status: string;
   status_code: number;

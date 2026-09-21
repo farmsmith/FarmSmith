@@ -4,8 +4,8 @@ import OrderConfirmationClient from "./OrderConfirmationClient";
 import OrderConfirmationLoading from "./loading";
 
 export const metadata: Metadata = {
-  title: "Order Confirmation",
-  description: "Your FarmSmith Foods order confirmation and tracking.",
+  title: "Order Details",
+  description: "Your FarmSmith Foods order details and tracking status.",
   robots: {
     index: false,
     follow: false,

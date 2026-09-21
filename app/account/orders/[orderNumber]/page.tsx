@@ -118,6 +118,7 @@ export default function AccountOrderDetailPage() {
           borderRadius: "var(--radius-xl)",
           padding: "clamp(1.5rem, 4vw, 2.5rem)",
           boxShadow: "var(--shadow-card)",
+          fontFamily: "var(--font-body)",
         }}
       >
         <LoadingState
@@ -138,6 +139,7 @@ export default function AccountOrderDetailPage() {
           border: "1px solid var(--color-border)",
           borderRadius: "var(--radius-xl)",
           padding: "clamp(1.5rem, 4vw, 2.5rem)",
+          fontFamily: "var(--font-body)",
         }}
       >
         {sessionExpired ? (
@@ -205,7 +207,6 @@ export default function AccountOrderDetailPage() {
 
   const hasShipment = Boolean(order.awb_code && order.awb_code.trim().length > 0);
   const canTrack =
-    Boolean(order.tracking_token) &&
     order.status !== "cancelled" &&
     order.status !== "refunded" &&
     order.status !== "pending_payment";
@@ -218,6 +219,8 @@ export default function AccountOrderDetailPage() {
         borderRadius: "var(--radius-xl)",
         padding: "clamp(1.5rem, 4vw, 2.5rem)",
         boxShadow: "var(--shadow-card)",
+        fontFamily: "var(--font-body)",
+        fontWeight: 400,
       }}
     >
       {/* 1. Back Navigation */}
@@ -229,7 +232,8 @@ export default function AccountOrderDetailPage() {
             alignItems: "center",
             gap: "0.375rem",
             fontSize: "0.875rem",
-            fontWeight: 600,
+            fontFamily: "var(--font-subheading)",
+            fontWeight: 500,
             color: "var(--color-muted)",
             textDecoration: "none",
             transition: "color 0.15s ease",
@@ -258,34 +262,130 @@ export default function AccountOrderDetailPage() {
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "clamp(1.375rem, 3vw, 1.75rem)",
+                fontWeight: 600,
                 color: "var(--color-primary)",
                 margin: 0,
                 letterSpacing: "0.01em",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
               }}
             >
-              ORDER #{order.order_number}
+              <span>ORDER</span>
+              <code
+                style={{
+                  background: "rgba(0,0,0,0.05)",
+                  padding: "2px 8px",
+                  borderRadius: "var(--radius-sm)",
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                  color: "var(--color-primary)",
+                  fontSize: "clamp(1.05rem, 2.2vw, 1.25rem)",
+                  letterSpacing: "0.02em",
+                }}
+              >
+                #{order.order_number}
+              </code>
             </h1>
             <CopyButton text={order.order_number} label="Copy Order ID" />
           </div>
-          <p
+
+          <div
             style={{
-              fontSize: "0.875rem",
-              color: "var(--color-muted)",
-              margin: "0.35rem 0 0",
               display: "flex",
               alignItems: "center",
-              gap: "0.35rem",
+              gap: "1.25rem",
+              flexWrap: "wrap",
+              marginTop: "0.4rem",
             }}
           >
-            <Calendar size={14} color="var(--color-muted)" />
-            Placed on {formattedDate}
-          </p>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                fontFamily: "var(--font-body)",
+                fontWeight: 400,
+                color: "var(--color-muted)",
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
+              }}
+            >
+              <Calendar size={14} color="var(--color-muted)" />
+              Placed on {formattedDate}
+            </p>
+
+            {order.tracking_token && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  fontSize: "0.8125rem",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 400,
+                  color: "var(--color-muted)",
+                }}
+              >
+                <span>Tracking Key:</span>
+                <code
+                  style={{
+                    background: "rgba(0,0,0,0.05)",
+                    padding: "2px 8px",
+                    borderRadius: "var(--radius-sm)",
+                    fontFamily: "monospace",
+                    fontWeight: 600,
+                    color: "var(--color-primary)",
+                    fontSize: "0.8125rem",
+                  }}
+                >
+                  {order.tracking_token}
+                </code>
+                <CopyButton text={order.tracking_token} label="Copy Tracking Key" />
+              </div>
+            )}
+
+            {order.awb_code && order.awb_code.trim().length > 0 && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  fontSize: "0.8125rem",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 400,
+                  color: "var(--color-muted)",
+                }}
+              >
+                <span>AWB No:</span>
+                <code
+                  style={{
+                    background: "rgba(0,0,0,0.05)",
+                    padding: "2px 8px",
+                    borderRadius: "var(--radius-sm)",
+                    fontFamily: "monospace",
+                    fontWeight: 600,
+                    color: "var(--color-primary)",
+                    fontSize: "0.8125rem",
+                  }}
+                >
+                  {order.awb_code}
+                </code>
+                <CopyButton text={order.awb_code} label="Copy AWB" />
+              </div>
+            )}
+          </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
           <Badge
             variant={statusVariant(order.status)}
-            style={{ fontSize: "0.875rem", padding: "0.4rem 0.875rem", fontWeight: 700 }}
+            style={{
+              fontSize: "0.875rem",
+              padding: "0.4rem 0.875rem",
+              fontFamily: "var(--font-subheading)",
+              fontWeight: 500,
+            }}
           >
             {statusLabel(order.status)}
           </Badge>
@@ -303,7 +403,8 @@ export default function AccountOrderDetailPage() {
                 color: "#FFFFFF",
                 padding: "0.45rem 1rem",
                 borderRadius: "var(--radius-md)",
-                fontWeight: 600,
+                fontFamily: "var(--font-subheading)",
+                fontWeight: 500,
                 fontSize: "0.8125rem",
                 textDecoration: "none",
                 boxShadow: "0 2px 6px rgba(31,58,46,0.18)",
@@ -328,10 +429,10 @@ export default function AccountOrderDetailPage() {
         <h2
           style={{
             fontFamily: "var(--font-heading)",
-            fontSize: "1.0625rem",
+            fontSize: "1.125rem",
+            fontWeight: 600,
             color: "var(--color-primary)",
             margin: "0 0 1.25rem",
-            fontWeight: 700,
           }}
         >
           Order Progress
@@ -361,7 +462,8 @@ export default function AccountOrderDetailPage() {
           <h2
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "1rem",
+              fontSize: "1.0625rem",
+              fontWeight: 600,
               color: "var(--color-primary)",
               margin: "0 0 1rem",
               display: "flex",
@@ -390,7 +492,8 @@ export default function AccountOrderDetailPage() {
                 <div>
                   <span
                     style={{
-                      fontWeight: 600,
+                      fontFamily: "var(--font-subheading)",
+                      fontWeight: 500,
                       color: "var(--color-foreground)",
                       fontSize: "0.9375rem",
                       display: "block",
@@ -398,13 +501,21 @@ export default function AccountOrderDetailPage() {
                   >
                     {item.product_name}
                   </span>
-                  <span style={{ fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+                  <span
+                    style={{
+                      fontSize: "0.8125rem",
+                      fontFamily: "var(--font-body)",
+                      fontWeight: 400,
+                      color: "var(--color-muted)",
+                    }}
+                  >
                     Qty: {item.quantity} × {formatPrice(item.unit_price, order.currency)}
                   </span>
                 </div>
                 <span
                   style={{
-                    fontWeight: 700,
+                    fontFamily: "var(--font-subheading)",
+                    fontWeight: 500,
                     color: "var(--color-primary)",
                     fontSize: "0.9375rem",
                     whiteSpace: "nowrap",
@@ -429,7 +540,8 @@ export default function AccountOrderDetailPage() {
           <h2
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "1rem",
+              fontSize: "1.0625rem",
+              fontWeight: 600,
               color: "var(--color-primary)",
               margin: "0 0 1rem",
               display: "flex",
@@ -445,17 +557,41 @@ export default function AccountOrderDetailPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               {order.courier_name && order.courier_name.trim().length > 0 && (
                 <div style={{ fontSize: "0.875rem" }}>
-                  <span style={{ color: "var(--color-muted)", display: "block", fontSize: "0.75rem" }}>
+                  <span
+                    style={{
+                      color: "var(--color-muted)",
+                      display: "block",
+                      fontSize: "0.75rem",
+                      fontFamily: "var(--font-body)",
+                      fontWeight: 400,
+                    }}
+                  >
                     Courier Partner
                   </span>
-                  <strong style={{ color: "var(--color-foreground)", fontSize: "0.9375rem" }}>
+                  <strong
+                    style={{
+                      color: "var(--color-foreground)",
+                      fontSize: "0.9375rem",
+                      fontFamily: "var(--font-subheading)",
+                      fontWeight: 500,
+                    }}
+                  >
                     {order.courier_name}
                   </strong>
                 </div>
               )}
 
               <div style={{ fontSize: "0.875rem" }}>
-                <span style={{ color: "var(--color-muted)", display: "block", fontSize: "0.75rem", marginBottom: "0.2rem" }}>
+                <span
+                  style={{
+                    color: "var(--color-muted)",
+                    display: "block",
+                    fontSize: "0.75rem",
+                    fontFamily: "var(--font-body)",
+                    fontWeight: 400,
+                    marginBottom: "0.2rem",
+                  }}
+                >
                   AWB / Tracking Number
                 </span>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -486,7 +622,8 @@ export default function AccountOrderDetailPage() {
                     alignItems: "center",
                     gap: "0.35rem",
                     fontSize: "0.8125rem",
-                    fontWeight: 600,
+                    fontFamily: "var(--font-subheading)",
+                    fontWeight: 500,
                     color: "var(--color-primary)",
                     textDecoration: "underline",
                   }}
@@ -500,6 +637,8 @@ export default function AccountOrderDetailPage() {
               style={{
                 margin: 0,
                 fontSize: "0.875rem",
+                fontFamily: "var(--font-body)",
+                fontWeight: 400,
                 color: "var(--color-muted)",
                 lineHeight: 1.5,
               }}
@@ -521,7 +660,8 @@ export default function AccountOrderDetailPage() {
           <h2
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "1rem",
+              fontSize: "1.0625rem",
+              fontWeight: 600,
               color: "var(--color-primary)",
               margin: "0 0 1rem",
             }}
@@ -531,22 +671,64 @@ export default function AccountOrderDetailPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-              <span style={{ color: "var(--color-muted)" }}>Subtotal</span>
-              <span style={{ color: "var(--color-foreground)", fontWeight: 500 }}>
+              <span
+                style={{
+                  color: "var(--color-muted)",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 400,
+                }}
+              >
+                Subtotal
+              </span>
+              <span
+                style={{
+                  color: "var(--color-foreground)",
+                  fontFamily: "var(--font-subheading)",
+                  fontWeight: 500,
+                }}
+              >
                 {formatPrice(order.subtotal_amount, order.currency)}
               </span>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-              <span style={{ color: "var(--color-muted)" }}>Shipping</span>
-              <span style={{ color: "var(--color-foreground)", fontWeight: 500 }}>
+              <span
+                style={{
+                  color: "var(--color-muted)",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 400,
+                }}
+              >
+                Shipping
+              </span>
+              <span
+                style={{
+                  color: "var(--color-foreground)",
+                  fontFamily: "var(--font-subheading)",
+                  fontWeight: 500,
+                }}
+              >
                 {order.shipping_amount === 0 ? "Free" : formatPrice(order.shipping_amount, order.currency)}
               </span>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-              <span style={{ color: "var(--color-muted)" }}>GST (Taxes Included)</span>
-              <span style={{ color: "var(--color-foreground)", fontWeight: 500 }}>
+              <span
+                style={{
+                  color: "var(--color-muted)",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 400,
+                }}
+              >
+                GST (Taxes Included)
+              </span>
+              <span
+                style={{
+                  color: "var(--color-foreground)",
+                  fontFamily: "var(--font-subheading)",
+                  fontWeight: 500,
+                }}
+              >
                 {formatPrice(order.tax_amount, order.currency)}
               </span>
             </div>
@@ -561,13 +743,20 @@ export default function AccountOrderDetailPage() {
                 borderTop: "2px solid var(--color-border)",
               }}
             >
-              <span style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-primary)" }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-subheading)",
+                  fontWeight: 500,
+                  fontSize: "1rem",
+                  color: "var(--color-primary)",
+                }}
+              >
                 Total Amount
               </span>
               <span
                 style={{
                   fontFamily: "var(--font-heading)",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: "1.25rem",
                   color: "var(--color-primary)",
                 }}
@@ -578,7 +767,7 @@ export default function AccountOrderDetailPage() {
           </div>
         </div>
 
-        {/* Row 2, Col 2: Shipping Destination (Aligned on the same line as Price Breakdown) */}
+        {/* Row 2, Col 2: Shipping Destination */}
         <div
           style={{
             border: "1px solid var(--color-border)",
@@ -590,7 +779,8 @@ export default function AccountOrderDetailPage() {
           <h2
             style={{
               fontFamily: "var(--font-heading)",
-              fontSize: "1rem",
+              fontSize: "1.0625rem",
+              fontWeight: 600,
               color: "var(--color-primary)",
               margin: "0 0 0.875rem",
               display: "flex",
@@ -606,11 +796,20 @@ export default function AccountOrderDetailPage() {
             style={{
               fontStyle: "normal",
               fontSize: "0.875rem",
+              fontFamily: "var(--font-body)",
+              fontWeight: 400,
               color: "var(--color-muted)",
               lineHeight: 1.6,
             }}
           >
-            <strong style={{ color: "var(--color-foreground)", fontSize: "0.9375rem" }}>
+            <strong
+              style={{
+                color: "var(--color-foreground)",
+                fontSize: "0.9375rem",
+                fontFamily: "var(--font-subheading)",
+                fontWeight: 500,
+              }}
+            >
               {order.customer_name}
             </strong>
             <br />
@@ -632,6 +831,8 @@ export default function AccountOrderDetailPage() {
                 paddingTop: "0.75rem",
                 borderTop: "1px solid var(--color-border)",
                 fontSize: "0.8125rem",
+                fontFamily: "var(--font-body)",
+                fontWeight: 400,
                 color: "var(--color-muted)",
                 display: "flex",
                 alignItems: "center",
@@ -663,8 +864,9 @@ export default function AccountOrderDetailPage() {
           rel="noopener noreferrer"
           style={{
             fontSize: "0.875rem",
+            fontFamily: "var(--font-subheading)",
+            fontWeight: 500,
             color: "var(--color-accent)",
-            fontWeight: 600,
             textDecoration: "none",
             display: "inline-flex",
             alignItems: "center",
@@ -674,9 +876,25 @@ export default function AccountOrderDetailPage() {
           View Public Tracking Page →
         </a>
 
-        <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--color-muted)" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.8125rem",
+            fontFamily: "var(--font-body)",
+            fontWeight: 400,
+            color: "var(--color-muted)",
+          }}
+        >
           Need assistance?{" "}
-          <Link href="/contact" style={{ color: "var(--color-primary)", fontWeight: 600, textDecoration: "underline" }}>
+          <Link
+            href="/contact"
+            style={{
+              color: "var(--color-primary)",
+              fontFamily: "var(--font-subheading)",
+              fontWeight: 500,
+              textDecoration: "underline",
+            }}
+          >
             Contact FarmSmith Support
           </Link>
         </p>

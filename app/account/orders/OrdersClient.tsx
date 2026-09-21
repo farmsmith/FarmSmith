@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
-import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import {
   Package,
@@ -14,7 +13,6 @@ import {
   Calendar,
   ChevronRight,
 } from "lucide-react";
-import { CopyButton } from "@/components/ui/CopyButton";
 import {
   ErrorState,
   OfflineState,
@@ -23,7 +21,7 @@ import {
   LoadingState,
 } from "@/components/ui/states";
 import { useNetworkStatus } from "@/lib/hooks/useNetworkStatus";
-import type { Order, OrderItem } from "@/types/order";
+import type { Order } from "@/types/order";
 
 function statusVariant(status: Order["status"]): "success" | "warning" | "error" | "muted" | "default" {
   switch (status) {
@@ -44,45 +42,6 @@ function statusVariant(status: Order["status"]): "success" | "warning" | "error"
 
 function statusLabel(status: Order["status"]): string {
   return status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function getOrderItemsSummary(items?: OrderItem[]): { count: number; summary: string } {
-  if (!items || items.length === 0) {
-    return { count: 1, summary: "1 item · FarmSmith Organic Harvest" };
-  }
-  const totalCount = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
-  const primaryName = items[0]?.product_name || "FarmSmith Product";
-  const otherTypesCount = items.length - 1;
-
-  let summary = "";
-  if (items.length === 1) {
-    summary = `${totalCount} ${totalCount === 1 ? "item" : "items"} · ${primaryName}`;
-  } else {
-    summary = `${totalCount} items · ${primaryName} + ${otherTypesCount} more`;
-  }
-
-  return { count: totalCount, summary };
-}
-
-function getDeliveryStatusMessage(status: Order["status"]): { text: string; isShippedOrDelivered?: boolean } {
-  switch (status) {
-    case "shipped":
-      return { text: "Your order is on its way.", isShippedOrDelivered: true };
-    case "processing":
-      return { text: "We're preparing your order." };
-    case "paid":
-      return { text: "Payment confirmed · Preparing your package." };
-    case "delivered":
-      return { text: "Delivered", isShippedOrDelivered: true };
-    case "cancelled":
-      return { text: "Order cancelled." };
-    case "refunded":
-      return { text: "Order refunded." };
-    case "pending_payment":
-      return { text: "Payment pending." };
-    default:
-      return { text: "Order placed." };
-  }
 }
 
 export default function OrdersClient() {
@@ -132,7 +91,7 @@ export default function OrdersClient() {
   }, [fetchOrders]);
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "100%", fontFamily: "var(--font-body)" }}>
       {/* Main Container Card */}
       <div
         style={{
@@ -161,6 +120,7 @@ export default function OrdersClient() {
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "clamp(1.5rem, 3.5vw, 1.875rem)",
+                fontWeight: 600,
                 color: "var(--color-primary)",
                 margin: "0 0 0.25rem",
                 lineHeight: 1.2,
@@ -171,7 +131,15 @@ export default function OrdersClient() {
             >
               My Orders
             </h1>
-            <p style={{ margin: 0, fontSize: "0.875rem", color: "var(--color-muted)" }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.875rem",
+                fontFamily: "var(--font-body)",
+                fontWeight: 400,
+                color: "var(--color-muted)",
+              }}
+            >
               View past purchases, tracking numbers, and real-time shipment statuses
             </p>
           </div>
@@ -184,7 +152,8 @@ export default function OrdersClient() {
                 alignItems: "center",
                 gap: "0.375rem",
                 fontSize: "0.8125rem",
-                fontWeight: 600,
+                fontFamily: "var(--font-subheading)",
+                fontWeight: 500,
                 color: "var(--color-accent)",
                 textDecoration: "none",
               }}
@@ -258,7 +227,7 @@ export default function OrdersClient() {
           />
         )}
 
-        {/* Premium Clean Empty State */}
+        {/* Empty State */}
         {!loading && !sessionExpired && !permissionDenied && !error && orders.length === 0 && (
           <div
             style={{
@@ -269,7 +238,6 @@ export default function OrdersClient() {
               padding: "clamp(2.5rem, 6vw, 4rem) 1rem 2rem",
             }}
           >
-            {/* Visual Icon Badge */}
             <div
               style={{
                 position: "relative",
@@ -309,7 +277,7 @@ export default function OrdersClient() {
               style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "1.375rem",
-                fontWeight: 700,
+                fontWeight: 600,
                 color: "var(--color-primary)",
                 margin: "0 0 1.5rem",
               }}
@@ -327,7 +295,8 @@ export default function OrdersClient() {
                 color: "#FFFFFF",
                 padding: "0.8125rem 1.75rem",
                 borderRadius: "var(--radius-md)",
-                fontWeight: 600,
+                fontFamily: "var(--font-subheading)",
+                fontWeight: 500,
                 fontSize: "0.9375rem",
                 textDecoration: "none",
                 boxShadow: "0 4px 14px rgba(31, 58, 46, 0.25)",
@@ -350,10 +319,7 @@ export default function OrdersClient() {
                 day: "numeric",
               });
 
-              const { summary: itemSummary } = getOrderItemsSummary(order.items);
-              const deliveryStatus = getDeliveryStatusMessage(order.status);
               const canTrack =
-                Boolean(order.tracking_token) &&
                 order.status !== "cancelled" &&
                 order.status !== "refunded" &&
                 order.status !== "pending_payment";
@@ -370,12 +336,11 @@ export default function OrdersClient() {
                     boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
                   }}
                 >
-                  {/* 1. Order Header: ID, Date, Status */}
+                  {/* Order Header: ID, Date, Status */}
                   <div
                     style={{
-                      padding: "1rem 1.25rem",
+                      padding: "1.25rem 1.5rem",
                       background: "var(--color-surface)",
-                      borderBottom: "1px solid var(--color-border)",
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -383,194 +348,107 @@ export default function OrdersClient() {
                       gap: "0.75rem",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                      <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                          <span
-                            style={{
-                              fontFamily: "var(--font-heading)",
-                              fontSize: "0.9375rem",
-                              fontWeight: 700,
-                              color: "var(--color-primary)",
-                              letterSpacing: "0.02em",
-                            }}
-                          >
-                            ORDER #{order.order_number}
-                          </span>
-                          <CopyButton text={order.order_number} label="Copy Order ID" />
-                        </div>
-                        <span
-                          style={{
-                            fontSize: "0.8125rem",
-                            color: "var(--color-muted)",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "0.3rem",
-                            marginTop: "0.15rem",
-                          }}
-                        >
-                          <Calendar size={13} color="var(--color-muted)" />
-                          {formattedDate}
-                        </span>
-                      </div>
+                    <div>
+                      <h2
+                        style={{
+                          fontFamily: "var(--font-heading)",
+                          fontSize: "1.0625rem",
+                          fontWeight: 600,
+                          color: "var(--color-primary)",
+                          letterSpacing: "0.02em",
+                          margin: 0,
+                        }}
+                      >
+                        ORDER #{order.order_number}
+                      </h2>
+                      <span
+                        style={{
+                          fontSize: "0.8125rem",
+                          fontFamily: "var(--font-body)",
+                          fontWeight: 400,
+                          color: "var(--color-muted)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                          marginTop: "0.25rem",
+                        }}
+                      >
+                        <Calendar size={13} color="var(--color-muted)" />
+                        {formattedDate}
+                      </span>
                     </div>
 
-                    {/* Prominent Status Badge */}
-                    <Badge variant={statusVariant(order.status)} style={{ fontSize: "0.8125rem", padding: "0.35rem 0.75rem" }}>
+                    {/* Status Badge */}
+                    <Badge
+                      variant={statusVariant(order.status)}
+                      style={{
+                        fontSize: "0.8125rem",
+                        padding: "0.35rem 0.75rem",
+                        fontFamily: "var(--font-subheading)",
+                        fontWeight: 500,
+                      }}
+                    >
                       {statusLabel(order.status)}
                     </Badge>
                   </div>
 
-                  {/* 2. Main Order Summary: Items, Contextual Delivery, Total */}
+                  {/* Actions Footer */}
                   <div
                     style={{
-                      padding: "1.25rem",
-                      display: "grid",
-                      gridTemplateColumns: "1fr auto",
-                      gap: "1.25rem",
-                      alignItems: "center",
-                    }}
-                  >
-                    {/* Left: Item Summary & Delivery Message */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", minWidth: 0 }}>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "0.9375rem",
-                          fontWeight: 600,
-                          color: "var(--color-foreground)",
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {itemSummary}
-                      </p>
-
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "0.8125rem",
-                          color: deliveryStatus.isShippedOrDelivered ? "var(--color-primary)" : "var(--color-muted)",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.4rem",
-                          fontWeight: deliveryStatus.isShippedOrDelivered ? 600 : 400,
-                        }}
-                      >
-                        <Truck size={14} style={{ color: "var(--color-accent)", flexShrink: 0 }} aria-hidden="true" />
-                        <span>{deliveryStatus.text}</span>
-                      </p>
-                    </div>
-
-                    {/* Right: Total Amount */}
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <span
-                        style={{
-                          fontSize: "0.6875rem",
-                          textTransform: "uppercase",
-                          color: "var(--color-muted)",
-                          fontWeight: 600,
-                          display: "block",
-                          letterSpacing: "0.05em",
-                          marginBottom: "0.1rem",
-                        }}
-                      >
-                        Total
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "var(--font-heading)",
-                          fontSize: "1.125rem",
-                          fontWeight: 700,
-                          color: "var(--color-primary)",
-                        }}
-                      >
-                        {formatPrice(order.total_amount, order.currency)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 3. Card Footer: De-emphasized Tracking Secret & Actions */}
-                  <div
-                    style={{
-                      padding: "0.875rem 1.25rem",
-                      background: "rgba(31, 58, 46, 0.02)",
+                      padding: "1rem 1.5rem",
+                      background: "var(--color-card)",
                       borderTop: "1px solid var(--color-border)",
                       display: "flex",
-                      justifyContent: "space-between",
+                      justifyContent: "flex-end",
                       alignItems: "center",
-                      flexWrap: "wrap",
                       gap: "0.75rem",
+                      flexWrap: "wrap",
                     }}
                   >
-                    {/* De-emphasized Tracking Secret */}
-                    <div>
-                      {order.tracking_token ? (
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.75rem", color: "var(--color-muted)" }}>
-                          <span>Tracking Key:</span>
-                          <code
-                            style={{
-                              background: "rgba(0,0,0,0.04)",
-                              padding: "1px 6px",
-                              borderRadius: "3px",
-                              fontSize: "0.72rem",
-                              color: "var(--color-muted)",
-                              fontFamily: "monospace",
-                            }}
-                          >
-                            {order.tracking_token.substring(0, 10)}...
-                          </code>
-                          <CopyButton text={order.tracking_token} label="Copy Tracking Key" />
-                        </div>
-                      ) : (
-                        <span style={{ fontSize: "0.75rem", color: "var(--color-muted)" }}>
-                          Tax Invoice Included
-                        </span>
-                      )}
-                    </div>
+                    <Link
+                      href={`/account/orders/${order.order_number}`}
+                      style={{
+                        fontSize: "0.8125rem",
+                        fontFamily: "var(--font-subheading)",
+                        fontWeight: 500,
+                        color: "var(--color-primary)",
+                        background: "var(--color-surface)",
+                        border: "1px solid var(--color-border)",
+                        padding: "0.5rem 1rem",
+                        borderRadius: "var(--radius-md)",
+                        textDecoration: "none",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        transition: "background 0.15s ease",
+                      }}
+                    >
+                      View Order Details <ChevronRight size={14} />
+                    </Link>
 
-                    {/* Actions */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
-                      <Link
-                        href={`/account/orders/${order.order_number}`}
+                    {canTrack && (
+                      <a
+                        href="https://www.shiprocket.in/shipment-tracking/"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         style={{
                           fontSize: "0.8125rem",
-                          color: "var(--color-primary)",
-                          background: "var(--color-card)",
-                          border: "1px solid var(--color-border)",
-                          padding: "0.45rem 0.875rem",
+                          fontFamily: "var(--font-subheading)",
+                          fontWeight: 500,
+                          background: "linear-gradient(135deg, #1F3A2E 0%, #2D5241 100%)",
+                          color: "#FFFFFF",
+                          padding: "0.5rem 1rem",
                           borderRadius: "var(--radius-md)",
-                          fontWeight: 600,
                           textDecoration: "none",
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: "0.35rem",
-                          transition: "background 0.15s ease",
+                          gap: "0.4rem",
+                          boxShadow: "0 2px 6px rgba(31,58,46,0.18)",
                         }}
                       >
-                        View Order Details <ChevronRight size={14} />
-                      </Link>
-
-                      {canTrack && (
-                        <Link
-                          href={`/order/${order.order_number}?token=${order.tracking_token}`}
-                          style={{
-                            fontSize: "0.8125rem",
-                            background: "linear-gradient(135deg, #1F3A2E 0%, #2D5241 100%)",
-                            color: "#FFFFFF",
-                            padding: "0.45rem 0.95rem",
-                            borderRadius: "var(--radius-md)",
-                            fontWeight: 600,
-                            textDecoration: "none",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "0.4rem",
-                            boxShadow: "0 2px 6px rgba(31,58,46,0.18)",
-                          }}
-                        >
-                          <Truck size={14} /> Track Live Delivery
-                        </Link>
-                      )}
-                    </div>
+                        <Truck size={14} /> Track Live Delivery
+                      </a>
+                    )}
                   </div>
                 </div>
               );

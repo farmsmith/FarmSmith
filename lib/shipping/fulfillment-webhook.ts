@@ -127,14 +127,19 @@ const RECONCILIATION_THROTTLE_MS = 60_000;
  * Queries Shiprocket API on-demand when active orders ('processing', 'shipped') are viewed.
  */
 export async function reconcileOrderStatusFromShiprocket(order: any): Promise<any> {
-  if (!order || (order.status !== "processing" && order.status !== "shipped")) {
+  if (
+    !order ||
+    (order.status !== "paid" &&
+      order.status !== "processing" &&
+      order.status !== "shipped")
+  ) {
     return order;
   }
 
-  // Throttle check: Skip if updated within the last 60 seconds
-  if (order.updated_at) {
+  // Throttle check: Skip if updated within the last 30 seconds, unless awb_code is missing
+  if (order.updated_at && order.awb_code) {
     const lastUpdate = new Date(order.updated_at).getTime();
-    if (Date.now() - lastUpdate < RECONCILIATION_THROTTLE_MS) {
+    if (Date.now() - lastUpdate < 30_000) {
       return order;
     }
   }
@@ -157,10 +162,22 @@ export async function reconcileOrderStatusFromShiprocket(order: any): Promise<an
 
       const rawStatus = srOrder.status;
       const statusCode = srOrder.status_code;
-      const shipment = srOrder.shipments?.[0];
-      const awbCode = shipment?.awb_code || null;
-      const courierName = shipment?.courier_name || null;
-      const srShipmentId = shipment?.id ? String(shipment.id) : null;
+      const shipment = Array.isArray(srOrder.shipments) && srOrder.shipments.length > 0 ? srOrder.shipments[0] : null;
+      const awbCode =
+        shipment?.awb ||
+        shipment?.awb_code ||
+        srOrder.last_mile_awb ||
+        (srOrder as any).awb_code ||
+        (srOrder as any).awb ||
+        null;
+      const courierName =
+        shipment?.courier ||
+        shipment?.sr_courier_name ||
+        shipment?.courier_name ||
+        srOrder.last_mile_courier_name ||
+        (srOrder as any).courier_name ||
+        null;
+      const srShipmentId = shipment?.id ? String(shipment.id) : (srOrder as any).shipment_id ? String((srOrder as any).shipment_id) : null;
       const srOrderId = srOrder.id ? String(srOrder.id) : null;
 
       const mappedStatus = mapShiprocketStatusToOrderStatus(rawStatus, statusCode);
@@ -184,6 +201,8 @@ export async function reconcileOrderStatusFromShiprocket(order: any): Promise<an
 
       if (mappedStatus && mappedStatus !== order.status) {
         updatePayload.status = mappedStatus;
+      } else if (awbCode && order.status === "paid") {
+        updatePayload.status = "shipped";
       }
 
       if (Object.keys(updatePayload).length > 1) {
