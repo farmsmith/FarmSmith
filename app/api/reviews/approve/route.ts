@@ -1,43 +1,105 @@
 import { NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { verifyModerationToken, consumeModerationToken } from "@/lib/security/review-moderation";
+import { escapeHtml } from "@/lib/security/html";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
-  const action = searchParams.get("action") || "approve";
-  const secret = searchParams.get("secret");
+  const action = searchParams.get("action");
+  const token = searchParams.get("token");
+  const expires = searchParams.get("expires");
 
-  // Validate admin secret
-  const expectedSecret = process.env.SUPABASE_SECRET_KEY?.substring(0, 16) || "farmsmith_admin";
-  if (secret !== expectedSecret && secret !== "farmsmith_admin") {
+  // Validate action
+  if (action !== "approve" && action !== "reject") {
     return new NextResponse(
       `<!DOCTYPE html>
-      <html>
+      <html lang="en">
+        <head><title>Invalid Request</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #F8F9FA;">
+          <div style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px;">
+            <h2 style="color: #C0392B; margin-top: 0;">Invalid Action</h2>
+            <p style="color: #666;">The specified moderation action is invalid.</p>
+          </div>
+        </body>
+      </html>`,
+      { status: 400, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
+  }
+
+  // Validate review ID format
+  if (!id || typeof id !== "string" || !/^[0-9a-fA-F-]{8,64}$/.test(id.trim())) {
+    return new NextResponse(
+      `<!DOCTYPE html>
+      <html lang="en">
+        <head><title>Invalid Request</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #F8F9FA;">
+          <div style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px;">
+            <h2 style="color: #C0392B; margin-top: 0;">Invalid Review ID</h2>
+            <p style="color: #666;">Missing or malformed review ID.</p>
+          </div>
+        </body>
+      </html>`,
+      { status: 400, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
+  }
+
+  const cleanId = id.trim();
+
+  // 1. Validate cryptographic HMAC moderation token (fails closed)
+  const isAuthorized = verifyModerationToken({
+    reviewId: cleanId,
+    action,
+    token,
+    expiresAt: expires,
+  });
+
+  if (!isAuthorized) {
+    return new NextResponse(
+      `<!DOCTYPE html>
+      <html lang="en">
         <head><title>Unauthorized</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
         <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #F8F9FA;">
           <div style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px;">
             <h2 style="color: #C0392B; margin-top: 0;">Access Denied</h2>
-            <p style="color: #666;">Invalid or expired moderation token.</p>
+            <p style="color: #666;">Invalid, tampered, or expired moderation token.</p>
           </div>
         </body>
       </html>`,
-      { status: 403, headers: { "Content-Type": "text/html" } }
+      { status: 403, headers: { "Content-Type": "text/html; charset=utf-8" } }
     );
   }
 
-  if (!id) {
-    return new NextResponse("Missing review ID", { status: 400 });
+  // 2. Enforce atomic single-use replay protection
+  const consumption = await consumeModerationToken(token!, expires!);
+  if (!consumption.success) {
+    return new NextResponse(
+      `<!DOCTYPE html>
+      <html lang="en">
+        <head><title>Link Expired or Already Used</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #F8F9FA;">
+          <div style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 420px;">
+            <h2 style="color: #C0392B; margin-top: 0;">Link Already Used</h2>
+            <p style="color: #666;">This moderation action has already been executed. Moderation links are single-use.</p>
+            <a href="/" style="display: inline-block; background: #162D21; color: #FAF6EE; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-top: 1rem;">
+              Return to Website
+            </a>
+          </div>
+        </body>
+      </html>`,
+      { status: 409, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
   }
 
   try {
     let authorName = "Customer";
     let productName = "FarmSmith Harvest";
 
-    // 1. Update Upstash Redis
+    // 3. Update Upstash Redis
     const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
     const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
     if (redisUrl && redisToken) {
-      const getRes = await fetch(`${redisUrl}/get/review:${encodeURIComponent(id)}`, {
+      const getRes = await fetch(`${redisUrl}/get/review:${encodeURIComponent(cleanId)}`, {
         headers: { Authorization: `Bearer ${redisToken}` },
       });
       const getData = await getRes.json();
@@ -48,27 +110,27 @@ export async function GET(req: Request) {
 
         if (action === "approve") {
           review.is_approved = true;
-          await fetch(`${redisUrl}/set/review:${encodeURIComponent(id)}`, {
+          await fetch(`${redisUrl}/set/review:${encodeURIComponent(cleanId)}`, {
             headers: { Authorization: `Bearer ${redisToken}` },
             method: "POST",
             body: JSON.stringify(review),
           });
         } else if (action === "reject") {
-          await fetch(`${redisUrl}/del/review:${encodeURIComponent(id)}`, {
+          await fetch(`${redisUrl}/del/review:${encodeURIComponent(cleanId)}`, {
             headers: { Authorization: `Bearer ${redisToken}` },
           });
         }
       }
     }
 
-    // 2. Try Supabase update as well
+    // 4. Try Supabase update as well
     try {
       const supabase = createAdminSupabaseClient();
       if (action === "approve") {
         const { data } = await supabase
           .from("product_reviews")
           .update({ is_approved: true })
-          .eq("id", id)
+          .eq("id", cleanId)
           .select()
           .single();
         if (data) {
@@ -76,11 +138,15 @@ export async function GET(req: Request) {
           productName = data.product_name || productName;
         }
       } else if (action === "reject") {
-        await supabase.from("product_reviews").delete().eq("id", id);
+        await supabase.from("product_reviews").delete().eq("id", cleanId);
       }
     } catch (dbErr) {
       console.warn("[Reviews Approve DB] Supabase table update notice:", dbErr);
     }
+
+    // 5. Escape dynamic parameters to prevent Stored XSS
+    const safeAuthorName = escapeHtml(authorName);
+    const safeProductName = escapeHtml(productName);
 
     if (action === "approve") {
       return new NextResponse(
@@ -100,7 +166,7 @@ export async function GET(req: Request) {
               </div>
               <h2 style="color: #162D21; margin: 0 0 0.5rem; font-size: 1.6rem; font-weight: 700;">Review Approved!</h2>
               <p style="color: #4A5568; line-height: 1.6; margin: 0 0 1.75rem; font-size: 1rem;">
-                The review by <strong>${authorName}</strong> for <strong>${productName}</strong> has been approved and is now live on the website.
+                The review by <strong>${safeAuthorName}</strong> for <strong>${safeProductName}</strong> has been approved and is now live on the website.
               </p>
               <a href="/" style="display: inline-block; background: #162D21; color: #FAF6EE; padding: 0.85rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(22, 45, 33, 0.2);">
                 Return to Website
@@ -113,8 +179,12 @@ export async function GET(req: Request) {
     } else {
       return new NextResponse(
         `<!DOCTYPE html>
-        <html>
-          <head><title>Review Rejected</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Review Rejected — FarmSmith</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+          </head>
           <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #FAFAF7;">
             <div style="background: #FFFFFF; padding: 2.5rem; border-radius: 16px; border: 1px solid #E2E8F0; box-shadow: 0 10px 30px rgba(0,0,0,0.06); text-align: center; max-width: 420px; width: 90%;">
               <h2 style="color: #718096; margin: 0 0 0.5rem;">Review Removed</h2>
@@ -123,11 +193,23 @@ export async function GET(req: Request) {
             </div>
           </body>
         </html>`,
-        { status: 200, headers: { "Content-Type": "text/html" } }
+        { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
       );
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to moderate review:", err);
-    return new NextResponse(`Error processing request: ${err.message}`, { status: 500 });
+    return new NextResponse(
+      `<!DOCTYPE html>
+      <html lang="en">
+        <head><title>Internal Server Error</title><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #F8F9FA;">
+          <div style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px;">
+            <h2 style="color: #C0392B; margin-top: 0;">Error</h2>
+            <p style="color: #666;">An error occurred while processing the moderation request.</p>
+          </div>
+        </body>
+      </html>`,
+      { status: 500, headers: { "Content-Type": "text/html; charset=utf-8" } }
+    );
   }
 }

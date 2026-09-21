@@ -19,7 +19,6 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isUnregistered, setIsUnregistered] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   useEffect(() => {
@@ -50,7 +49,6 @@ function LoginForm() {
 
     setLoading(true);
     setError(null);
-    setIsUnregistered(false);
 
     try {
       const cleanEmail = email.trim().toLowerCase();
@@ -61,24 +59,8 @@ function LoginForm() {
       });
 
       if (authError) {
-        // Differentiate between unregistered email and wrong password
-        try {
-          const checkRes = await fetch("/api/auth/check-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: cleanEmail }),
-          });
-          const checkData = await checkRes.json();
-          if (checkRes.ok && checkData.exists === false) {
-            setIsUnregistered(true);
-            setError("This email is not registered.");
-            return;
-          }
-        } catch {
-          // If check fails, fallback to invalid password
-        }
-
-        setError("Invalid password. Please try again.");
+        // Uniform error message to prevent account email enumeration
+        setError("Invalid email or password. Please try again.");
         return;
       }
 
@@ -213,30 +195,12 @@ function LoginForm() {
                   fontSize: "0.84rem",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
                   gap: "0.5rem",
                   lineHeight: 1.4,
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <AlertCircle size={16} className="shrink-0" aria-hidden="true" />
-                  <span>{error}</span>
-                </div>
-                {isUnregistered && (
-                  <Link
-                    href={`/signup${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
-                    style={{
-                      color: "var(--color-error)",
-                      fontWeight: 700,
-                      textDecoration: "underline",
-                      whiteSpace: "nowrap",
-                      fontSize: "0.84rem",
-                    }}
-                  >
-                    Register now →
-                  </Link>
-                )}
+                <AlertCircle size={16} className="shrink-0" aria-hidden="true" />
+                <span>{error}</span>
               </div>
             )}
 
@@ -248,7 +212,7 @@ function LoginForm() {
         </div>
 
         <p style={{ textAlign: "center", marginTop: "1rem", fontSize: "0.875rem", color: "var(--color-muted)" }}>
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href={`/signup${redirectTo !== "/" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`} style={{ color: "var(--color-accent)", fontWeight: 600, textDecoration: "none" }}>
             Sign up
           </Link>

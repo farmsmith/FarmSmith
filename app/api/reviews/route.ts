@@ -4,6 +4,8 @@ import crypto from "crypto";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { withSecurityHeaders } from "@/lib/security/headers";
+import { generateModerationToken } from "@/lib/security/review-moderation";
+import { escapeHtml, sanitizeHeaderValue } from "@/lib/security/html";
 
 const reviewSchema = z.object({
   productName: z.string().trim().min(1).max(200),
@@ -14,7 +16,7 @@ const reviewSchema = z.object({
 });
 
 // Helper to save to Upstash Redis
-async function saveToRedis(key: string, data: any) {
+async function saveToRedis(key: string, data: unknown) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return;
@@ -91,15 +93,22 @@ export async function POST(req: Request) {
 
     if (resendApiKey) {
       try {
-        const secret = process.env.SUPABASE_SECRET_KEY?.substring(0, 16) || "farmsmith_admin";
-        
+        const { token: approveToken, expiresAt: approveExpires } = generateModerationToken(reviewId, "approve");
+        const { token: rejectToken, expiresAt: rejectExpires } = generateModerationToken(reviewId, "reject");
+
         // Dynamically detect current host so approval links work in both local development and production
         const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
         const protocol = host?.includes("localhost") || host?.includes("127.0.0.1") ? "http" : "https";
         const siteUrl = host ? `${protocol}://${host}` : (process.env.SITE_URL || "https://farm-smith.vercel.app");
 
-        const approveUrl = `${siteUrl}/api/reviews/approve?id=${reviewId}&action=approve&secret=${secret}`;
-        const rejectUrl = `${siteUrl}/api/reviews/approve?id=${reviewId}&action=reject&secret=${secret}`;
+        const approveUrl = `${siteUrl}/api/reviews/approve?id=${encodeURIComponent(reviewId)}&action=approve&token=${approveToken}&expires=${approveExpires}`;
+        const rejectUrl = `${siteUrl}/api/reviews/approve?id=${encodeURIComponent(reviewId)}&action=reject&token=${rejectToken}&expires=${rejectExpires}`;
+
+        const safeProductName = escapeHtml(productName);
+        const safeName = escapeHtml(name);
+        const safeEmail = escapeHtml(email || "");
+        const safeReview = escapeHtml(review);
+        const headerSubject = sanitizeHeaderValue(`[New Customer Review - ${rating}★] for ${productName} by ${name}`);
 
         console.log(`[Reviews API] Dispatching review notification with 1-Click Approve buttons to ${recipientEmail}...`);
         const emailRes = await fetch("https://api.resend.com/emails", {
@@ -112,7 +121,7 @@ export async function POST(req: Request) {
             from: senderEmail,
             to: [recipientEmail],
             reply_to: email || undefined,
-            subject: `[New Customer Review - ${rating}★] for ${productName} by ${name}`,
+            subject: headerSubject,
             html: `
               <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; line-height: 1.6; color: #1C3121; background-color: #FAFAF7; border-radius: 12px; max-width: 580px; margin: 0 auto;">
                 <div style="background: #162D21; padding: 18px 24px; border-radius: 8px 8px 0 0; color: #FFFFFF; display: flex; align-items: center; justify-content: space-between;">
@@ -123,7 +132,7 @@ export async function POST(req: Request) {
                 <div style="background: #FFFFFF; padding: 24px; border: 1px solid #E5E7EB; border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
                   <div style="margin-bottom: 16px;">
                     <p style="margin: 0 0 4px 0; font-size: 0.85rem; color: #6B7280; text-transform: uppercase; font-weight: 600;">Product</p>
-                    <p style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #162D21;">${productName}</p>
+                    <p style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #162D21;">${safeProductName}</p>
                   </div>
                   
                   <div style="margin-bottom: 16px;">
@@ -136,13 +145,13 @@ export async function POST(req: Request) {
                   <div style="display: flex; gap: 24px; margin-bottom: 16px;">
                     <div>
                       <p style="margin: 0 0 4px 0; font-size: 0.85rem; color: #6B7280; text-transform: uppercase; font-weight: 600;">Customer</p>
-                      <p style="margin: 0; font-weight: 600; color: #1F2937;">${name}</p>
+                      <p style="margin: 0; font-weight: 600; color: #1F2937;">${safeName}</p>
                     </div>
                     ${
                       email
                         ? `<div>
                             <p style="margin: 0 0 4px 0; font-size: 0.85rem; color: #6B7280; text-transform: uppercase; font-weight: 600;">Email</p>
-                            <p style="margin: 0; color: #1F2937;"><a href="mailto:${email}" style="color: #059669; text-decoration: none;">${email}</a></p>
+                            <p style="margin: 0; color: #1F2937;"><a href="mailto:${safeEmail}" style="color: #059669; text-decoration: none;">${safeEmail}</a></p>
                           </div>`
                         : ""
                     }
@@ -150,7 +159,7 @@ export async function POST(req: Request) {
 
                   <div style="background: #FAF7F0; padding: 16px 20px; border-left: 4px solid #D9A441; margin: 20px 0; border-radius: 4px;">
                     <p style="margin: 0 0 6px 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #A06B28; font-weight: 700;">Customer Feedback</p>
-                    <p style="margin: 0; font-style: italic; color: #2D3748; font-size: 1rem; line-height: 1.6; white-space: pre-wrap;">&ldquo;${review}&rdquo;</p>
+                    <p style="margin: 0; font-style: italic; color: #2D3748; font-size: 1rem; line-height: 1.6; white-space: pre-wrap;">&ldquo;${safeReview}&rdquo;</p>
                   </div>
 
                   {/* Moderation Controls */}

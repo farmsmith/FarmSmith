@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { rateLimit, getClientIp } from "@/lib/security/rate-limit";
 import { withSecurityHeaders } from "@/lib/security/headers";
+import { escapeHtml, sanitizeHeaderValue } from "@/lib/security/html";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -70,6 +71,12 @@ export async function POST(req: Request) {
 
     if (resendApiKey) {
       try {
+        const safeName = escapeHtml(name);
+        const safeEmail = escapeHtml(email);
+        const safeSubject = escapeHtml(subject || "N/A");
+        const safeMessage = escapeHtml(message);
+        const headerSubject = sanitizeHeaderValue(subject || `New Customer Inquiry from ${name}`);
+
         await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
@@ -80,15 +87,15 @@ export async function POST(req: Request) {
             from: senderEmail,
             to: [recipientEmail],
             reply_to: email,
-            subject: `[Contact Form] ${subject || "New Customer Inquiry from " + name}`,
+            subject: `[Contact Form] ${headerSubject}`,
             html: `
               <div style="font-family: sans-serif; padding: 20px; line-height: 1.6; color: #1C3121;">
                 <h2 style="color: #1C3121; border-bottom: 2px solid #C4883E; padding-bottom: 8px;">New Customer Inquiry</h2>
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Subject:</strong> ${subject || "N/A"}</p>
+                <p><strong>Name:</strong> ${safeName}</p>
+                <p><strong>Email:</strong> ${safeEmail}</p>
+                <p><strong>Subject:</strong> ${safeSubject}</p>
                 <div style="background: #FBFAF6; padding: 15px; border-left: 4px solid #C4883E; margin-top: 15px;">
-                  <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+                  <p style="margin: 0; white-space: pre-wrap;">${safeMessage}</p>
                 </div>
               </div>
             `,

@@ -2,6 +2,7 @@ import "server-only";
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { formatPrice } from "@/lib/utils/cn";
+import { escapeHtml, sanitizeHeaderValue } from "@/lib/security/html";
 
 export interface SendEmailResult {
   success: boolean;
@@ -67,7 +68,7 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     }
 
     const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://farm-smith.vercel.app";
-    const directTrackingUrl = `${siteUrl}/order/${order.order_number}?token=${order.tracking_token}`;
+    const directTrackingUrl = `${siteUrl}/order/${encodeURIComponent(order.order_number)}?token=${encodeURIComponent(order.tracking_token || "")}`;
     const generalTrackingUrl = `${siteUrl}/track`;
     
     const contactEmail = process.env.CONTACT_EMAIL;
@@ -78,13 +79,19 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     // Explicitly configured to FarmSmith <onboarding@resend.dev> for testing Resend email delivery without custom domain setup
     const senderEmail = "FarmSmith <onboarding@resend.dev>";
 
+    // Escape dynamic parameters for HTML injection prevention
+    const safeOrderNumber = escapeHtml(order.order_number);
+    const safeCustomerName = escapeHtml(order.customer_name || "Valued Customer");
+    const safeTrackingToken = escapeHtml(order.tracking_token || "");
+    const safeCustomerPhone = escapeHtml(order.customer_phone || "");
+
     // Build items HTML table rows
     const itemsHtml = (order.order_items || [])
       .map(
-        (item: any) => `
+        (item: { product_name: string; quantity: number; unit_price: number; subtotal?: number }) => `
         <tr>
           <td style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; font-size: 14px; color: #1F2937;">
-            <strong>${item.product_name}</strong>
+            <strong>${escapeHtml(item.product_name)}</strong>
           </td>
           <td style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; font-size: 14px; color: #4B5563; text-align: center;">
             ${item.quantity}
@@ -97,11 +104,19 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
       )
       .join("");
 
-    const shippingAddr = order.shipping_address || {};
+    const shippingAddr = (order.shipping_address as Record<string, string>) || {};
+    const addressCityStatePin = [
+      shippingAddr.city ? escapeHtml(shippingAddr.city) : "",
+      shippingAddr.state ? escapeHtml(shippingAddr.state) : "",
+      shippingAddr.pincode ? escapeHtml(shippingAddr.pincode) : "",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
     const formattedAddress = [
-      shippingAddr.line1,
-      shippingAddr.line2,
-      `${shippingAddr.city || ""}, ${shippingAddr.state || ""} ${shippingAddr.pincode || ""}`.trim(),
+      shippingAddr.line1 ? escapeHtml(shippingAddr.line1) : null,
+      shippingAddr.line2 ? escapeHtml(shippingAddr.line2) : null,
+      addressCityStatePin || null,
       "India",
     ]
       .filter(Boolean)
@@ -114,7 +129,7 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Order Confirmation - ${order.order_number}</title>
+      <title>Order Confirmation - ${safeOrderNumber}</title>
     </head>
     <body style="margin: 0; padding: 0; background-color: #F4F6F4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1C3121;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F4F6F4; padding: 24px 12px;">
@@ -137,9 +152,9 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
                     <span style="color: #15803D; font-weight: 600; font-size: 15px;">✓ Payment Verified & Order Confirmed</span>
                   </div>
 
-                  <h2 style="margin: 0 0 8px; font-size: 20px; color: #1C3121;">Thank you for your order, ${order.customer_name || "Valued Customer"}!</h2>
+                  <h2 style="margin: 0 0 8px; font-size: 20px; color: #1C3121;">Thank you for your order, ${safeCustomerName}!</h2>
                   <p style="margin: 0 0 20px; font-size: 15px; color: #4B5563; line-height: 1.6;">
-                    We have received your order <strong>${order.order_number}</strong> and are preparing it for shipment.
+                    We have received your order <strong>${safeOrderNumber}</strong> and are preparing it for shipment.
                   </p>
                 </td>
               </tr>
@@ -151,11 +166,11 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
                     <h3 style="margin: 0 0 10px; font-size: 16px; color: #1C3121;">📦 Order Tracking Credentials</h3>
                     
                     <p style="margin: 0 0 6px; font-size: 13px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px;">Order Number</p>
-                    <p style="margin: 0 0 14px; font-size: 18px; font-weight: 700; color: #1C3121; font-family: monospace;">${order.order_number}</p>
+                    <p style="margin: 0 0 14px; font-size: 18px; font-weight: 700; color: #1C3121; font-family: monospace;">${safeOrderNumber}</p>
                     
                     <p style="margin: 0 0 6px; font-size: 13px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px;">Tracking Access Key</p>
                     <div style="background: #FFFFFF; border: 1px solid #E5E7EB; padding: 10px 14px; border-radius: 8px; display: inline-block; margin-bottom: 16px;">
-                      <code style="font-size: 15px; font-weight: 700; color: #C4883E; font-family: monospace; letter-spacing: 0.5px;">${order.tracking_token}</code>
+                      <code style="font-size: 15px; font-weight: 700; color: #C4883E; font-family: monospace; letter-spacing: 0.5px;">${safeTrackingToken}</code>
                     </div>
 
                     <div>
@@ -198,9 +213,9 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
                       <td width="55%" valign="top" style="padding-right: 16px;">
                         <h4 style="margin: 0 0 6px; font-size: 14px; color: #1C3121;">Shipping Address</h4>
                         <p style="margin: 0; font-size: 13px; color: #4B5563; line-height: 1.5;">
-                          <strong>${order.customer_name}</strong><br/>
+                          <strong>${safeCustomerName}</strong><br/>
                           ${formattedAddress}<br/>
-                          ${order.customer_phone ? `Phone: ${order.customer_phone}` : ""}
+                          ${safeCustomerPhone ? `Phone: ${safeCustomerPhone}` : ""}
                         </p>
                       </td>
 
@@ -256,8 +271,10 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     </html>
     `;
 
+    const emailSubject = sanitizeHeaderValue(`Order Confirmation #${order.order_number} - FarmSmith`);
+
     // Send HTTP POST request to Resend API
-    console.log(`[Email] Dispatching Resend API request for ${order.order_number}: from="${senderEmail}", to=["${order.customer_email}"], subject="Order Confirmation #${order.order_number} - FarmSmith"`);
+    console.log(`[Email] Dispatching Resend API request for ${order.order_number}: from="${senderEmail}", to=["${order.customer_email}"], subject="${emailSubject}"`);
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -268,7 +285,7 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
       body: JSON.stringify({
         from: senderEmail,
         to: [order.customer_email],
-        subject: `Order Confirmation #${order.order_number} - FarmSmith`,
+        subject: emailSubject,
         html: htmlContent,
       }),
     });
@@ -284,8 +301,8 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     console.log(`[Email] Order confirmation email successfully sent for ${order.order_number}. Resend ID: ${resData?.id}`);
 
     return { success: true, messageId: resData?.id };
-  } catch (err: any) {
-    const errorMsg = err?.message || String(err);
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
     console.error(`[Email] Error sending order confirmation email for order ${orderId}:`, errorMsg);
     return { success: false, error: errorMsg };
   }
