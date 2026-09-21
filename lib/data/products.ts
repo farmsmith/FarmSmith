@@ -22,10 +22,16 @@ export const getActiveProducts = cache(async (): Promise<Product[]> => {
       return [];
     }
 
-    return products.map((product: any) => ({
-      ...product,
-      images: (product.product_images ?? []).sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
-    }));
+    return products
+      .filter(
+        (product: any) =>
+          !product.short_description?.toLowerCase().includes("launching soon") &&
+          !product.description?.toLowerCase().includes("launching soon")
+      )
+      .map((product: any) => ({
+        ...product,
+        images: (product.product_images ?? []).sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+      }));
   } catch (err) {
     console.error("Error in getActiveProducts:", err);
     return [];

@@ -13,10 +13,6 @@ interface ShopClientProps {
 const CATEGORIES = [
   "All Items",
   "Powdered Spices",
-  "Oil",
-  "Rice",
-  "Daal",
-  "Grains / Pulses",
 ];
 
 const FALLBACK_LAUNCH_PRODUCTS: Product[] = [
@@ -39,91 +35,20 @@ const FALLBACK_LAUNCH_PRODUCTS: Product[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
-  {
-    id: "oil-001",
-    name: "Cold-Pressed Kachi Ghani Mustard Oil",
-    slug: "cold-pressed-mustard-oil",
-    sku: "FS-OIL-001",
-    short_description: "Pure traditional cold-pressed mustard oil with natural aroma & rich nutrients. Launching Soon!",
-    description: "Extracted slowly using wooden ghani methods without synthetic heat or chemicals.",
-    category: "Oil",
-    price: 249,
-    currency: "INR",
-    unit: "500ml",
-    weight_grams: 500,
-    gst_rate: 5,
-    image_url: "/images/product_mustard_oil.png",
-    stock_quantity: 50,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "rice-001",
-    name: "GI-Tagged Organic Aromatic Rice",
-    slug: "gi-tagged-aromatic-rice",
-    sku: "FS-RICE-001",
-    short_description: "Unpolished GI-tagged aromatic rice harvested from natural spring water farms. Launching Soon!",
-    description: "Single-origin heritage rice grown with zero pesticides.",
-    category: "Rice",
-    price: 199,
-    currency: "INR",
-    unit: "1 kg",
-    weight_grams: 1000,
-    gst_rate: 5,
-    image_url: "/images/product_aromatic_rice.png",
-    stock_quantity: 50,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "daal-001",
-    name: "Unpolished Organic Arhar Daal (Toor)",
-    slug: "unpolished-arhar-daal",
-    sku: "FS-DAAL-001",
-    short_description: "High-protein, unpolished organic yellow lentils direct from farm gates. Launching Soon!",
-    description: "Unpolished yellow split pulses containing zero artificial color.",
-    category: "Daal",
-    price: 149,
-    currency: "INR",
-    unit: "1 kg",
-    weight_grams: 1000,
-    gst_rate: 5,
-    image_url: "/images/product_arhar_daal.png",
-    stock_quantity: 50,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "grain-001",
-    name: "FarmFresh Ancient Grains & Pulses Mix",
-    slug: "ancient-grains-pulses-mix",
-    sku: "FS-GRAIN-001",
-    short_description: "Nutrient-dense ancient grains and organic whole pulses blend. Launching Soon!",
-    description: "A balanced superfood mixture of millets, moong, and wild grains.",
-    category: "Grains / Pulses",
-    price: 179,
-    currency: "INR",
-    unit: "1 kg",
-    weight_grams: 1000,
-    gst_rate: 5,
-    image_url: "/images/product_ancient_grains.png",
-    stock_quantity: 50,
-    is_active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
 ];
 
 export default function ShopClient({ initialProducts }: ShopClientProps) {
   const [selectedCategory, setSelectedCategory] = useState("All Items");
 
   const allProducts = useMemo(() => {
-    return initialProducts && initialProducts.length > 0
+    const raw = initialProducts && initialProducts.length > 0
       ? initialProducts
       : FALLBACK_LAUNCH_PRODUCTS;
+    return raw.filter(
+      (p) =>
+        !p.short_description?.toLowerCase().includes("launching soon") &&
+        !p.description?.toLowerCase().includes("launching soon")
+    );
   }, [initialProducts]);
 
   // Filter Products
@@ -139,10 +64,6 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
         return (
           productCat.includes(catTarget) ||
           productName.includes(catTarget) ||
-          (catTarget.includes("oil") && (productCat.includes("oil") || productName.includes("oil"))) ||
-          (catTarget.includes("rice") && (productCat.includes("rice") || productName.includes("rice"))) ||
-          (catTarget.includes("daal") && (productCat.includes("daal") || productName.includes("daal") || productName.includes("toor") || productName.includes("lentil"))) ||
-          (catTarget.includes("grain") && (productCat.includes("grain") || productCat.includes("pulse") || productName.includes("grain") || productName.includes("pulse"))) ||
           (catTarget.includes("spice") && (productCat.includes("spice") || productName.includes("spice") || productName.includes("turmeric") || productName.includes("chilli")))
         );
       });
@@ -151,26 +72,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     return result;
   }, [allProducts, selectedCategory]);
 
-  // Separate Available Now vs Launching Soon products
-  const availableProducts = useMemo(
-    () =>
-      filteredProducts.filter(
-        (p) =>
-          !p.short_description?.toLowerCase().includes("launching soon") &&
-          !p.description?.toLowerCase().includes("launching soon")
-      ),
-    [filteredProducts]
-  );
-
-  const launchingSoonProducts = useMemo(
-    () =>
-      filteredProducts.filter(
-        (p) =>
-          p.short_description?.toLowerCase().includes("launching soon") ||
-          p.description?.toLowerCase().includes("launching soon")
-      ),
-    [filteredProducts]
-  );
+  const availableProducts = filteredProducts;
 
   return (
     <div style={{ background: "var(--color-background)", minHeight: "100vh", paddingBottom: "5rem" }}>
@@ -326,9 +228,9 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
           />
         ) : (
           <>
-            {/* SECTION 1: Available Now (Flagship Products) */}
+            {/* Products Grid */}
             {availableProducts.length > 0 && (
-              <section style={{ marginBottom: launchingSoonProducts.length > 0 ? "3.5rem" : "0" }}>
+              <section>
                 <div
                   style={{
                     display: "flex",
@@ -359,7 +261,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                         margin: 0,
                       }}
                     >
-                      Available Now
+                      Our Harvests
                     </h2>
                   </div>
                   <span
@@ -390,89 +292,6 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                   }}
                 >
                   {availableProducts.map((product) => (
-                    <li key={product.id}>
-                      <ProductCard product={product} />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {/* SECTION 2: Launching Soon Products */}
-            {launchingSoonProducts.length > 0 && (
-              <section style={{ marginTop: availableProducts.length > 0 ? "2.5rem" : "0" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: "1.5rem",
-                    paddingBottom: "0.75rem",
-                    borderBottom: "1px dashed var(--color-border)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                    <div
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        background: "#FFFBF0",
-                        border: "1px solid #D9A441",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      🚀
-                    </div>
-                    <div>
-                      <h2
-                        style={{
-                          fontFamily: "var(--font-heading)",
-                          fontSize: "1.35rem",
-                          fontWeight: 700,
-                          color: "var(--color-primary)",
-                          margin: 0,
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        Launching Soon
-                      </h2>
-                      <p style={{ fontSize: "0.78125rem", color: "var(--color-muted)", margin: 0, lineHeight: 1.35 }}>
-                        Upcoming organic harvests in<br className="mobile-br" /> traditional farm processing
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "0.8125rem",
-                      fontWeight: 600,
-                      color: "#B37E14",
-                      background: "#FFFBF0",
-                      border: "1px solid #D9A441",
-                      padding: "0.25rem 0.75rem",
-                      borderRadius: "999px",
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {launchingSoonProducts.length} Upcoming
-                  </span>
-                </div>
-
-                <ul
-                  role="list"
-                  aria-label="Launching Soon Products"
-                  className="shop-grid"
-                  style={{
-                    listStyle: "none",
-                    padding: 0,
-                    margin: 0,
-                  }}
-                >
-                  {launchingSoonProducts.map((product) => (
                     <li key={product.id}>
                       <ProductCard product={product} />
                     </li>
