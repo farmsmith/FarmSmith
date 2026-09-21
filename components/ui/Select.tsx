@@ -43,7 +43,28 @@ export function Select({
   const containerRef = useRef<HTMLDivElement>(null);
   const selectId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   const selectedOption = options.find((opt) => opt.value === value);
+
+  // Filter options if searchQuery is active
+  const filteredOptions = searchQuery.trim()
+    ? options.filter((opt) =>
+        opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : options;
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (isOpen && options.length > 6) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    } else {
+      setSearchQuery("");
+    }
+  }, [isOpen, options.length]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -62,6 +83,7 @@ export function Select({
   const handleSelect = (val: string) => {
     onChange?.({ target: { value: val, name } });
     setIsOpen(false);
+    setSearchQuery("");
   };
 
   return (
@@ -135,7 +157,7 @@ export function Select({
       {/* Hidden input for form integration */}
       <input type="hidden" name={name} value={value} required={required} />
 
-      {/* Dropdown Options Popup (Compact, max-h 240px, never full screen) */}
+      {/* Dropdown Options Popup (Compact, max-h 260px, searchable for long lists) */}
       {isOpen && (
         <div
           role="listbox"
@@ -145,59 +167,90 @@ export function Select({
             top: "calc(100% + 4px)",
             left: 0,
             right: 0,
-            maxHeight: "240px",
+            maxHeight: "260px",
             overflowY: "auto",
             background: "var(--color-card)",
             border: "1px solid var(--color-border)",
             borderRadius: "var(--radius-md)",
             boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-            zIndex: 50,
+            zIndex: 100,
             padding: "0.375rem",
           }}
         >
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
-              <div
-                key={opt.value}
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => handleSelect(opt.value)}
+          {/* Search box if list has many options (e.g. 36 states) */}
+          {options.length > 6 && (
+            <div style={{ padding: "0.25rem 0.25rem 0.5rem" }}>
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Type to search state..."
                 style={{
-                  padding: "0.625rem 0.875rem",
-                  fontSize: "0.875rem",
+                  width: "100%",
+                  height: "2.25rem",
+                  padding: "0.25rem 0.625rem",
+                  fontSize: "0.8125rem",
                   borderRadius: "var(--radius-sm)",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  color: isSelected
-                    ? "var(--color-primary)"
-                    : "var(--color-foreground)",
-                  background: isSelected
-                    ? "rgba(31, 58, 46, 0.08)"
-                    : "transparent",
-                  fontWeight: isSelected ? 600 : 400,
-                  transition: "background 0.15s ease",
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-surface)",
+                  color: "var(--color-foreground)",
+                  outline: "none",
                 }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    (e.currentTarget as HTMLElement).style.background =
-                      "var(--color-surface)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    (e.currentTarget as HTMLElement).style.background =
-                      "transparent";
-                  }
-                }}
-              >
-                <span>{opt.label}</span>
-                {isSelected && <Check size={16} style={{ color: "var(--color-primary)" }} />}
-              </div>
-            );
-          })}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )}
+
+          {filteredOptions.length === 0 ? (
+            <div style={{ padding: "0.75rem", fontSize: "0.8125rem", color: "var(--color-muted)", textAlign: "center" }}>
+              No matches found
+            </div>
+          ) : (
+            filteredOptions.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <div
+                  key={opt.value}
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => handleSelect(opt.value)}
+                  style={{
+                    padding: "0.625rem 0.875rem",
+                    fontSize: "0.875rem",
+                    borderRadius: "var(--radius-sm)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    color: isSelected
+                      ? "var(--color-primary)"
+                      : "var(--color-foreground)",
+                    background: isSelected
+                      ? "rgba(31, 58, 46, 0.08)"
+                      : "transparent",
+                    fontWeight: isSelected ? 600 : 400,
+                    transition: "background 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      (e.currentTarget as HTMLElement).style.background =
+                        "var(--color-surface)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      (e.currentTarget as HTMLElement).style.background =
+                        "transparent";
+                    }
+                  }}
+                >
+                  <span>{opt.label}</span>
+                  {isSelected && <Check size={16} style={{ color: "var(--color-primary)" }} />}
+                </div>
+              );
+            })
+          )}
         </div>
       )}
 

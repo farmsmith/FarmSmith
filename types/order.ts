@@ -47,6 +47,7 @@ export interface Order {
   shiprocket_error?: string | null;
   created_at: string;
   updated_at: string;
+  items?: OrderItem[];
 }
 
 export interface OrderItem {

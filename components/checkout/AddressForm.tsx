@@ -247,7 +247,15 @@ export default function AddressForm({ onSubmit, loading, initialValues }: Addres
             onChange={(e) => set("line2", e.target.value)}
             placeholder="Landmark, Building name (Optional)"
           />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+          {/* City, State, Pincode in clean responsive grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gap: "1.25rem",
+              alignItems: "start",
+            }}
+          >
             <Input
               id="checkout-city"
               label="City *"
@@ -257,6 +265,16 @@ export default function AddressForm({ onSubmit, loading, initialValues }: Addres
               onBlur={() => touch("city")}
               error={touched.city ? errors.city : undefined}
               placeholder="Chennai"
+              required
+            />
+            <Select
+              id="checkout-state"
+              label="State *"
+              value={vals.state}
+              onChange={(e) => set("state", e.target.value)}
+              onBlur={() => touch("state")}
+              error={touched.state ? errors.state : undefined}
+              options={INDIAN_STATE_OPTIONS}
               required
             />
             <Input
@@ -273,18 +291,6 @@ export default function AddressForm({ onSubmit, loading, initialValues }: Addres
               required
             />
           </div>
-
-          {/* State Dropdown */}
-          <Select
-            id="checkout-state"
-            label="State *"
-            value={vals.state}
-            onChange={(e) => set("state", e.target.value)}
-            onBlur={() => touch("state")}
-            error={touched.state ? errors.state : undefined}
-            options={INDIAN_STATE_OPTIONS}
-            required
-          />
         </div>
       </fieldset>
 
