@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Star, CheckCircle2, MessageSquarePlus, UserCheck } from "lucide-react";
-import AddReviewModal from "./AddReviewModal";
+import dynamic from "next/dynamic";
+import { useState, useEffect, useCallback } from "react";
+import { Star, CheckCircle2, MessageSquarePlus } from "lucide-react";
+
+const AddReviewModal = dynamic(
+  () => import("./AddReviewModal"),
+  { ssr: false }
+);
 
 interface Review {
   id: string;
@@ -23,7 +28,7 @@ export default function ProductReviewsList({ productName }: ProductReviewsListPr
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/reviews?product=${encodeURIComponent(productName)}`);
@@ -36,10 +41,32 @@ export default function ProductReviewsList({ productName }: ProductReviewsListPr
     } finally {
       setLoading(false);
     }
-  };
+  }, [productName]);
 
   useEffect(() => {
-    fetchReviews();
+    let ignore = false;
+
+    async function load() {
+      try {
+        const res = await fetch(`/api/reviews?product=${encodeURIComponent(productName)}`);
+        if (ignore) return;
+        if (res.ok) {
+          const data = await res.json();
+          setReviews(data.reviews || []);
+        }
+      } catch (err) {
+        console.error("Failed to load reviews:", err);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void load();
+    return () => {
+      ignore = true;
+    };
   }, [productName]);
 
   const averageRating =
@@ -258,14 +285,16 @@ export default function ProductReviewsList({ productName }: ProductReviewsListPr
       )}
 
       {/* Write Review Modal */}
-      <AddReviewModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          fetchReviews();
-        }}
-        productName={productName}
-      />
+      {isModalOpen && (
+        <AddReviewModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            fetchReviews();
+          }}
+          productName={productName}
+        />
+      )}
     </section>
   );
 }

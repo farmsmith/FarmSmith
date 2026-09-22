@@ -1,9 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
-import { BarChart2, ShieldCheck, Sparkles } from "lucide-react";
-import ProductComparisonModal from "@/components/product/ProductComparisonModal";
+import { BarChart2, ShieldCheck } from "lucide-react";
 import type { Product } from "@/types/product";
+
+const ProductComparisonModal = dynamic(
+  () => import("@/components/product/ProductComparisonModal"),
+  { ssr: false }
+);
 
 interface ProductDetailCompareTriggerProps {
   product: Product;
@@ -79,11 +84,13 @@ export default function ProductDetailCompareTrigger({ product }: ProductDetailCo
         </button>
       </div>
 
-      <ProductComparisonModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        product={product}
-      />
+      {isOpen && (
+        <ProductComparisonModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          product={product}
+        />
+      )}
     </>
   );
 }

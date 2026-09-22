@@ -1,29 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ArrowRight, MessageSquarePlus, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatPrice } from "@/lib/utils/cn";
+import { Heart, MessageSquarePlus, ChevronLeft, ChevronRight } from "lucide-react";
 import AddToCartButton from "@/components/product/AddToCartButton";
-import AddReviewModal from "@/components/product/AddReviewModal";
 import type { Product } from "@/types/product";
+
+const AddReviewModal = dynamic(
+  () => import("@/components/product/AddReviewModal"),
+  { ssr: false }
+);
 
 interface FeaturedProductShowcaseProps {
   product: Product;
-}
-
-function formatWeightLabel(product: Product): string | null {
-  if (product.weight_grams && product.weight_grams > 0) {
-    if (product.weight_grams >= 1000 && product.weight_grams % 1000 === 0) {
-      return `${product.weight_grams / 1000}kg`;
-    }
-    return `${product.weight_grams}g`;
-  }
-  if (product.unit && /^\d+(g|kg|ml|l)$/i.test(product.unit.trim())) {
-    return product.unit.trim();
-  }
-  return null;
 }
 
 export default function FeaturedProductShowcase({ product }: FeaturedProductShowcaseProps) {
@@ -76,9 +67,6 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
     }, 5500);
     return () => clearInterval(timer);
   }, [isHovered, slides.length]);
-
-  const currentImageUrl = slides[currentIdx];
-  const weightLabel = formatWeightLabel(product);
 
   const prevSlide = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -341,7 +329,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                   return (
                     <button
                       key={imgUrl + idx}
-                      role="listitem"
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         setCurrentIdx(idx);
@@ -581,11 +569,13 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
       </div>
 
       {/* Interactive Review Modal */}
-      <AddReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        productName={product.name || "Kandhamal Turmeric"}
-      />
+      {isReviewModalOpen && (
+        <AddReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          productName={product.name || "Kandhamal Turmeric"}
+        />
+      )}
     </section>
   );
 }
