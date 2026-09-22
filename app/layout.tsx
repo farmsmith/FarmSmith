@@ -8,10 +8,25 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
 import { OfflineBanner } from "@/components/ui/states";
 
-const siteUrl = process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+function getSafeSiteUrl(): { siteUrlStr: string; siteUrlObj: URL } {
+  let raw = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://www.farmsmithfoods.com";
+  raw = raw.replace(/^"|"$/g, "").trim();
+  if (!raw.startsWith("http://") && !raw.startsWith("https://")) {
+    raw = `https://${raw}`;
+  }
+  try {
+    const urlObj = new URL(raw);
+    return { siteUrlStr: urlObj.origin, siteUrlObj: urlObj };
+  } catch {
+    const fallback = new URL("https://www.farmsmithfoods.com");
+    return { siteUrlStr: fallback.origin, siteUrlObj: fallback };
+  }
+}
+
+const { siteUrlStr, siteUrlObj } = getSafeSiteUrl();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: siteUrlObj,
   title: {
     default: "FarmSmith Foods — Organic Food Crafted with a Mother's Care",
     template: "%s | FarmSmith Foods",
@@ -27,7 +42,7 @@ export const metadata: Metadata = {
     title: "FarmSmith Foods — Organic Food Crafted with a Mother's Care",
     description:
       "100% GI-tagged, batch lab-tested Kandhamal turmeric and organic foods made with complete transparency.",
-    url: siteUrl,
+    url: siteUrlStr,
     siteName: "FarmSmith Foods",
     images: [
       {
