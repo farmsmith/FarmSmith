@@ -1,16 +1,34 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { formatPrice } from "@/lib/utils/cn";
 import ProductGallery from "@/components/product/ProductGallery";
 import TrustBadge, { TURMERIC_TRUST_BADGES } from "@/components/product/TrustBadge";
 import ProductFactsGrid from "@/components/product/ProductFactsGrid";
 import ProductReviewsList from "@/components/product/ProductReviewsList";
-import AddToCartButton from "@/components/product/AddToCartButton";
 import QuantitySelector from "@/components/product/QuantitySelector";
 import type { Product } from "@/types/product";
-import { getProductBySlug } from "@/lib/data/products";
+import { getProductBySlug, getActiveProducts } from "@/lib/data/products";
 
 export const revalidate = 60; // Incremental Static Regeneration every 60 seconds
+
+export async function generateStaticParams() {
+  try {
+    const products = await getActiveProducts({ limit: 100 });
+    const params = products
+      .filter((product) => Boolean(product.slug))
+      .map((product) => ({
+        slug: product.slug,
+      }));
+
+    if (params.length === 0) {
+      return [{ slug: "turmeric-powder" }];
+    }
+    return params;
+  } catch {
+    return [{ slug: "turmeric-powder" }];
+  }
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -91,9 +109,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <ol
             style={{ display: "flex", gap: "0.5rem", listStyle: "none", padding: 0, margin: 0, fontSize: "0.8125rem", color: "var(--color-muted)" }}
           >
-            <li><a href="/" style={{ color: "var(--color-muted)", textDecoration: "none" }}>Home</a></li>
+            <li><Link href="/" style={{ color: "var(--color-muted)", textDecoration: "none" }}>Home</Link></li>
             <li aria-hidden="true">/</li>
-            <li><a href="/shop" style={{ color: "var(--color-muted)", textDecoration: "none" }}>Shop</a></li>
+            <li><Link href="/shop" style={{ color: "var(--color-muted)", textDecoration: "none" }}>Shop</Link></li>
             <li aria-hidden="true">/</li>
             <li aria-current="page" style={{ color: "var(--color-foreground)" }}>{product.name}</li>
           </ol>
