@@ -26,13 +26,14 @@ export async function GET(
     await supabase
       .from("orders")
       .update({ customer_id: user.id })
+      .eq("order_number", orderNumber)
       .eq("customer_email", cleanEmail)
       .is("customer_id", null);
   }
 
   const { data: rawOrder, error } = await supabase
     .from("orders")
-    .select("id, order_number, tracking_token, status, customer_name, customer_email, customer_phone, shipping_address, subtotal_amount, taxable_amount, shipping_amount, tax_amount, cgst_amount, sgst_amount, igst_amount, total_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id, razorpay_order_id, razorpay_payment_id, created_at, updated_at")
+    .select("id, order_number, tracking_token, status, customer_name, customer_email, customer_phone, shipping_address, subtotal_amount, taxable_amount, shipping_amount, tax_amount, cgst_amount, sgst_amount, igst_amount, total_amount, currency, awb_code, courier_name, shiprocket_order_id, shiprocket_shipment_id, razorpay_order_id, razorpay_payment_id, created_at, updated_at, order_items(id, product_id, product_name, unit_price, quantity, subtotal, gst_rate, tax_amount)")
     .eq("order_number", orderNumber)
     .eq("customer_id", user.id)
     .maybeSingle();
@@ -44,18 +45,11 @@ export async function GET(
 
   if (!rawOrder) return NextResponse.json({ error: "Order not found" }, { status: 404, headers });
 
+  const { order_items, ...orderData } = rawOrder;
+  const items = order_items ?? [];
+
   const { reconcileOrderStatusFromShiprocket } = await import("@/lib/shipping/fulfillment-webhook");
-  const order = await reconcileOrderStatusFromShiprocket(rawOrder);
+  const order = await reconcileOrderStatusFromShiprocket(orderData);
 
-  const { data: items, error: itemsError } = await supabase
-    .from("order_items")
-    .select("id, product_id, product_name, unit_price, quantity, subtotal, gst_rate, tax_amount")
-    .eq("order_id", order.id);
-
-  if (itemsError) {
-    console.error("Failed to load order items", itemsError);
-    return NextResponse.json({ error: "Failed to load order items" }, { status: 500, headers });
-  }
-
-  return NextResponse.json({ ...order, items: items ?? [] }, { status: 200, headers });
+  return NextResponse.json({ ...order, items }, { status: 200, headers });
 }

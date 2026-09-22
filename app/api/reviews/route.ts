@@ -241,18 +241,41 @@ export async function GET(req: Request) {
       });
       const keysData = await keysRes.json();
       if (keysData.result && Array.isArray(keysData.result)) {
+        const targetKeys = keysData.result.slice(-10);
+        if (targetKeys.length === 0) {
+          return NextResponse.json({ reviews: [] }, { status: 200, headers });
+        }
+
+        const mgetRes = await fetch(`${url}/mget`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(targetKeys),
+        });
+        const mgetData = await mgetRes.json();
+
         const reviews = [];
-        for (const key of keysData.result.slice(-10)) {
-          const itemRes = await fetch(`${url}/get/${encodeURIComponent(key)}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const itemData = await itemRes.json();
-          if (itemData.result) {
-            const parsedItem = typeof itemData.result === "string" ? JSON.parse(itemData.result) : itemData.result;
-            if (parsedItem.is_approved) {
-              if (!productName || parsedItem.product_name === productName) {
-                reviews.push(parsedItem);
+        if (mgetData.result && Array.isArray(mgetData.result)) {
+          for (const rawItem of mgetData.result) {
+            if (!rawItem) continue;
+            try {
+              const parsedItem = typeof rawItem === "string" ? JSON.parse(rawItem) : rawItem;
+              if (parsedItem && parsedItem.is_approved) {
+                if (!productName || parsedItem.product_name === productName) {
+                  reviews.push({
+                    id: parsedItem.id,
+                    product_name: parsedItem.product_name,
+                    rating: parsedItem.rating,
+                    author_name: parsedItem.author_name,
+                    content: parsedItem.content,
+                    created_at: parsedItem.created_at,
+                  });
+                }
               }
+            } catch {
+              // Ignore corrupt/invalid JSON item
             }
           }
         }

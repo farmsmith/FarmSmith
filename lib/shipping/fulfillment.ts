@@ -140,36 +140,39 @@ export async function processOrderFulfillment(orderId: string): Promise<Fulfillm
       throw new Error(`Failed to load full order details: ${fullOrderErr?.message}`);
     }
 
-    // Fetch product weight_grams for line items
-    const productIds = (fullOrder.order_items || [])
-      .map((item: any) => item.product_id)
-      .filter(Boolean);
+    // Fetch product weight_grams for line items in a single batched query
+    const rawProductIds = (fullOrder.order_items || [])
+      .map((item: { product_id?: string | null }) => item.product_id)
+      .filter((id: string | null | undefined): id is string => Boolean(id && id.trim().length > 0));
+    const uniqueProductIds = Array.from(new Set(rawProductIds));
 
-    let productWeightsMap = new Map<string, number>();
-    if (productIds.length > 0) {
-      const { data: productRows } = await supabase
+    const productWeightsMap = new Map<string, number>();
+    if (uniqueProductIds.length > 0) {
+      const { data: productRows, error: productErr } = await supabase
         .from("products")
         .select("id, weight_grams, sku")
-        .in("id", productIds);
+        .in("id", uniqueProductIds);
 
-      if (productRows) {
-        productRows.forEach((p: any) => {
-          productWeightsMap.set(p.id, p.weight_grams ?? 500);
+      if (productErr) {
+        console.warn(`[Fulfillment] Failed to batch fetch weights for products:`, productErr.message);
+      } else if (productRows) {
+        productRows.forEach((p: { id: string; weight_grams?: number | null }) => {
+          productWeightsMap.set(p.id, typeof p.weight_grams === "number" && p.weight_grams > 0 ? p.weight_grams : 500);
         });
       }
     }
 
     // Calculate total gross weight
     let totalWeightGrams = 0;
-    const items: ShiprocketOrderItem[] = (fullOrder.order_items || []).map((item: any) => {
-      const weightGrams = productWeightsMap.get(item.product_id) ?? 500;
+    const items: ShiprocketOrderItem[] = (fullOrder.order_items || []).map((item: { product_id?: string; product_name?: string; quantity?: number; unit_price?: number; tax_amount?: number }) => {
+      const weightGrams = (item.product_id ? productWeightsMap.get(item.product_id) : undefined) ?? 500;
       totalWeightGrams += weightGrams * (item.quantity || 1);
 
       return {
-        name: item.product_name,
+        name: item.product_name || "Farm Produce",
         sku: item.product_id ? item.product_id.substring(0, 30) : "FS-ITEM",
-        units: item.quantity,
-        selling_price: Number(item.unit_price),
+        units: item.quantity || 1,
+        selling_price: Number(item.unit_price || 0),
         tax: Number(item.tax_amount || 0),
         discount: 0,
       };
