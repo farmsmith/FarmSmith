@@ -2,42 +2,65 @@ import "server-only";
 
 import { cache } from "react";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import type { Product } from "@/types/product";
+import type { Product, ProductImage } from "@/types/product";
+
+export interface GetActiveProductsOptions {
+  limit?: number;
+  offset?: number;
+}
+
+const DEFAULT_CATALOG_LIMIT = 100;
+const MAX_CATALOG_LIMIT = 100;
 
 /**
- * Server-side product data loader with React cache deduplication.
+ * Server-side product data loader with React cache deduplication and bounded querying.
  * Eliminates loopback HTTP fetches and combines product and gallery queries into a single PostgREST join.
  */
-export const getActiveProducts = cache(async (): Promise<Product[]> => {
-  try {
-    const supabase = createAdminSupabaseClient();
-    const { data: products, error } = await supabase
-      .from("products")
-      .select("id, name, slug, sku, short_description, description, category, price, currency, unit, weight_grams, gst_rate, image_url, stock_quantity, is_active, created_at, updated_at, product_images(id, product_id, image_url, alt_text, sort_order, is_primary, created_at)")
-      .eq("is_active", true)
-      .order("created_at", { ascending: true });
+export const getActiveProducts = cache(
+  async (options?: GetActiveProductsOptions): Promise<Product[]> => {
+    try {
+      const rawLimit = options?.limit ?? DEFAULT_CATALOG_LIMIT;
+      const rawOffset = options?.offset ?? 0;
 
-    if (error || !products) {
-      console.error("Failed to fetch products from database:", error);
+      const limit =
+        Number.isFinite(rawLimit) && rawLimit >= 1
+          ? Math.min(rawLimit, MAX_CATALOG_LIMIT)
+          : DEFAULT_CATALOG_LIMIT;
+      const offset =
+        Number.isFinite(rawOffset) && rawOffset >= 0 ? rawOffset : 0;
+
+      const supabase = createAdminSupabaseClient();
+      const { data: products, error } = await supabase
+        .from("products")
+        .select("id, name, slug, sku, short_description, description, category, price, currency, unit, weight_grams, gst_rate, image_url, stock_quantity, is_active, created_at, updated_at, product_images(id, product_id, image_url, alt_text, sort_order, is_primary, created_at)")
+        .eq("is_active", true)
+        .order("created_at", { ascending: true })
+        .range(offset, offset + limit - 1);
+
+      if (error || !products) {
+        console.error("Failed to fetch products from database:", error);
+        return [];
+      }
+
+      type RawProduct = Product & { product_images?: ProductImage[] };
+
+      return (products as RawProduct[])
+        .filter(
+          (product) =>
+            !product.short_description?.toLowerCase().includes("launching soon") &&
+            !product.description?.toLowerCase().includes("launching soon")
+        )
+        .map((product) => ({
+          ...product,
+          slug: product.slug === "kandhamal-turmeric-powder" ? "turmeric-powder" : product.slug,
+          images: (product.product_images ?? []).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+        }));
+    } catch (err) {
+      console.error("Error in getActiveProducts:", err);
       return [];
     }
-
-    return products
-      .filter(
-        (product: any) =>
-          !product.short_description?.toLowerCase().includes("launching soon") &&
-          !product.description?.toLowerCase().includes("launching soon")
-      )
-      .map((product: any) => ({
-        ...product,
-        slug: product.slug === "kandhamal-turmeric-powder" ? "turmeric-powder" : product.slug,
-        images: (product.product_images ?? []).sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
-      }));
-  } catch (err) {
-    console.error("Error in getActiveProducts:", err);
-    return [];
   }
-});
+);
 
 /**
  * Server-side single product data loader with React cache deduplication.
@@ -90,9 +113,10 @@ export const getProductBySlug = cache(async (slug: string): Promise<Product | nu
       return null;
     }
 
-    const images = (product.product_images ?? []).sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const rawProduct = product as Product & { product_images?: ProductImage[] };
+    const images = (rawProduct.product_images ?? []).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
     return {
-      ...product,
+      ...rawProduct,
       slug: "turmeric-powder",
       images,
     };

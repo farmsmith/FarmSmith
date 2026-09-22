@@ -6,13 +6,15 @@ import type { PublicProduct } from "@/types/product";
  * it uses the publishable-key client, which is RLS-gated to active
  * products only, so there's no need for a separate server-side path here.
  */
-export async function getActiveProducts(): Promise<PublicProduct[]> {
+export async function getActiveProducts(limit = 50): Promise<PublicProduct[]> {
+  const safeLimit = Number.isFinite(limit) && limit >= 1 ? Math.min(limit, 50) : 50;
   const supabase = createBrowserSupabaseClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("is_active", true)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .limit(safeLimit);
 
   if (error) throw error;
   return data ?? [];

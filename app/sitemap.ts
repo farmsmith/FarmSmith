@@ -3,6 +3,8 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 const baseUrl = "https://www.farmsmithfoods.com";
 
+const BATCH_SIZE = 100;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -51,22 +53,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createAdminSupabaseClient();
+    const allProducts: Array<{ id: string; slug: string; updated_at?: string | null }> = [];
+    let from = 0;
+    let hasMore = true;
 
-    const { data: products, error } = await supabase
-      .from("products")
-      .select("id, slug, updated_at")
-      .eq("is_active", true);
+    while (hasMore) {
+      const to = from + BATCH_SIZE - 1;
+      const { data: batch, error } = await supabase
+        .from("products")
+        .select("id, slug, updated_at")
+        .eq("is_active", true)
+        .order("id", { ascending: true })
+        .range(from, to);
 
-    if (error) {
-      console.error(
-        "Failed to fetch products for sitemap:",
-        error.message
-      );
+      if (error) {
+        console.error(
+          "Failed to fetch products batch for sitemap:",
+          error.message
+        );
+        break;
+      }
 
-      return staticRoutes;
+      if (!batch || batch.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      allProducts.push(...batch);
+
+      if (batch.length < BATCH_SIZE) {
+        hasMore = false;
+      } else {
+        from += BATCH_SIZE;
+      }
     }
 
-    const productRoutes: MetadataRoute.Sitemap = (products ?? [])
+    const productRoutes: MetadataRoute.Sitemap = allProducts
       .filter((product) => product.slug || product.id)
       .map((product) => {
         const rawSlug = product.slug || product.id;

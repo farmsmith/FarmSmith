@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import FeaturedProductShowcase from "@/components/home/FeaturedProductShowcase";
-import type { Product } from "@/types/product";
 import { getActiveProducts } from "@/lib/data/products";
-import TrustTicker from "@/components/home/TrustTicker";
 import PurityShowcase from "@/components/home/PurityShowcase";
 import CustomerReviewsSection from "@/components/home/CustomerReviewsSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
@@ -22,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const products = await getActiveProducts();
+  const products = await getActiveProducts({ limit: 8 });
 
   // Prioritize the flagship GI-Tagged Kandhamal Turmeric Powder product
   const featuredProduct =

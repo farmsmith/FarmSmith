@@ -48,6 +48,9 @@ export default function OrdersClient() {
   const { isOnline } = useNetworkStatus();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -57,6 +60,7 @@ export default function OrdersClient() {
     setError(null);
     setPermissionDenied(false);
     setSessionExpired(false);
+    setPage(1);
     try {
       const supabase = createBrowserSupabaseClient();
       const {
@@ -66,7 +70,7 @@ export default function OrdersClient() {
         setSessionExpired(true);
         return;
       }
-      const res = await fetch("/api/account/orders", {
+      const res = await fetch("/api/account/orders?page=1&limit=20", {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.status === 401) {
@@ -74,8 +78,9 @@ export default function OrdersClient() {
       } else if (res.status === 403) {
         setPermissionDenied(true);
       } else if (res.ok) {
-        const data = await res.json();
+        const data: Order[] = await res.json();
         setOrders(data);
+        setHasMore(data.length === 20);
       } else {
         setError("We couldn't load your order history. Please try again.");
       }
@@ -86,9 +91,82 @@ export default function OrdersClient() {
     }
   }, []);
 
+  const loadMoreOrders = async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        setSessionExpired(true);
+        return;
+      }
+      const nextPage = page + 1;
+      const res = await fetch(`/api/account/orders?page=${nextPage}&limit=20`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const data: Order[] = await res.json();
+        setOrders((prev) => [...prev, ...data]);
+        setPage(nextPage);
+        setHasMore(data.length === 20);
+      }
+    } catch {
+      // Keep existing orders if page request fails
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
-    void fetchOrders();
-  }, [fetchOrders]);
+    let ignore = false;
+
+    async function initialLoad() {
+      try {
+        const supabase = createBrowserSupabaseClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (ignore) return;
+        if (!session) {
+          setSessionExpired(true);
+          setLoading(false);
+          return;
+        }
+        const res = await fetch("/api/account/orders?page=1&limit=20", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (ignore) return;
+        if (res.status === 401) {
+          setSessionExpired(true);
+        } else if (res.status === 403) {
+          setPermissionDenied(true);
+        } else if (res.ok) {
+          const data: Order[] = await res.json();
+          setOrders(data);
+          setHasMore(data.length === 20);
+          setError(null);
+        } else {
+          setError("We couldn't load your order history. Please try again.");
+        }
+      } catch {
+        if (!ignore) {
+          setError("Network error while loading orders. Please check your connection.");
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void initialLoad();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div style={{ width: "100%", fontFamily: "var(--font-body)" }}>
@@ -453,6 +531,32 @@ export default function OrdersClient() {
                 </div>
               );
             })}
+
+            {/* Load More Pagination Trigger */}
+            {hasMore && (
+              <div style={{ textAlign: "center", marginTop: "1rem", paddingTop: "0.5rem" }}>
+                <button
+                  type="button"
+                  onClick={() => void loadMoreOrders()}
+                  disabled={loadingMore}
+                  style={{
+                    padding: "0.625rem 1.5rem",
+                    background: "var(--color-surface)",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-md)",
+                    fontFamily: "var(--font-subheading)",
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    color: "var(--color-primary)",
+                    cursor: loadingMore ? "not-allowed" : "pointer",
+                    opacity: loadingMore ? 0.7 : 1,
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {loadingMore ? "Loading more orders..." : "Load More Orders"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
