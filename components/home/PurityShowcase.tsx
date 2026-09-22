@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ShieldCheck, AlertTriangle, Check, CheckCircle2, Search, FileText, Sparkles, Award, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 const ORIGIN_SLIDES = [
   { src: "/images/Know the origin 0.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 0" },
@@ -42,7 +43,6 @@ const SAMPLE_BATCHES: SampleBatch[] = [
 ];
 
 export default function PurityShowcase() {
-  const [selectedBatchCode, setSelectedBatchCode] = useState("FS00001");
   const [inputCode, setInputCode] = useState("");
   const [activeBatch, setActiveBatch] = useState<SampleBatch | null>(SAMPLE_BATCHES[0]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -118,7 +118,6 @@ export default function PurityShowcase() {
 
     if (found) {
       setActiveBatch(found);
-      setSelectedBatchCode(found.code);
       setErrorMessage(null);
       setVerifyPulseKey((prev) => prev + 1);
       setIsReportVisible(true);
@@ -313,12 +312,12 @@ export default function PurityShowcase() {
                       zIndex: isActive ? 2 : 1,
                     }}
                   >
-                    <img
+                    <Image
                       src={slide.src}
                       alt={slide.alt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 560px"
                       style={{
-                        width: "100%",
-                        height: "100%",
                         objectFit: "cover",
                         objectPosition: idx === 0 ? "top center" : "center",
                         display: "block",

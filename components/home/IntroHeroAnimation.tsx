@@ -263,7 +263,6 @@ export default function IntroHeroAnimation({
             width={255}
             height={255}
             priority
-            unoptimized
             style={{
               width: "100%",
               height: "100%",

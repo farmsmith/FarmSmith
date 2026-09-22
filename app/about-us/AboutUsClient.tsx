@@ -335,12 +335,12 @@ export default function AboutUsClient() {
                       zIndex: isActive ? 2 : 1,
                     }}
                   >
-                    <img
+                    <Image
                       src={slide.src}
                       alt={slide.alt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 540px"
                       style={{
-                        width: "100%",
-                        height: "100%",
                         objectFit: "cover",
                         display: "block",
                       }}

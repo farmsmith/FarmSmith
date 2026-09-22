@@ -307,7 +307,6 @@ export default function Navbar() {
                   width={46}
                   height={46}
                   priority
-                  unoptimized
                   style={{ width: "100%", height: "100%", objectFit: "contain" }}
                 />
               </div>

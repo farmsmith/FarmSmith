@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Package, Sparkles, Rocket } from "lucide-react";
+import { Package } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
 import { EmptyState } from "@/components/ui/states";
 import type { Product } from "@/types/product";
@@ -291,9 +291,9 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                     margin: 0,
                   }}
                 >
-                  {availableProducts.map((product) => (
+                  {availableProducts.map((product, index) => (
                     <li key={product.id}>
-                      <ProductCard product={product} />
+                      <ProductCard product={product} priority={index === 0} />
                     </li>
                   ))}
                 </ul>

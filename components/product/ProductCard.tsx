@@ -10,6 +10,7 @@ import type { Product } from "@/types/product";
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
 function getProductBadge(product: Product) {
@@ -45,7 +46,7 @@ function formatWeightLabel(product: Product): string | null {
   return null;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -80,7 +81,6 @@ export default function ProductCard({ product }: ProductCardProps) {
   }, [isHovered, slides.length]);
 
   const badge = getProductBadge(product);
-  const currentImageUrl = slides[currentIdx];
   const weightLabel = formatWeightLabel(product);
 
   return (
@@ -185,7 +185,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     alt={`${product.name} view ${idx + 1}`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    priority={idx === 0}
+                    priority={priority && idx === 0}
                     style={{ objectFit: "cover" }}
                   />
                 </div>

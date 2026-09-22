@@ -227,7 +227,6 @@ export default function GrowingSection() {
                   objectFit: "cover",
                   objectPosition: "center center",
                 }}
-                priority
               />
             </div>
           </div>

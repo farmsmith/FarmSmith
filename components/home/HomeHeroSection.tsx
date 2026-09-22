@@ -60,7 +60,7 @@ export default function HomeHeroSection() {
     >
       {/* Background Image */}
       <Image
-        src="/images/hero_groceries.png"
+        src="/images/hero_groceries.webp"
         alt="Fresh organic groceries, spices, pulses, and wholesome farm produce"
         fill
         priority

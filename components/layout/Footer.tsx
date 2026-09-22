@@ -118,7 +118,6 @@ export default function Footer() {
                     alt="FarmSmith Foods"
                     width={48}
                     height={48}
-                    unoptimized
                     style={{ width: "100%", height: "100%", objectFit: "contain" }}
                   />
                 </div>
