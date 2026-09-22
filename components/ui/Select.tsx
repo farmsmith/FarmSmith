@@ -1,8 +1,5 @@
-"use client";
-
 import * as React from "react";
-import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export interface SelectOption {
@@ -10,259 +7,121 @@ export interface SelectOption {
   value: string;
 }
 
-export interface SelectProps {
+export interface SelectProps
+  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "onChange"> {
   label?: string;
   error?: string;
   hint?: string;
-  id?: string;
-  value?: string;
-  onChange?: (e: { target: { value: string; name?: string } }) => void;
-  onBlur?: () => void;
-  name?: string;
-  placeholder?: string;
   options: SelectOption[];
-  required?: boolean;
-  className?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement> | { target: { value: string; name?: string } }) => void;
 }
 
-export function Select({
-  label,
-  error,
-  hint,
-  id,
-  value = "",
-  onChange,
-  onBlur,
-  name,
-  placeholder = "Select an option",
-  options,
-  required,
-  className,
-}: SelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const selectId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
+const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+  (
+    {
+      className,
+      label,
+      error,
+      hint,
+      id,
+      options,
+      value = "",
+      onChange,
+      required,
+      ...props
+    },
+    ref
+  ) => {
+    const selectId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
+    const isPlaceholderSelected = !value || value === "";
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef<HTMLInputElement>(null);
+    return (
+      <div className="flex flex-col gap-1.5 w-full min-w-0">
+        {label ? (
+          <label
+            htmlFor={selectId}
+            className="text-sm font-medium text-[var(--color-foreground)] max-w-full break-words leading-tight"
+          >
+            {label}
+          </label>
+        ) : null}
 
-  const selectedOption = options.find((opt) => opt.value === value);
-
-  // Filter options if searchQuery is active
-  const filteredOptions = searchQuery.trim()
-    ? options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : options;
-
-  // Focus search input when opened
-  useEffect(() => {
-    if (isOpen && options.length > 6) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 50);
-    } else {
-      setSearchQuery("");
-    }
-  }, [isOpen, options.length]);
-
-  // Close dropdown on click outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        if (isOpen) {
-          setIsOpen(false);
-          onBlur?.();
-        }
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, onBlur]);
-
-  const handleSelect = (val: string) => {
-    onChange?.({ target: { value: val, name } });
-    setIsOpen(false);
-    setSearchQuery("");
-  };
-
-  return (
-    <div className="flex flex-col gap-1.5 relative w-full min-w-0" ref={containerRef}>
-      {label ? (
-        <label
-          htmlFor={selectId}
-          className="text-sm font-medium text-[var(--color-foreground)] max-w-full break-words leading-tight"
-        >
-          {label}
-        </label>
-      ) : null}
-
-      {/* Select trigger button */}
-      <button
-        type="button"
-        id={selectId}
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-invalid={!!error}
-        style={{
-          height: "2.75rem",
-          width: "100%",
-          borderRadius: "var(--radius-md)",
-          paddingLeft: "0.875rem",
-          paddingRight: "2.75rem", // Generous space so text doesn't touch the arrow
-          fontSize: "0.875rem",
-          textAlign: "left",
-          position: "relative",
-          background: "var(--color-card)",
-          color: selectedOption?.value
-            ? "var(--color-foreground)"
-            : "var(--color-muted)",
-          border: error
-            ? "1px solid var(--color-error)"
-            : isOpen
-            ? "2px solid var(--color-primary)"
-            : "1px solid var(--color-border)",
-          transition: "border-color 0.15s ease, box-shadow 0.15s ease",
-          boxShadow: isOpen ? "0 0 0 2px rgba(31,58,46,0.1)" : "none",
-          display: "flex",
-          alignItems: "center",
-          cursor: "pointer",
-        }}
-        className={cn(className)}
-      >
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-
-        {/* Downside Chevron Arrow (moved inwards from corner) */}
-        <span
-          style={{
-            position: "absolute",
-            right: "1.125rem", // Moved slightly left from extreme corner
-            top: "50%",
-            transform: `translateY(-50%) rotate(${isOpen ? 180 : 0}deg)`,
-            transition: "transform 0.2s ease",
-            color: "var(--color-primary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            pointerEvents: "none",
-          }}
-        >
-          <ChevronDown size={18} />
-        </span>
-      </button>
-
-      {/* Hidden input for form integration */}
-      <input type="hidden" name={name} value={value} required={required} />
-
-      {/* Dropdown Options Popup (Compact, max-h 260px, searchable for long lists) */}
-      {isOpen && (
-        <div
-          role="listbox"
-          aria-label={label ?? "Select options"}
-          style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
-            left: 0,
-            right: 0,
-            maxHeight: "260px",
-            overflowY: "auto",
-            background: "var(--color-card)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-md)",
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-            zIndex: 100,
-            padding: "0.375rem",
-          }}
-        >
-          {/* Search box if list has many options (e.g. 36 states) */}
-          {options.length > 6 && (
-            <div style={{ padding: "0.25rem 0.25rem 0.5rem" }}>
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Type to search state..."
+        <div className="relative flex items-center w-full min-w-0">
+          <select
+            id={selectId}
+            ref={ref}
+            value={value}
+            onChange={(e) => onChange?.(e)}
+            required={required}
+            className={cn(
+              "h-11 w-full min-w-0 rounded-[var(--radius-md)] border pl-3.5 pr-10 text-sm",
+              "bg-[var(--color-card)]",
+              isPlaceholderSelected
+                ? "text-[var(--color-muted)]"
+                : "text-[var(--color-foreground)]",
+              "appearance-none cursor-pointer",
+              "transition-colors duration-150",
+              "focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent",
+              error
+                ? "border-[var(--color-error)] focus:ring-[var(--color-error)]"
+                : "border-[var(--color-border)]",
+              className
+            )}
+            style={{
+              WebkitAppearance: "none",
+              MozAppearance: "none",
+              appearance: "none",
+            }}
+            aria-describedby={
+              error ? `${selectId}-error` : hint ? `${selectId}-hint` : undefined
+            }
+            aria-invalid={!!error}
+            {...props}
+          >
+            {options.map((opt) => (
+              <option
+                key={opt.value}
+                value={opt.value}
                 style={{
-                  width: "100%",
-                  height: "2.25rem",
-                  padding: "0.25rem 0.625rem",
-                  fontSize: "0.8125rem",
-                  borderRadius: "var(--radius-sm)",
-                  border: "1px solid var(--color-border)",
-                  background: "var(--color-surface)",
-                  color: "var(--color-foreground)",
-                  outline: "none",
+                  color: opt.value ? "var(--color-foreground)" : "var(--color-muted)",
+                  background: "var(--color-card)",
                 }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          )}
+              >
+                {opt.label}
+              </option>
+            ))}
+          </select>
 
-          {filteredOptions.length === 0 ? (
-            <div style={{ padding: "0.75rem", fontSize: "0.8125rem", color: "var(--color-muted)", textAlign: "center" }}>
-              No matches found
-            </div>
-          ) : (
-            filteredOptions.map((opt) => {
-              const isSelected = opt.value === value;
-              return (
-                <div
-                  key={opt.value}
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => handleSelect(opt.value)}
-                  style={{
-                    padding: "0.625rem 0.875rem",
-                    fontSize: "0.875rem",
-                    borderRadius: "var(--radius-sm)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    color: isSelected
-                      ? "var(--color-primary)"
-                      : "var(--color-foreground)",
-                    background: isSelected
-                      ? "rgba(31, 58, 46, 0.08)"
-                      : "transparent",
-                    fontWeight: isSelected ? 600 : 400,
-                    transition: "background 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--color-surface)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "transparent";
-                    }
-                  }}
-                >
-                  <span>{opt.label}</span>
-                  {isSelected && <Check size={16} style={{ color: "var(--color-primary)" }} />}
-                </div>
-              );
-            })
-          )}
+          {/* Clean Custom Chevron Down Icon */}
+          <div
+            className="absolute right-3.5 flex items-center justify-center pointer-events-none text-[var(--color-muted)]"
+            aria-hidden="true"
+          >
+            <ChevronDown size={18} />
+          </div>
         </div>
-      )}
 
-      {error ? (
-        <p id={`${selectId}-error`} role="alert" className="text-xs text-[var(--color-error)]">
-          {error}
-        </p>
-      ) : hint ? (
-        <p id={`${selectId}-hint`} className="text-xs text-[var(--color-muted)]">
-          {hint}
-        </p>
-      ) : null}
-    </div>
-  );
-}
+        {error ? (
+          <p
+            id={`${selectId}-error`}
+            role="alert"
+            className="text-xs text-[var(--color-error)]"
+          >
+            {error}
+          </p>
+        ) : hint ? (
+          <p
+            id={`${selectId}-hint`}
+            className="text-xs text-[var(--color-muted)]"
+          >
+            {hint}
+          </p>
+        ) : null}
+      </div>
+    );
+  }
+);
+
+Select.displayName = "Select";
+
+export { Select };

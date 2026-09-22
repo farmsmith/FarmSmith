@@ -883,8 +883,8 @@ export default function CheckoutClient() {
                             </span>
                           </div>
 
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
-                            {addr.isDefault ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexShrink: 0 }}>
+                            {addr.isDefault && (
                               <span
                                 style={{
                                   background: "#C4883E",
@@ -899,19 +899,50 @@ export default function CheckoutClient() {
                               >
                                 DEFAULT
                               </span>
-                            ) : (
-                              <div style={{ display: "flex", gap: "0.75rem" }}>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedAddressId(addr.id);
-                                    setIsAddingNewAddress(true);
-                                  }}
-                                  style={{ color: "#6B7280", background: "none", border: "none", fontSize: "0.8125rem", cursor: "pointer" }}
-                                >
-                                  Edit
-                                </button>
+                            )}
+
+                            <div style={{ display: "flex", gap: "0.625rem", alignItems: "center" }}>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAddressId(addr.id);
+                                  setIsAddingNewAddress(true);
+                                  setNewAddressLabel((addr.label as any) || "Home");
+                                  setShippingAddress({
+                                    line1: addr.line1,
+                                    line2: addr.line2 || "",
+                                    city: addr.city,
+                                    state: addr.state,
+                                    pincode: addr.pincode,
+                                  });
+                                  if (addr.name) setCustomer((c) => ({ ...c, name: addr.name }));
+                                  if (addr.phone) setCustomer((c) => ({ ...c, phone: addr.phone }));
+                                }}
+                                style={{
+                                  color: "#4B5563",
+                                  background: "none",
+                                  border: "1px solid var(--color-border)",
+                                  fontSize: "0.8125rem",
+                                  fontWeight: 600,
+                                  cursor: "pointer",
+                                  padding: "0.25rem 0.625rem",
+                                  borderRadius: "var(--radius-sm)",
+                                  transition: "all 0.15s ease",
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.borderColor = "#C4883E";
+                                  e.currentTarget.style.color = "#C4883E";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.borderColor = "var(--color-border)";
+                                  e.currentTarget.style.color = "#4B5563";
+                                }}
+                              >
+                                Edit
+                              </button>
+
+                              {!addr.isDefault && (
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -940,12 +971,20 @@ export default function CheckoutClient() {
                                       }
                                     }
                                   }}
-                                  style={{ color: "#6B7280", background: "none", border: "none", fontSize: "0.8125rem", cursor: "pointer" }}
+                                  style={{
+                                    color: "#EF4444",
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "0.8125rem",
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                    padding: "0.25rem 0.35rem",
+                                  }}
                                 >
                                   Remove
                                 </button>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -964,6 +1003,40 @@ export default function CheckoutClient() {
                   {/* Inline Address Inputs Form (For New / Editing Address) */}
                   {(selectedAddressId === "new" || isAddingNewAddress) && (
                     <div style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", padding: "1.25rem", background: "#FFFFFF", display: "flex", flexDirection: "column", gap: "1rem", marginTop: "0.5rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.25rem" }}>
+                        <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--color-primary)" }}>
+                          {selectedAddressId !== "new" ? "Edit Address Details" : "New Address Details"}
+                        </span>
+                        {savedAddresses.length > 0 && isAddingNewAddress && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingNewAddress(false);
+                              if (savedAddresses.length > 0) {
+                                const def = savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
+                                setSelectedAddressId(def.id);
+                                setShippingAddress({
+                                  line1: def.line1,
+                                  line2: def.line2 || "",
+                                  city: def.city,
+                                  state: def.state,
+                                  pincode: def.pincode,
+                                });
+                              }
+                            }}
+                            style={{
+                              color: "#6B7280",
+                              background: "none",
+                              border: "none",
+                              fontSize: "0.8125rem",
+                              cursor: "pointer",
+                              textDecoration: "underline",
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                       <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.25rem" }}>
                         {(["Home", "Office", "Other"] as const).map((type) => (
                           <button
