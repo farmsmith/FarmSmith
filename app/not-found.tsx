@@ -65,7 +65,7 @@ export default function NotFound() {
           Go Home
         </Link>
         <Link
-          href="/shop"
+          href="/#featured-harvest"
           style={{
             border: "1.5px solid var(--color-primary)",
             color: "var(--color-primary)",

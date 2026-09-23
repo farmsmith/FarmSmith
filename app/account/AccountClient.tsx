@@ -206,7 +206,7 @@ export default function AccountClient() {
           }}
           secondaryAction={{
             label: "Browse Products",
-            href: "/shop",
+            href: "/#featured-harvest",
             variant: "outline",
           }}
           className="max-w-2xl mx-auto py-8"

@@ -27,7 +27,7 @@ function InstagramIcon({ size = 16, style }: { size?: number; style?: React.CSSP
 
 const SHOP_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
+  { href: "/#featured-harvest", label: "Shop" },
   { href: "/why-us", label: "Our Standards" },
   { href: "/about-us", label: "Our Story" },
   { href: "/account", label: "My Account" },

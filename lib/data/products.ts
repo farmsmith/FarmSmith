@@ -38,7 +38,12 @@ export const getActiveProducts = cache(
         .range(offset, offset + limit - 1);
 
       if (error || !products) {
-        console.error("Failed to fetch products from database:", error);
+        console.error("Failed to fetch products from database:", {
+          message: error?.message,
+          details: error?.details,
+          hint: error?.hint,
+          code: error?.code,
+        });
         return [];
       }
 

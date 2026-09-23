@@ -198,7 +198,7 @@ export default function PurityShowcase() {
           }}
         >
           <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.12em" }}>
-            OUR STANDARD: BATCH TRANSPARENCY
+            OUR STANDARD • BATCH TRANSPARENCY
           </p>
           <h2
             style={{

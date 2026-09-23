@@ -550,7 +550,7 @@ export default function CheckoutClient() {
           description="Add something farm-fresh before checking out."
           primaryAction={{
             label: "Browse Products",
-            href: "/shop",
+            href: "/#featured-harvest",
           }}
         />
       </div>

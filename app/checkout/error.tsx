@@ -35,7 +35,7 @@ export default function CheckoutError({ error, reset }: CheckoutErrorProps) {
           }}
           secondaryAction={{
             label: "Return to Cart",
-            href: "/shop",
+            href: "/#featured-harvest",
           }}
         />
       </div>

@@ -224,7 +224,7 @@ export default function OrdersClient() {
 
           {orders.length > 0 && (
             <Link
-              href="/shop"
+              href="/#featured-harvest"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -272,7 +272,7 @@ export default function OrdersClient() {
             }}
             secondaryAction={{
               label: "Shop Now",
-              href: "/shop",
+              href: "/#featured-harvest",
               variant: "outline",
             }}
             className="py-6"
@@ -364,7 +364,7 @@ export default function OrdersClient() {
             </h2>
 
             <Link
-              href="/shop"
+              href="/#featured-harvest"
               style={{
                 display: "inline-flex",
                 alignItems: "center",

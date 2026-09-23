@@ -21,7 +21,7 @@ export default function IntroHeroAnimation({
 }: {
   onIntroComplete?: () => void;
 }) {
-  // Animation stages: 'enter' (0-2.2s) -> 'flying' (2.2s-5.8s, slow graceful logo + text flight) -> 'settled'
+  // Animation stages: 'enter' (0-1.0s screen showcase) -> 'flying' (1.0s-3.5s, 2.5s graceful flight) -> 'settled'
   const [stage, setStage] = useState<"enter" | "flying" | "settled">("enter");
   const [showSkip, setShowSkip] = useState(false);
 
@@ -47,14 +47,14 @@ export default function IntroHeroAnimation({
       return;
     }
 
-    // Reveal skip button after 0.6s
-    const skipTimer = setTimeout(() => setShowSkip(true), 600);
+    // Reveal skip button after 0.3s
+    const skipTimer = setTimeout(() => setShowSkip(true), 300);
     timerRef.current.push(skipTimer);
 
-    // At 2.2s, initiate the slow, majestic logo, text, and navbar pages flight
+    // At 1.0s, initiate the logo, text, and navbar pages flight
     const dockTimer = setTimeout(() => {
       startFlight();
-    }, 2200);
+    }, 1000);
     timerRef.current.push(dockTimer);
 
     // If user starts scrolling down, immediately dismiss intro completely
@@ -156,12 +156,12 @@ export default function IntroHeroAnimation({
 
     setStage("flying");
 
-    // Flight takes 2.5s for smooth, graceful docking and hero reveal
+    // Flight takes 1.5s for smooth, responsive docking and hero reveal
     const settledTimer = setTimeout(() => {
       document.documentElement.classList.add("farmsmith-intro-hidden");
       setStage("settled");
       onIntroComplete?.();
-    }, 2500);
+    }, 1500);
     timerRef.current.push(settledTimer);
   };
 
@@ -193,7 +193,7 @@ export default function IntroHeroAnimation({
           backgroundColor: "#FFFFFF",
           backgroundImage:
             "linear-gradient(135deg, #FFFFFF 0%, #FAF7F2 100%)",
-          transition: "opacity 2.5s cubic-bezier(0.35, 0, 0.25, 1)",
+          transition: "opacity 1.5s cubic-bezier(0.35, 0, 0.25, 1)",
           opacity: isFlying ? 0 : 1,
           zIndex: 1,
         }}
@@ -213,7 +213,7 @@ export default function IntroHeroAnimation({
           background: "radial-gradient(circle, rgba(217, 164, 65, 0.12) 0%, rgba(31, 58, 46, 0.05) 50%, transparent 70%)",
           filter: "blur(50px)",
           pointerEvents: "none",
-          transition: "opacity 1.8s ease",
+          transition: "opacity 1.2s ease",
           opacity: isFlying ? 0 : 1,
           zIndex: 1,
         }}
@@ -235,7 +235,7 @@ export default function IntroHeroAnimation({
         }}
         className="intro-showcase-container"
       >
-        {/* ───── TOP: Big Logo (FLIES SLOWLY ACROSS SCREEN TO NAVBAR LOGO) ───── */}
+        {/* ───── TOP: Big Logo (FLIES ACROSS SCREEN TO NAVBAR LOGO IN 1.5s) ───── */}
         <div
           ref={bigLogoRef}
           style={{
@@ -251,7 +251,7 @@ export default function IntroHeroAnimation({
             transform: logoTransform,
             transformOrigin: "center center",
             transition: isFlying
-              ? "transform 2.5s cubic-bezier(0.35, 0, 0.2, 1)"
+              ? "transform 1.5s cubic-bezier(0.35, 0, 0.2, 1)"
               : "none",
             zIndex: 100,
             opacity: 1,
@@ -271,7 +271,7 @@ export default function IntroHeroAnimation({
           />
         </div>
 
-        {/* ───── MIDDLE: Brand Title & Subtitle (FARMSMITH TEXT FLIES TO NAVBAR TEXT) ───── */}
+        {/* ───── MIDDLE: Brand Title & Subtitle (FARMSMITH TEXT FLIES TO NAVBAR TEXT IN 1.5s) ───── */}
         <div
           style={{
             marginTop: "1.1rem",
@@ -296,7 +296,7 @@ export default function IntroHeroAnimation({
               transform: textTransform,
               transformOrigin: "center center",
               transition: isFlying
-                ? "transform 2.5s cubic-bezier(0.35, 0, 0.2, 1), color 2.5s cubic-bezier(0.35, 0, 0.2, 1)"
+                ? "transform 1.5s cubic-bezier(0.35, 0, 0.2, 1), color 1.5s cubic-bezier(0.35, 0, 0.2, 1)"
                 : "none",
               opacity: 1,
             }}
@@ -313,7 +313,7 @@ export default function IntroHeroAnimation({
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               margin: "0.4rem 0 0",
-              transition: "opacity 1.6s ease, transform 1.6s ease",
+              transition: "opacity 1.0s ease, transform 1.0s ease",
               opacity: isFlying ? 0 : 1,
               transform: isFlying ? "translateY(12px)" : "translateY(0)",
               pointerEvents: isFlying ? "none" : "auto",
@@ -323,7 +323,7 @@ export default function IntroHeroAnimation({
           </p>
         </div>
 
-        {/* ───── BOTTOM: Navbar Pages Down Below the Logo (FLIES TO NAVBAR LINKS) ───── */}
+        {/* ───── BOTTOM: Navbar Pages Down Below the Logo (FLIES TO NAVBAR LINKS IN 1.5s) ───── */}
         <div
           style={{
             marginTop: "2.25rem",
@@ -377,7 +377,7 @@ export default function IntroHeroAnimation({
                     transform: navTransforms[index] || "translate3d(0, 0, 0) scale(1)",
                     transformOrigin: "center center",
                     transition: isFlying
-                      ? "transform 2.5s cubic-bezier(0.35, 0, 0.2, 1), color 2.5s cubic-bezier(0.35, 0, 0.2, 1)"
+                      ? "transform 1.5s cubic-bezier(0.35, 0, 0.2, 1), color 1.5s cubic-bezier(0.35, 0, 0.2, 1)"
                       : "color 0.2s ease",
                   }}
                 >

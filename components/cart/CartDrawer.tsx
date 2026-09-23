@@ -151,7 +151,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 description="Add something wholesome to get started."
                 primaryAction={{
                   label: "Browse Products",
-                  href: "/shop",
+                  href: "/#featured-harvest",
                   onClick: onClose,
                 }}
               />

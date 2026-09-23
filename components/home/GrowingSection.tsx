@@ -75,18 +75,13 @@ export default function GrowingSection() {
         >
           {/* Text Left - Slides in slowly from Left to Right */}
           <div>
-            {/* Pill Eyebrow */}
+            {/* Eyebrow */}
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                background: "rgba(217, 164, 65, 0.12)",
-                border: "1px solid rgba(217, 164, 65, 0.35)",
-                padding: "0.45rem 1.1rem",
-                borderRadius: "100px",
-                marginBottom: "1.25rem",
-                backdropFilter: "blur(6px)",
+                marginBottom: "0.85rem",
                 opacity: isAssembled ? 1 : 0,
                 transform: isAssembled ? "translateX(0)" : "translateX(-75px)",
                 transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
@@ -94,11 +89,12 @@ export default function GrowingSection() {
             >
               <Sparkles size={15} style={{ color: "#D9A441" }} />
               <span
+                className="eyebrow"
                 style={{
-                  fontSize: "0.78125rem",
-                  fontWeight: 800,
+                  fontSize: "0.8125rem",
+                  fontWeight: 700,
                   color: "#D9A441",
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.1em",
                   textTransform: "uppercase",
                 }}
               >
@@ -174,7 +170,7 @@ export default function GrowingSection() {
               </Link>
 
               <Link
-                href="/shop"
+                href="/#featured-harvest"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -232,115 +228,78 @@ export default function GrowingSection() {
           </div>
         </div>
 
-        {/* Bottom Row: Upcoming Teaser Cards (Placed below the split section) */}
+        {/* Bottom Row: 2 Upcoming Points (Clean typography without rounded box containers) */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "1.5rem",
-            marginTop: "3.75rem",
+            gap: "2.5rem",
+            marginTop: "3.5rem",
+            paddingTop: "2.5rem",
+            borderTop: "1px solid rgba(217, 164, 65, 0.15)",
+            opacity: isAssembled ? 1 : 0,
+            transform: isAssembled ? "translateY(0)" : "translateY(30px)",
+            transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s",
           }}
         >
-          {/* Card 1: Cold-Pressed Oils */}
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.05)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(217, 164, 65, 0.3)",
-              borderRadius: "var(--radius-xl)",
-              padding: "2rem 1.75rem",
-              textAlign: "center",
-              boxShadow: isAssembled
-                ? "0 16px 36px rgba(0, 0, 0, 0.25)"
-                : "0 4px 12px rgba(0, 0, 0, 0.1)",
-              opacity: isAssembled ? 1 : 0,
-              transform: isAssembled
-                ? "translateY(0) scale(1)"
-                : "translateY(40px) scale(0.95)",
-              transition:
-                "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, box-shadow 2.75s ease",
-            }}
-          >
+          {/* Point 1: Cold-Pressed Oils */}
+          <div style={{ textAlign: "left" }}>
             <span
               style={{
                 fontSize: "0.6875rem",
                 color: "#D9A441",
                 fontWeight: 800,
                 textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                background: "rgba(217, 164, 65, 0.12)",
-                padding: "0.25rem 0.65rem",
-                borderRadius: "100px",
-                display: "inline-block",
-                marginBottom: "0.75rem",
+                letterSpacing: "0.12em",
+                display: "block",
+                marginBottom: "0.35rem",
               }}
             >
               UPCOMING
             </span>
-            <h4
+            <h3
               style={{
                 fontFamily: "var(--font-heading)",
-                fontSize: "1.3rem",
-                color: "#FFFFFF",
+                fontSize: "1.45rem",
+                color: "#FBFAF6",
                 marginBottom: "0.35rem",
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
               Cold-Pressed Oils
-            </h4>
-            <p style={{ fontSize: "0.875rem", color: "rgba(251,250,246,0.7)", margin: 0 }}>
+            </h3>
+            <p style={{ fontSize: "0.9375rem", color: "rgba(251,250,246,0.75)", margin: 0 }}>
               Wood-milled purity
             </p>
           </div>
 
-          {/* Card 2: Grains and pulses */}
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.05)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(217, 164, 65, 0.3)",
-              borderRadius: "var(--radius-xl)",
-              padding: "2rem 1.75rem",
-              textAlign: "center",
-              boxShadow: isAssembled
-                ? "0 16px 36px rgba(0, 0, 0, 0.25)"
-                : "0 4px 12px rgba(0, 0, 0, 0.1)",
-              opacity: isAssembled ? 1 : 0,
-              transform: isAssembled
-                ? "translateY(0) scale(1)"
-                : "translateY(40px) scale(0.95)",
-              transition:
-                "transform 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s, opacity 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s, box-shadow 2.75s ease",
-            }}
-          >
+          {/* Point 2: Grains and pulses */}
+          <div style={{ textAlign: "left" }}>
             <span
               style={{
                 fontSize: "0.6875rem",
                 color: "#D9A441",
                 fontWeight: 800,
                 textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                background: "rgba(217, 164, 65, 0.12)",
-                padding: "0.25rem 0.65rem",
-                borderRadius: "100px",
-                display: "inline-block",
-                marginBottom: "0.75rem",
+                letterSpacing: "0.12em",
+                display: "block",
+                marginBottom: "0.35rem",
               }}
             >
               UPCOMING
             </span>
-            <h4
+            <h3
               style={{
                 fontFamily: "var(--font-heading)",
-                fontSize: "1.3rem",
-                color: "#FFFFFF",
+                fontSize: "1.45rem",
+                color: "#FBFAF6",
                 marginBottom: "0.35rem",
-                fontWeight: 700,
+                fontWeight: 600,
               }}
             >
               Grains and pulses
-            </h4>
-            <p style={{ fontSize: "0.875rem", color: "rgba(251,250,246,0.7)", margin: 0 }}>
+            </h3>
+            <p style={{ fontSize: "0.9375rem", color: "rgba(251,250,246,0.75)", margin: 0 }}>
               From where it grows best
             </p>
           </div>

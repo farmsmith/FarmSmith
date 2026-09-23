@@ -104,7 +104,7 @@ html.farmsmith-intro-hidden #nav-center-links {
   transition: opacity 0.3s ease;
 }
 
-/* ─── Hero Section Cinematic Fade-in During Flight (2.5s) ─── */
+/* ─── Hero Section Cinematic Fade-in During Flight (1.5s) ─── */
 html:not(.farmsmith-intro-hidden):not(.farmsmith-hero-fadein) #home-hero-section {
   opacity: 0;
   filter: blur(8px);
@@ -115,9 +115,9 @@ html.farmsmith-hero-fadein #home-hero-section {
   opacity: 1;
   filter: blur(0px);
   transform: translateY(0) scale(1);
-  transition: opacity 2.5s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 2.5s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.5s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 html.farmsmith-intro-hidden #home-hero-section {

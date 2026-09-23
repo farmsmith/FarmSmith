@@ -111,7 +111,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           >
             <li><Link href="/" style={{ color: "var(--color-muted)", textDecoration: "none" }}>Home</Link></li>
             <li aria-hidden="true">/</li>
-            <li><Link href="/shop" style={{ color: "var(--color-muted)", textDecoration: "none" }}>Shop</Link></li>
+            <li><Link href="/#featured-harvest" style={{ color: "var(--color-muted)", textDecoration: "none" }}>Shop</Link></li>
             <li aria-hidden="true">/</li>
             <li aria-current="page" style={{ color: "var(--color-foreground)" }}>{product.name}</li>
           </ol>

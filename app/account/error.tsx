@@ -35,7 +35,7 @@ export default function AccountError({ error, reset }: AccountErrorProps) {
           }}
           secondaryAction={{
             label: "Browse Shop",
-            href: "/shop",
+            href: "/#featured-harvest",
           }}
         />
       </div>
