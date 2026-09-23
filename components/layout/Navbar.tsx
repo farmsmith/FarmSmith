@@ -64,6 +64,9 @@ export default function Navbar() {
   // Auto-close menus and drawer whenever the route changes
   useEffect(() => {
     closeAllMenus();
+    if (pathname !== "/") {
+      document.documentElement.classList.add("farmsmith-intro-hidden");
+    }
   }, [pathname]);
 
 

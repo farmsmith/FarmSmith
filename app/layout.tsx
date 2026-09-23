@@ -90,7 +90,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                if (sessionStorage.getItem('farmsmith_intro_seen') === 'true') {
+                if (sessionStorage.getItem('farmsmith_intro_seen') === 'true' || (window.location.pathname && window.location.pathname !== '/')) {
                   document.documentElement.classList.add('farmsmith-intro-hidden');
                 }
               } catch(e) {}

@@ -87,6 +87,23 @@ html.farmsmith-intro-hidden #farmsmith-intro-overlay {
   pointer-events: none !important;
 }
 
+/* ─── Intro Animation Navbar Docking Sync ─── */
+/* Remove/hide navbar logo, brand text, and center links while intro animation is active so only the flying animated contents appear until docked */
+html:not(.farmsmith-intro-hidden) #nav-brand-logo,
+html:not(.farmsmith-intro-hidden) #nav-brand-text,
+html:not(.farmsmith-intro-hidden) #nav-center-links {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.farmsmith-intro-hidden #nav-brand-logo,
+html.farmsmith-intro-hidden #nav-brand-text,
+html.farmsmith-intro-hidden #nav-center-links {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
 /* ─── Hero Section Cinematic Fade-in During Flight (2.5s) ─── */
 html:not(.farmsmith-intro-hidden):not(.farmsmith-hero-fadein) #home-hero-section {
   opacity: 0;
