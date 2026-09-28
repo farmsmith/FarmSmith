@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 
 const ORIGIN_SLIDES = [
   { src: "/images/Know the origin 0.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 0" },
@@ -49,6 +49,25 @@ export default function PurityShowcase() {
   const [isAssembled, setIsAssembled] = useState(false);
   const [isReportVisible, setIsReportVisible] = useState(false);
   const [verifyPulseKey, setVerifyPulseKey] = useState(0);
+
+  // Live Verify Quality click counter state (Real database count starting from 0)
+  const [verificationCount, setVerificationCount] = useState<number>(0);
+
+  // Fetch real count from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/metrics/verify-quality")
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data?.count && typeof data.count === "number") {
+          setVerificationCount(data.count);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Know the origin slideshow state
   const [originSlideIdx, setOriginSlideIdx] = useState(0);
@@ -106,6 +125,23 @@ export default function PurityShowcase() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Optimistically increment live count on screen
+    setVerificationCount((prev) => prev + 1);
+
+    // Persist increment in background to Supabase
+    fetch("/api/metrics/verify-quality", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.count && typeof data.count === "number") {
+          setVerificationCount(data.count);
+        }
+      })
+      .catch(() => {});
+
     const query = inputCode.trim();
     if (!query) {
       setErrorMessage("Please enter a valid batch number to view the report.");
@@ -141,6 +177,20 @@ export default function PurityShowcase() {
         @media (max-width: 480px) {
           .batch-report-grid {
             grid-template-columns: 1fr !important;
+          }
+        }
+        @keyframes livePulseDot {
+          0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+          }
+          70% {
+            transform: scale(1.6);
+            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+          }
+          100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
           }
         }
         @keyframes labTileStampIn {
@@ -458,22 +508,90 @@ export default function PurityShowcase() {
           />
 
           <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
-            <div style={{ maxWidth: "700px" }}>
-              <h3
+            {/* Header: Title Left + Live Verification Social Proof Badge Right */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                flexWrap: "wrap",
+                gap: "1.25rem",
+              }}
+            >
+              <div style={{ maxWidth: "620px" }}>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontSize: "clamp(1.4rem, 3vw, 1.85rem)",
+                    color: "var(--color-primary)",
+                    margin: 0,
+                    fontWeight: 700,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Batch Quality check report
+                </h3>
+                <p style={{ fontSize: "0.9375rem", color: "#4B5563", margin: "0.4rem 0 0", lineHeight: 1.6 }}>
+                  Enter the batch code on your pack to verify the quality of your product. Protective packaging design preserves natural freshness with a shelf life of 1 year for our pure turmeric.
+                </p>
+              </div>
+
+              {/* Live Tracking Social Proof Badge */}
+              <div
                 style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "clamp(1.4rem, 3vw, 1.85rem)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.55rem",
+                  background: "rgba(31, 58, 46, 0.04)",
+                  border: "1px solid rgba(217, 164, 65, 0.35)",
+                  padding: "0.55rem 1rem",
+                  borderRadius: "100px",
+                  fontSize: "0.8125rem",
                   color: "var(--color-primary)",
-                  margin: 0,
-                  fontWeight: 700,
-                  letterSpacing: "-0.01em",
+                  boxShadow: "0 2px 8px rgba(31, 58, 46, 0.04)",
+                  alignSelf: "flex-start",
                 }}
               >
-                Batch Quality check report
-              </h3>
-              <p style={{ fontSize: "0.9375rem", color: "#4B5563", margin: "0.4rem 0 0", lineHeight: 1.6 }}>
-                Enter the batch code on your pack to verify the quality of your product. Protective packaging design preserves natural freshness with a shelf life of 1 year for our pure turmeric.
-              </p>
+                <span
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "10px",
+                    height: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      position: "absolute",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      backgroundColor: "#10B981",
+                      animation: "livePulseDot 2s cubic-bezier(0, 0, 0.2, 1) infinite",
+                    }}
+                  />
+                  <span
+                    style={{
+                      position: "relative",
+                      width: "6px",
+                      height: "6px",
+                      borderRadius: "50%",
+                      backgroundColor: "#059669",
+                    }}
+                  />
+                </span>
+
+                <ShieldCheck size={16} style={{ color: "#D9A441", flexShrink: 0 }} />
+
+                <span style={{ fontWeight: 500 }}>
+                  <strong style={{ color: "#1F3A2E", fontWeight: 700, fontFamily: "monospace", fontSize: "0.9rem" }}>
+                    {verificationCount.toLocaleString()}
+                  </strong>{" "}
+                  {verificationCount === 1 ? "customer verified quality" : "customers verified quality"}
+                </span>
+              </div>
             </div>
 
             {/* Input Search Form */}

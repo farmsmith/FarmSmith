@@ -13,14 +13,293 @@ export interface SendEmailResult {
 
 // Module-level in-memory cache to prevent duplicate email dispatches within process lifecycle
 const dispatchedOrderEmails = new Set<string>();
+const dispatchedAdminEmails = new Set<string>();
 
 /**
- * Sends a branded order confirmation email to the customer using Resend.
+ * Sends a notification email to the store owner/admin when a new order is received.
+ * Safe to be called asynchronously in background tasks.
+ * Idempotent: checks if admin notification was already dispatched for this order.
+ */
+export async function sendAdminOrderNotificationEmail(orderId: string): Promise<SendEmailResult> {
+  console.log(`[AdminEmail] Invoked sendAdminOrderNotificationEmail for orderId: ${orderId}`);
+
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    console.warn(`[AdminEmail] RESEND_API_KEY not configured. Skipping admin notification for order ${orderId}`);
+    return { success: false, skipped: true, error: "RESEND_API_KEY missing" };
+  }
+
+  if (dispatchedAdminEmails.has(orderId)) {
+    console.log(`[AdminEmail] Admin notification already dispatched for order ${orderId}. Skipping duplicate.`);
+    return { success: true, skipped: true };
+  }
+
+  try {
+    const supabase = createAdminSupabaseClient();
+
+    // Fetch complete order & items data
+    const { data: order, error: orderErr } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          id,
+          product_name,
+          unit_price,
+          quantity,
+          subtotal,
+          tax_amount
+        )
+      `)
+      .eq("id", orderId)
+      .single();
+
+    if (orderErr || !order) {
+      console.error(`[AdminEmail] Failed to load order ${orderId} for admin notification:`, orderErr?.message);
+      return { success: false, error: orderErr?.message || "Order not found" };
+    }
+
+    const adminEmailRaw = process.env.ADMIN_EMAIL || process.env.CONTACT_EMAIL || "farmsmith6@gmail.com";
+    const recipientAdminEmail = adminEmailRaw.includes("<")
+      ? adminEmailRaw.match(/<([^>]+)>/)?.[1] || adminEmailRaw
+      : adminEmailRaw;
+
+    const senderEmail = "FarmSmith Orders <onboarding@resend.dev>";
+    const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://farm-smith.vercel.app";
+    const directTrackingUrl = `${siteUrl}/order/${encodeURIComponent(order.order_number)}?token=${encodeURIComponent(order.tracking_token || "")}`;
+
+    // Escape dynamic strings
+    const safeOrderNumber = escapeHtml(order.order_number);
+    const safeCustomerName = escapeHtml(order.customer_name || "Guest Customer");
+    const safeCustomerEmail = escapeHtml(order.customer_email || "N/A");
+    const safeCustomerPhone = escapeHtml(order.customer_phone || "N/A");
+    const safeRazorpayPaymentId = escapeHtml(order.razorpay_payment_id || "N/A");
+    const safeRazorpayOrderId = escapeHtml(order.razorpay_order_id || "N/A");
+    const safeShiprocketShipmentId = escapeHtml(order.shiprocket_shipment_id || "Pending / Auto-dispatch");
+
+    // Build items HTML table rows
+    const itemsHtml = (order.order_items || [])
+      .map(
+        (item: { product_name: string; quantity: number; unit_price: number; subtotal?: number }) => `
+        <tr>
+          <td style="padding: 10px 14px; border-bottom: 1px solid #E5E7EB; font-size: 14px; color: #1F2937;">
+            <strong>${escapeHtml(item.product_name)}</strong>
+          </td>
+          <td style="padding: 10px 14px; border-bottom: 1px solid #E5E7EB; font-size: 14px; color: #4B5563; text-align: center;">
+            ${item.quantity}
+          </td>
+          <td style="padding: 10px 14px; border-bottom: 1px solid #E5E7EB; font-size: 14px; color: #1F2937; text-align: right; font-weight: 600;">
+            ${formatPrice(item.subtotal || item.unit_price * item.quantity)}
+          </td>
+        </tr>
+      `
+      )
+      .join("");
+
+    const shippingAddr = (order.shipping_address as Record<string, string>) || {};
+    const addressCityStatePin = [
+      shippingAddr.city ? escapeHtml(shippingAddr.city) : "",
+      shippingAddr.state ? escapeHtml(shippingAddr.state) : "",
+      shippingAddr.pincode ? escapeHtml(shippingAddr.pincode) : "",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    const formattedAddress = [
+      shippingAddr.line1 ? escapeHtml(shippingAddr.line1) : null,
+      shippingAddr.line2 ? escapeHtml(shippingAddr.line2) : null,
+      addressCityStatePin || null,
+      "India",
+    ]
+      .filter(Boolean)
+      .join("<br/>");
+
+    const orderTime = new Date(order.created_at || Date.now()).toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    const adminHtmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>🚨 New Order Received - ${safeOrderNumber}</title>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #F3F4F6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F3F4F6; padding: 24px 12px;">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #E5E7EB;">
+              
+              <!-- Header Alert Banner -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #1C3121 0%, #2D4C34 100%); padding: 28px 24px; text-align: center;">
+                  <span style="background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; display: inline-block; margin-bottom: 8px;">
+                    ⚡ Store Admin Alert
+                  </span>
+                  <h1 style="margin: 0; color: #FFFFFF; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">New Order Placed! 🎉</h1>
+                  <p style="margin: 6px 0 0; color: #D1D5DB; font-size: 14px;">Order #${safeOrderNumber} • Total: <strong style="color: #6EE7B7;">${formatPrice(order.total_amount)}</strong></p>
+                </td>
+              </tr>
+
+              <!-- Key Metrics Grid -->
+              <tr>
+                <td style="padding: 24px 24px 16px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td width="50%" style="padding: 12px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB;">
+                        <span style="font-size: 12px; color: #6B7280; text-transform: uppercase; font-weight: 600;">Order Amount</span>
+                        <div style="font-size: 20px; font-weight: 800; color: #15803D; margin-top: 4px;">${formatPrice(order.total_amount)}</div>
+                        <span style="font-size: 11px; color: #059669; font-weight: 600;">✓ Payment Paid</span>
+                      </td>
+                      <td width="8"></td>
+                      <td width="50%" style="padding: 12px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB;">
+                        <span style="font-size: 12px; color: #6B7280; text-transform: uppercase; font-weight: 600;">Placed On</span>
+                        <div style="font-size: 14px; font-weight: 700; color: #111827; margin-top: 4px;">${orderTime}</div>
+                        <span style="font-size: 11px; color: #6B7280;">IST (India)</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Customer & Shipping Information -->
+              <tr>
+                <td style="padding: 0 24px 16px;">
+                  <div style="background: #FBFAF6; border: 1px solid #E2E8F0; border-radius: 10px; padding: 18px;">
+                    <h3 style="margin: 0 0 12px; font-size: 15px; color: #1C3121; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #E5E7EB; padding-bottom: 6px;">
+                      👤 Customer & Shipping Details
+                    </h3>
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 13px; line-height: 1.6; color: #374151;">
+                      <tr>
+                        <td width="30%" style="font-weight: 600; color: #4B5563; padding: 3px 0;">Name:</td>
+                        <td style="color: #111827; font-weight: 600;">${safeCustomerName}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight: 600; color: #4B5563; padding: 3px 0;">Email:</td>
+                        <td><a href="mailto:${safeCustomerEmail}" style="color: #C4883E; text-decoration: none;">${safeCustomerEmail}</a></td>
+                      </tr>
+                      <tr>
+                        <td style="font-weight: 600; color: #4B5563; padding: 3px 0;">Phone:</td>
+                        <td><a href="tel:${safeCustomerPhone}" style="color: #111827; text-decoration: none; font-weight: 600;">${safeCustomerPhone}</a></td>
+                      </tr>
+                      <tr>
+                        <td valign="top" style="font-weight: 600; color: #4B5563; padding: 3px 0;">Address:</td>
+                        <td style="color: #111827;">${formattedAddress}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Order Items Breakdown -->
+              <tr>
+                <td style="padding: 0 24px 16px;">
+                  <h3 style="margin: 0 0 10px; font-size: 15px; color: #1C3121; text-transform: uppercase; letter-spacing: 0.5px;">
+                    📦 Ordered Items (${order.order_items?.length || 0})
+                  </h3>
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse: collapse; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
+                    <thead>
+                      <tr style="background-color: #F9FAFB;">
+                        <th style="padding: 10px 14px; text-align: left; font-size: 12px; color: #6B7280; text-transform: uppercase; font-weight: 600;">Product</th>
+                        <th style="padding: 10px 14px; text-align: center; font-size: 12px; color: #6B7280; text-transform: uppercase; font-weight: 600;">Qty</th>
+                        <th style="padding: 10px 14px; text-align: right; font-size: 12px; color: #6B7280; text-transform: uppercase; font-weight: 600;">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${itemsHtml}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+
+              <!-- Payment & Technical IDs -->
+              <tr>
+                <td style="padding: 0 24px 24px;">
+                  <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 16px; font-size: 12px; color: #4B5563;">
+                    <div style="margin-bottom: 4px;"><strong>Razorpay Payment ID:</strong> <code style="color: #1F2937;">${safeRazorpayPaymentId}</code></div>
+                    <div style="margin-bottom: 4px;"><strong>Razorpay Order ID:</strong> <code style="color: #1F2937;">${safeRazorpayOrderId}</code></div>
+                    <div style="margin-bottom: 4px;"><strong>Shiprocket Shipment:</strong> <code style="color: #1F2937;">${safeShiprocketShipmentId}</code></div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Action Button -->
+              <tr>
+                <td style="padding: 0 24px 28px; text-align: center;">
+                  <a href="${directTrackingUrl}" target="_blank" style="display: inline-block; background-color: #1C3121; color: #FFFFFF; font-weight: 600; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    View / Track Order Live ➔
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="background-color: #FBFAF6; padding: 16px; text-align: center; border-top: 1px solid #E5E7EB; font-size: 12px; color: #9CA3AF;">
+                  FarmSmith Automated Notification System
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+    `;
+
+    const adminSubject = sanitizeHeaderValue(`🛒 [NEW ORDER] #${order.order_number} - ${formatPrice(order.total_amount)} from ${order.customer_name || "Customer"}`);
+
+    console.log(`[AdminEmail] Dispatching Resend API admin alert for ${order.order_number} to ${recipientAdminEmail}`);
+
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendApiKey}`,
+      },
+      body: JSON.stringify({
+        from: senderEmail,
+        to: [recipientAdminEmail],
+        subject: adminSubject,
+        html: adminHtmlContent,
+      }),
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => "");
+      console.error(`[AdminEmail] Resend API error (${response.status}) for admin alert ${order.order_number}:`, errBody);
+      return { success: false, error: `Resend API HTTP ${response.status}: ${errBody}` };
+    }
+
+    const resData = await response.json();
+    dispatchedAdminEmails.add(orderId);
+    console.log(`[AdminEmail] Admin notification email sent for order ${order.order_number}. Resend ID: ${resData?.id}`);
+
+    return { success: true, messageId: resData?.id };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[AdminEmail] Error sending admin notification for order ${orderId}:`, errorMsg);
+    return { success: false, error: errorMsg };
+  }
+}
+
+/**
+ * Sends a branded order confirmation email to the customer using Resend,
+ * and also dispatches the admin notification alert.
  * Safe to be called asynchronously in background tasks.
  * Idempotent: checks if confirmation email was already dispatched.
  */
 export async function sendOrderConfirmationEmail(orderId: string): Promise<SendEmailResult> {
   console.log(`[Email] Invoked sendOrderConfirmationEmail for orderId: ${orderId}`);
+
+  // Trigger Admin Notification in parallel
+  sendAdminOrderNotificationEmail(orderId).catch((adminErr) => {
+    console.error(`[Email] Background admin notification error for order ${orderId}:`, adminErr);
+  });
 
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) {
@@ -307,3 +586,4 @@ export async function sendOrderConfirmationEmail(orderId: string): Promise<SendE
     return { success: false, error: errorMsg };
   }
 }
+

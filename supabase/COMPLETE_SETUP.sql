@@ -326,3 +326,45 @@ on conflict (slug) do update set
   price = 129.00,
   is_active = true,
   updated_at = now();
+
+-- ==============================================================================
+-- 12. SITE METRICS & BATCH VERIFICATIONS TRACKER
+-- ==============================================================================
+create table if not exists site_metrics (
+  id text primary key,
+  count bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table site_metrics enable row level security;
+
+create policy "Allow public read site_metrics"
+  on site_metrics for select
+  to anon, authenticated
+  using (true);
+
+insert into site_metrics (id, count)
+values ('batch_verifications', 0)
+on conflict (id) do nothing;
+
+create or replace function increment_site_metric(metric_id text, increment_by int default 1)
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_count bigint;
+begin
+  insert into site_metrics (id, count, updated_at)
+  values (metric_id, increment_by, now())
+  on conflict (id) do update
+  set count = site_metrics.count + increment_by,
+      updated_at = now()
+  returning count into new_count;
+
+  return new_count;
+end;
+$$;
+
+grant execute on function increment_site_metric(text, int) to anon, authenticated, service_role;
