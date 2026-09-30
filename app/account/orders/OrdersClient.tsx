@@ -12,7 +12,11 @@ import {
   Sparkles,
   Calendar,
   ChevronRight,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
 } from "lucide-react";
+import { formatPrice } from "@/lib/utils/cn";
 import {
   ErrorState,
   OfflineState,
@@ -389,175 +393,378 @@ export default function OrdersClient() {
 
         {/* Active Orders List */}
         {!loading && !sessionExpired && !permissionDenied && !error && orders.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-            {orders.map((order) => {
-              const formattedDate = new Date(order.created_at).toLocaleDateString("en-IN", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              });
+          <>
+            <style>{`
+              @keyframes orderCardFade {
+                from { opacity: 0; transform: translateY(12px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              .order-card-luxury {
+                animation: orderCardFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+                transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+              }
+              .order-card-luxury:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 28px rgba(31, 58, 46, 0.08) !important;
+                border-color: rgba(31, 58, 46, 0.25) !important;
+              }
+              .order-btn-details:hover {
+                background: rgba(31, 58, 46, 0.06) !important;
+                border-color: var(--color-primary) !important;
+                color: var(--color-primary) !important;
+              }
+              .order-btn-track:hover {
+                box-shadow: 0 4px 14px rgba(31, 58, 46, 0.32) !important;
+                transform: translateY(-1px);
+              }
+            `}</style>
 
-              const canTrack =
-                order.status !== "cancelled" &&
-                order.status !== "refunded" &&
-                order.status !== "pending_payment";
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              {orders.map((order, idx) => {
+                const formattedDate = new Date(order.created_at).toLocaleDateString("en-IN", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                });
 
-              return (
-                <div
-                  key={order.id}
-                  style={{
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-lg)",
-                    background: "var(--color-card)",
-                    overflow: "hidden",
-                    transition: "all 0.2s ease",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
-                  }}
-                >
-                  {/* Order Header: ID, Date, Status */}
+                const canTrack =
+                  order.status !== "cancelled" &&
+                  order.status !== "refunded" &&
+                  order.status !== "pending_payment";
+
+                const totalItemsCount =
+                  order.items && order.items.length > 0
+                    ? order.items.reduce((s, i) => s + (i.quantity || 1), 0)
+                    : null;
+
+                return (
                   <div
+                    key={order.id}
+                    className="order-card-luxury"
                     style={{
-                      padding: "1.25rem 1.5rem",
-                      background: "var(--color-surface)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: "0.75rem",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "16px",
+                      background: "var(--color-card)",
+                      overflow: "hidden",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+                      animationDelay: `${idx * 0.05}s`,
                     }}
                   >
-                    <div>
-                      <h2
-                        style={{
-                          fontFamily: "var(--font-heading)",
-                          fontSize: "1.0625rem",
-                          fontWeight: 600,
-                          color: "var(--color-primary)",
-                          letterSpacing: "0.02em",
-                          margin: 0,
-                        }}
-                      >
-                        ORDER #{order.order_number}
-                      </h2>
-                      <span
-                        style={{
-                          fontSize: "0.8125rem",
-                          fontFamily: "var(--font-body)",
-                          fontWeight: 400,
-                          color: "var(--color-muted)",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.3rem",
-                          marginTop: "0.25rem",
-                        }}
-                      >
-                        <Calendar size={13} color="var(--color-muted)" />
-                        {formattedDate}
-                      </span>
+                    {/* Order Card Header */}
+                    <div
+                      style={{
+                        padding: "1.25rem 1.5rem",
+                        background: "linear-gradient(180deg, rgba(31, 58, 46, 0.04) 0%, rgba(31, 58, 46, 0.01) 100%)",
+                        borderBottom: "1px solid var(--color-border)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "1rem",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", flexWrap: "wrap" }}>
+                        <div
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "10px",
+                            background: "linear-gradient(135deg, rgba(31, 58, 46, 0.1) 0%, rgba(196, 136, 62, 0.15) 100%)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "var(--color-primary)",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Package size={20} strokeWidth={2} />
+                        </div>
+
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                            <h2
+                              style={{
+                                fontFamily: "var(--font-heading)",
+                                fontSize: "1.0625rem",
+                                fontWeight: 700,
+                                color: "var(--color-primary)",
+                                letterSpacing: "0.02em",
+                                margin: 0,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.35rem",
+                              }}
+                            >
+                              <span>ORDER</span>
+                              <code
+                                style={{
+                                  background: "rgba(31, 58, 46, 0.07)",
+                                  padding: "2px 8px",
+                                  borderRadius: "6px",
+                                  fontFamily: "monospace",
+                                  fontWeight: 700,
+                                  color: "var(--color-primary)",
+                                  fontSize: "0.95rem",
+                                  letterSpacing: "0.02em",
+                                }}
+                              >
+                                #{order.order_number}
+                              </code>
+                            </h2>
+                          </div>
+
+                          <span
+                            style={{
+                              fontSize: "0.8125rem",
+                              fontFamily: "var(--font-body)",
+                              fontWeight: 400,
+                              color: "var(--color-muted)",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.35rem",
+                              marginTop: "0.2rem",
+                            }}
+                          >
+                            <Calendar size={13} color="var(--color-muted)" />
+                            Placed on {formattedDate}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Status & Price Pill */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                        <Badge
+                          variant={statusVariant(order.status)}
+                          style={{
+                            fontSize: "0.8125rem",
+                            padding: "0.35rem 0.85rem",
+                            fontFamily: "var(--font-subheading)",
+                            fontWeight: 600,
+                            borderRadius: "999px",
+                          }}
+                        >
+                          {statusLabel(order.status)}
+                        </Badge>
+                      </div>
                     </div>
 
-                    {/* Status Badge */}
-                    <Badge
-                      variant={statusVariant(order.status)}
+                    {/* Order Card Body (Items preview & Total) */}
+                    <div
                       style={{
-                        fontSize: "0.8125rem",
-                        padding: "0.35rem 0.75rem",
-                        fontFamily: "var(--font-subheading)",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {statusLabel(order.status)}
-                    </Badge>
-                  </div>
-
-                  {/* Actions Footer */}
-                  <div
-                    style={{
-                      padding: "1rem 1.5rem",
-                      background: "var(--color-card)",
-                      borderTop: "1px solid var(--color-border)",
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                      gap: "0.75rem",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <Link
-                      href={`/account/orders/${order.order_number}`}
-                      style={{
-                        fontSize: "0.8125rem",
-                        fontFamily: "var(--font-subheading)",
-                        fontWeight: 500,
-                        color: "var(--color-primary)",
-                        background: "var(--color-surface)",
-                        border: "1px solid var(--color-border)",
-                        padding: "0.5rem 1rem",
-                        borderRadius: "var(--radius-md)",
-                        textDecoration: "none",
-                        display: "inline-flex",
+                        padding: "1.25rem 1.5rem",
+                        display: "flex",
+                        justifyContent: "space-between",
                         alignItems: "center",
-                        gap: "0.35rem",
-                        transition: "background 0.15s ease",
+                        flexWrap: "wrap",
+                        gap: "1.25rem",
+                        background: "var(--color-card)",
                       }}
                     >
-                      View Order Details <ChevronRight size={14} />
-                    </Link>
+                      {/* Left: Items list / summary */}
+                      <div style={{ flex: "1 1 280px", minWidth: 0 }}>
+                        {order.items && order.items.length > 0 ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            {order.items.slice(0, 3).map((item, i) => (
+                              <div
+                                key={item.id || i}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  gap: "0.75rem",
+                                  fontSize: "0.875rem",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontFamily: "var(--font-subheading)",
+                                    fontWeight: 500,
+                                    color: "var(--color-foreground)",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {item.product_name}
+                                </span>
+                                <span
+                                  style={{
+                                    fontFamily: "var(--font-body)",
+                                    color: "var(--color-muted)",
+                                    fontSize: "0.8125rem",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  Qty: {item.quantity}
+                                </span>
+                              </div>
+                            ))}
+                            {order.items.length > 3 && (
+                              <span style={{ fontSize: "0.78rem", color: "var(--color-muted)", fontFamily: "var(--font-body)" }}>
+                                + {order.items.length - 3} more item(s)
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--color-muted)", fontSize: "0.875rem" }}>
+                            <ShoppingBag size={15} color="var(--color-accent)" />
+                            <span>Standard Order Shipment</span>
+                          </div>
+                        )}
 
-                    {canTrack && (
-                      <a
-                        href="https://www.shiprocket.in/shipment-tracking/"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        {/* Courier / Tracking badge if available */}
+                        {order.awb_code && (
+                          <div
+                            style={{
+                              marginTop: "0.625rem",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.4rem",
+                              padding: "0.25rem 0.625rem",
+                              borderRadius: "6px",
+                              background: "rgba(31, 58, 46, 0.05)",
+                              fontSize: "0.78rem",
+                              fontFamily: "var(--font-subheading)",
+                              color: "var(--color-primary)",
+                              fontWeight: 500,
+                            }}
+                          >
+                            <Truck size={13} color="var(--color-accent)" />
+                            <span>{order.courier_name || "Shiprocket"}: {order.awb_code}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: Total Amount Display */}
+                      <div
+                        style={{
+                          textAlign: "right",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-end",
+                          justifyContent: "center",
+                          paddingLeft: "1rem",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "0.75rem",
+                            fontFamily: "var(--font-body)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                            color: "var(--color-muted)",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {totalItemsCount ? `Total (${totalItemsCount} ${totalItemsCount === 1 ? 'item' : 'items'})` : "Total Amount"}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: "var(--font-heading)",
+                            fontSize: "1.375rem",
+                            fontWeight: 700,
+                            color: "var(--color-primary)",
+                            lineHeight: 1.2,
+                            marginTop: "0.15rem",
+                          }}
+                        >
+                          {formatPrice(order.total_amount, order.currency)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Actions Footer */}
+                    <div
+                      style={{
+                        padding: "0.875rem 1.5rem",
+                        background: "var(--color-surface)",
+                        borderTop: "1px solid var(--color-border)",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Link
+                        href={`/account/orders/${order.order_number}`}
+                        className="order-btn-details"
                         style={{
                           fontSize: "0.8125rem",
                           fontFamily: "var(--font-subheading)",
-                          fontWeight: 500,
-                          background: "linear-gradient(135deg, #1F3A2E 0%, #2D5241 100%)",
-                          color: "#FFFFFF",
-                          padding: "0.5rem 1rem",
+                          fontWeight: 600,
+                          color: "var(--color-primary)",
+                          background: "var(--color-card)",
+                          border: "1px solid var(--color-border)",
+                          padding: "0.5rem 1.125rem",
                           borderRadius: "var(--radius-md)",
                           textDecoration: "none",
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: "0.4rem",
-                          boxShadow: "0 2px 6px rgba(31,58,46,0.18)",
+                          gap: "0.35rem",
+                          transition: "all 0.15s ease",
                         }}
                       >
-                        <Truck size={14} /> Track Live Delivery
-                      </a>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                        View Order Details <ChevronRight size={14} />
+                      </Link>
 
-            {/* Load More Pagination Trigger */}
-            {hasMore && (
-              <div style={{ textAlign: "center", marginTop: "1rem", paddingTop: "0.5rem" }}>
-                <button
-                  type="button"
-                  onClick={() => void loadMoreOrders()}
-                  disabled={loadingMore}
-                  style={{
-                    padding: "0.625rem 1.5rem",
-                    background: "var(--color-surface)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-md)",
-                    fontFamily: "var(--font-subheading)",
-                    fontWeight: 500,
-                    fontSize: "0.875rem",
-                    color: "var(--color-primary)",
-                    cursor: loadingMore ? "not-allowed" : "pointer",
-                    opacity: loadingMore ? 0.7 : 1,
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  {loadingMore ? "Loading more orders..." : "Load More Orders"}
-                </button>
-              </div>
-            )}
-          </div>
+                      {canTrack && (
+                        <a
+                          href="https://www.shiprocket.in/shipment-tracking/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="order-btn-track"
+                          style={{
+                            fontSize: "0.8125rem",
+                            fontFamily: "var(--font-subheading)",
+                            fontWeight: 600,
+                            background: "linear-gradient(135deg, #1F3A2E 0%, #2D5241 100%)",
+                            color: "#FFFFFF",
+                            padding: "0.5rem 1.125rem",
+                            borderRadius: "var(--radius-md)",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.45rem",
+                            boxShadow: "0 2px 8px rgba(31,58,46,0.22)",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          <Truck size={14} /> Track Live Delivery
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Load More Pagination Trigger */}
+              {hasMore && (
+                <div style={{ textAlign: "center", marginTop: "1rem", paddingTop: "0.5rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => void loadMoreOrders()}
+                    disabled={loadingMore}
+                    style={{
+                      padding: "0.625rem 1.5rem",
+                      background: "var(--color-surface)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "var(--radius-md)",
+                      fontFamily: "var(--font-subheading)",
+                      fontWeight: 500,
+                      fontSize: "0.875rem",
+                      color: "var(--color-primary)",
+                      cursor: loadingMore ? "not-allowed" : "pointer",
+                      opacity: loadingMore ? 0.7 : 1,
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {loadingMore ? "Loading more orders..." : "Load More Orders"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
