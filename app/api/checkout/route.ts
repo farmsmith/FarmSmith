@@ -206,6 +206,13 @@ export async function POST(request: Request) {
   );
 
   if (createOrderError || !orderId) {
+    console.error("Supabase create_pending_order failed:", {
+      error: createOrderError,
+      message: createOrderError?.message,
+      details: createOrderError?.details,
+      hint: createOrderError?.hint,
+      orderNumber,
+    });
     const isStockConflict = createOrderError?.message?.includes("INSUFFICIENT_STOCK");
     return NextResponse.json(
       {
