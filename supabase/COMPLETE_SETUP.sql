@@ -1,4 +1,4 @@
-﻿-- ==============================================================================
+-- ==============================================================================
 -- FARMSMITH FOODS — COMPLETE MASTER DATABASE SETUP
 -- Single file combining all migrations (001-009) + seed data.
 -- Safe to run on a FRESH Supabase project or re-run on an existing one.
@@ -496,14 +496,11 @@ insert into shipping_rates (name, state, min_order_amount, shipping_amount, is_a
 values ('All India Standard Shipping (Rs.60)', null, 0, 60.00, true);
 
 -- ==============================================================================
--- 23. SEED DATA: Products (6 official products with fixed UUIDs)
+-- 23. SEED DATA: Products (Turmeric Powder only)
 -- ==============================================================================
+-- Deactivate all other products
 update products set is_active = false
-where slug not in (
-  'kandhamal-turmeric-powder','cold-pressed-mustard-oil',
-  'gi-tagged-aromatic-rice','unpolished-arhar-daal',
-  'ancient-grains-pulses-mix','whole-ground-spice-pack'
-);
+where slug <> 'kandhamal-turmeric-powder';
 
 insert into products (id, name, slug, sku, short_description, description, category, price, currency, unit, weight_grams, gst_rate, image_url, stock_quantity, is_active)
 values
@@ -513,41 +510,6 @@ values
   'Pure GI-tagged Kandhamal turmeric powder with high curcumin content and batch test reports.',
   'Sourced directly from Kandhamal organic farming clusters in Odisha. 100% pure, unadulterated, and rich in natural curcumin.',
   'Other spices whole and powder',129.00,'INR','100g',100,5.0,'/images/Product 1.PNG',92,true
-),
-(
-  '00000000-0000-4000-a000-000000000002',
-  'Cold-Pressed Kachi Ghani Mustard Oil','cold-pressed-mustard-oil','FS-OIL-001',
-  'Pure traditional cold-pressed mustard oil with natural aroma and rich nutrients. Launching Soon!',
-  'Extracted slowly using wooden ghani methods without synthetic heat or chemicals, preserving original antioxidants.',
-  'Oil',249.00,'INR','500ml',500,5.0,'/images/product_turmeric.png',50,true
-),
-(
-  '00000000-0000-4000-a000-000000000003',
-  'GI-Tagged Organic Aromatic Rice','gi-tagged-aromatic-rice','FS-RICE-001',
-  'Unpolished GI-tagged aromatic rice harvested from natural spring water farms. Launching Soon!',
-  'Single-origin heritage rice grown with zero pesticides, featuring natural aroma and high fiber content.',
-  'Rice',199.00,'INR','1 kg',1000,5.0,'/images/product_turmeric.png',50,true
-),
-(
-  '00000000-0000-4000-a000-000000000004',
-  'Unpolished Organic Arhar Daal (Toor)','unpolished-arhar-daal','FS-DAAL-001',
-  'High-protein, unpolished organic yellow lentils direct from farm gates. Launching Soon!',
-  'Unpolished yellow split pulses containing zero artificial color or mineral oil treatment.',
-  'Daal',149.00,'INR','1 kg',1000,5.0,'/images/product_turmeric.png',50,true
-),
-(
-  '00000000-0000-4000-a000-000000000005',
-  'FarmFresh Ancient Grains and Pulses Mix','ancient-grains-pulses-mix','FS-GRAIN-001',
-  'Nutrient-dense ancient grains and organic whole pulses blend. Launching Soon!',
-  'A balanced superfood mixture of millets, moong, and wild grains crafted for daily nutritious meals.',
-  'Other grains and pulses',179.00,'INR','1 kg',1000,5.0,'/images/product_turmeric.png',50,true
-),
-(
-  '00000000-0000-4000-a000-000000000006',
-  'Hand-Selected Whole and Ground Spice Pack','whole-ground-spice-pack','FS-SPICE-001',
-  'Batch-tested aromatic whole spices and freshly milled pure powders. Launching Soon!',
-  'Pure single-origin spices solar-dried and crushed to retain natural essential oils and vibrant flavors.',
-  'Other spices whole and powder',299.00,'INR','250g',250,5.0,'/images/product_turmeric.png',50,true
 )
 on conflict (slug) do update set
   id = excluded.id, name = excluded.name, category = excluded.category,
