@@ -1136,16 +1136,14 @@ export default function CheckoutClient() {
                   </p>
                 </div>
 
-                {/* Payment Selection Options */}
+                  {/* Payment Selection Options */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <label
-                    onClick={() => setPaymentMethod("online")}
+                  <div
                     style={{
-                      border: paymentMethod === "online" ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
-                      background: paymentMethod === "online" ? "rgba(31, 58, 46, 0.04)" : "transparent",
+                      border: "2px solid var(--color-primary)",
+                      background: "rgba(31, 58, 46, 0.04)",
                       borderRadius: "var(--radius-md)",
                       padding: "1rem 1.25rem",
-                      cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -1154,42 +1152,16 @@ export default function CheckoutClient() {
                     <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
                       <CreditCard size={22} style={{ color: "var(--color-primary)" }} />
                       <div>
-                        <p style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--color-primary)" }}>
+                        <p style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--color-primary)", margin: 0 }}>
                           Online Payment (UPI, Cards, NetBanking, Wallets)
                         </p>
-                        <p style={{ fontSize: "0.75rem", color: "var(--color-muted)" }}>
+                        <p style={{ fontSize: "0.75rem", color: "var(--color-muted)", margin: "0.2rem 0 0" }}>
                           Secured via 256-bit encrypted Razorpay Gateway
                         </p>
                       </div>
                     </div>
                     <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--color-accent)" }}>Fast & Safe</span>
-                  </label>
-
-                  <label
-                    onClick={() => setPaymentMethod("cod")}
-                    style={{
-                      border: paymentMethod === "cod" ? "2px solid var(--color-primary)" : "1px solid var(--color-border)",
-                      background: paymentMethod === "cod" ? "rgba(31, 58, 46, 0.04)" : "transparent",
-                      borderRadius: "var(--radius-md)",
-                      padding: "1rem 1.25rem",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
-                      <Truck size={22} style={{ color: "var(--color-primary)" }} />
-                      <div>
-                        <p style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--color-primary)" }}>
-                          Cash on Delivery (COD)
-                        </p>
-                        <p style={{ fontSize: "0.75rem", color: "var(--color-muted)" }}>
-                          Pay cash upon receiving your delivery
-                        </p>
-                      </div>
-                    </div>
-                  </label>
+                  </div>
                 </div>
 
                 <div style={{ height: "1px", background: "var(--color-border)", margin: "0.5rem 0" }} />
@@ -1338,8 +1310,8 @@ export default function CheckoutClient() {
                       <Edit2 size={13} /> Edit
                     </button>
                   </div>
-                  <p style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--color-primary)" }}>
-                    {paymentMethod === "online" ? "💳 Online Payment (Razorpay — UPI, Cards, NetBanking)" : "💵 Cash on Delivery (COD)"}
+                  <p style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--color-primary)", margin: 0 }}>
+                    💳 Online Payment (Razorpay — UPI, Cards, NetBanking, Wallets)
                   </p>
                 </div>
 
@@ -1350,53 +1322,30 @@ export default function CheckoutClient() {
                   </div>
                 )}
 
-                {paymentMethod === "online" ? (
-                  checkoutResponse ? (
-                    <RazorpayButton
-                      checkoutData={checkoutResponse}
-                      customerName={customer.name}
-                      customerEmail={customer.email}
-                      customerPhone={customer.phone}
-                      cartItems={items}
-                      onSuccess={handlePaymentSuccess}
-                      onDismiss={() => setCheckoutResponse(null)}
-                    />
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="accent"
-                      size="lg"
-                      loading={checkoutLoading}
-                      disabled={checkoutLoading}
-                      style={{ width: "100%", padding: "1rem", fontSize: "1rem" }}
-                      onClick={async () => {
-                        await createCheckoutOrder();
-                      }}
-                      aria-label={checkoutLoading ? "Initializing payment..." : `Proceed to Online Payment — ${formatPrice(calculatedTotal)}`}
-                    >
-                      {checkoutLoading ? "Initializing Payment..." : `Proceed to Online Payment — ${formatPrice(calculatedTotal)}`}
-                    </Button>
-                  )
+                {checkoutResponse ? (
+                  <RazorpayButton
+                    checkoutData={checkoutResponse}
+                    customerName={customer.name}
+                    customerEmail={customer.email}
+                    customerPhone={customer.phone}
+                    cartItems={items}
+                    onSuccess={handlePaymentSuccess}
+                    onDismiss={() => setCheckoutResponse(null)}
+                  />
                 ) : (
                   <Button
                     type="button"
-                    variant="primary"
+                    variant="accent"
                     size="lg"
                     loading={checkoutLoading}
                     disabled={checkoutLoading}
                     style={{ width: "100%", padding: "1rem", fontSize: "1rem" }}
                     onClick={async () => {
-                      let resp = checkoutResponse;
-                      if (!resp) {
-                        resp = await createCheckoutOrder();
-                      }
-                      if (resp) {
-                        handlePaymentSuccess(resp.orderNumber, resp.trackingToken);
-                      }
+                      await createCheckoutOrder();
                     }}
-                    aria-label={checkoutLoading ? "Placing order..." : `Place Order (COD) — ${formatPrice(calculatedTotal)}`}
+                    aria-label={checkoutLoading ? "Initializing payment..." : `Proceed to Online Payment — ${formatPrice(calculatedTotal)}`}
                   >
-                    {checkoutLoading ? "Placing Order..." : `Place Order (COD) — ${formatPrice(calculatedTotal)}`}
+                    {checkoutLoading ? "Initializing Payment..." : `Proceed to Online Payment — ${formatPrice(calculatedTotal)}`}
                   </Button>
                 )}
               </div>
