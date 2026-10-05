@@ -772,26 +772,28 @@ export default function AccountOrderDetailPage() {
               </span>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-              <span
-                style={{
-                  color: "var(--color-muted)",
-                  fontFamily: "var(--font-body)",
-                  fontWeight: 400,
-                }}
-              >
-                GST (Taxes Included)
-              </span>
-              <span
-                style={{
-                  color: "var(--color-foreground)",
-                  fontFamily: "var(--font-subheading)",
-                  fontWeight: 500,
-                }}
-              >
-                {formatPrice(order.tax_amount, order.currency)}
-              </span>
-            </div>
+            {order.tax_amount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+                <span
+                  style={{
+                    color: "var(--color-muted)",
+                    fontFamily: "var(--font-body)",
+                    fontWeight: 400,
+                  }}
+                >
+                  GST (Taxes Included)
+                </span>
+                <span
+                  style={{
+                    color: "var(--color-foreground)",
+                    fontFamily: "var(--font-subheading)",
+                    fontWeight: 500,
+                  }}
+                >
+                  {formatPrice(order.tax_amount, order.currency)}
+                </span>
+              </div>
+            )}
 
             <div
               style={{

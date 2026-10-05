@@ -28,7 +28,7 @@ const FALLBACK_LAUNCH_PRODUCTS: Product[] = [
     currency: "INR",
     unit: "100g",
     weight_grams: 100,
-    gst_rate: 5,
+    gst_rate: 0,
     image_url: "/images/Product 1.PNG",
     stock_quantity: 100,
     is_active: true,

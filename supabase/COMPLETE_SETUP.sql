@@ -498,9 +498,11 @@ values ('All India Standard Shipping (Rs.60)', null, 0, 60.00, true);
 -- ==============================================================================
 -- 23. SEED DATA: Products (Turmeric Powder only)
 -- ==============================================================================
--- Deactivate all other products
+-- Deactivate all other products and ensure gst_rate is 0
 update products set is_active = false
 where slug <> 'kandhamal-turmeric-powder';
+
+update products set gst_rate = 0.00;
 
 insert into products (id, name, slug, sku, short_description, description, category, price, currency, unit, weight_grams, gst_rate, image_url, stock_quantity, is_active)
 values
@@ -509,11 +511,12 @@ values
   'Farmsmith Turmeric Powder','kandhamal-turmeric-powder','FS-TURMERIC-001',
   'Pure GI-tagged Kandhamal turmeric powder with high curcumin content and batch test reports.',
   'Sourced directly from Kandhamal organic farming clusters in Odisha. 100% pure, unadulterated, and rich in natural curcumin.',
-  'Other spices whole and powder',129.00,'INR','100g',100,5.0,'/images/Product 1.PNG',92,true
+  'Other spices whole and powder',129.00,'INR','100g',100,0.00,'/images/Product 1.PNG',92,true
 )
 on conflict (slug) do update set
   id = excluded.id, name = excluded.name, category = excluded.category,
   price = excluded.price, unit = excluded.unit, weight_grams = excluded.weight_grams,
+  gst_rate = 0.00,
   short_description = excluded.short_description, stock_quantity = excluded.stock_quantity,
   is_active = true, updated_at = now();
 

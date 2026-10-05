@@ -67,7 +67,7 @@ export default function CartSummary({ onClose }: CartSummaryProps) {
           marginBottom: "1rem",
         }}
       >
-        Shipping and taxes calculated at checkout.
+        Shipping calculated at checkout.
       </p>
 
       <Button

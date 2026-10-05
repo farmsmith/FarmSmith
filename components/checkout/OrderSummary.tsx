@@ -94,19 +94,15 @@ export default function OrderSummary({ items, quote, loading }: OrderSummaryProp
           )}
         </div>
 
-        {/* Tax */}
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
-          <span style={{ color: "var(--color-muted)" }}>GST</span>
-          {loading ? (
-            <span className="skeleton" style={{ width: "50px", height: "1rem" }} />
-          ) : quote ? (
+        {/* Tax (only if applicable) */}
+        {quote && quote.tax > 0 && (
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
+            <span style={{ color: "var(--color-muted)" }}>GST</span>
             <span style={{ color: "var(--color-foreground)" }}>
               {formatPrice(quote.tax, quote.currency)}
             </span>
-          ) : (
-            <span style={{ color: "var(--color-muted)", fontStyle: "italic" }}>—</span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Total */}
         <div

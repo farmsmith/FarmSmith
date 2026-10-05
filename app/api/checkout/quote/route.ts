@@ -72,8 +72,8 @@ export async function POST(request: Request) {
       if (!product.is_active) throw new Error(`UNAVAILABLE:${product.name}`);
       if (product.stock_quantity < item.quantity) throw new Error(`INSUFFICIENT_STOCK:${product.name}`);
       const subtotal = money(Number(product.price) * item.quantity);
-      const gstRate = Number(product.gst_rate ?? 0);
-      return { subtotal, gstRate, tax: calculateItemTax(subtotal, gstRate) };
+      const gstRate = 0;
+      return { subtotal, gstRate, tax: 0 };
     });
 
     const subtotal = money(orderItems.reduce((sum, item) => sum + item.subtotal, 0));
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       orderItems.map((item) => ({ subtotal: item.subtotal, gstRate: item.gstRate })),
       shippingAddress.state
     );
-    const total = money(subtotal + shipping.amount + tax.taxAmount);
+    const total = money(subtotal + shipping.amount);
 
     return NextResponse.json(
       {
@@ -90,10 +90,10 @@ export async function POST(request: Request) {
         shipping: shipping.amount,
         shippingRate: shipping.rateName,
         taxableAmount: tax.taxableAmount,
-        tax: tax.taxAmount,
-        cgst: tax.cgstAmount,
-        sgst: tax.sgstAmount,
-        igst: tax.igstAmount,
+        tax: 0,
+        cgst: 0,
+        sgst: 0,
+        igst: 0,
         total,
         currency: products[0]?.currency ?? "INR",
       },

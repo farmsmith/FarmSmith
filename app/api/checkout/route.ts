@@ -136,8 +136,8 @@ export async function POST(request: Request) {
     const product = productMap.get(item.productId)!;
     const unitPrice = Number(product.price);
     const subtotal = money(unitPrice * item.quantity);
-    const gstRate = Number(product.gst_rate ?? 0);
-    const taxAmount = calculateItemTax(subtotal, gstRate);
+    const gstRate = 0;
+    const taxAmount = 0;
 
     return {
       product_id: product.id,
@@ -145,8 +145,8 @@ export async function POST(request: Request) {
       unit_price: unitPrice,
       quantity: item.quantity,
       subtotal,
-      gst_rate: gstRate,
-      tax_amount: taxAmount,
+      gst_rate: 0,
+      tax_amount: 0,
     };
   });
 
@@ -175,7 +175,7 @@ export async function POST(request: Request) {
     shippingAddress.state
   );
 
-  const totalAmount = money(subtotalAmount + shipping.amount + tax.taxAmount);
+  const totalAmount = money(subtotalAmount + shipping.amount);
 
   const orderNumber = generateOrderNumber();
   const trackingToken = generateTrackingToken();
@@ -194,10 +194,10 @@ export async function POST(request: Request) {
         subtotal_amount: subtotalAmount,
         taxable_amount: tax.taxableAmount,
         shipping_amount: shipping.amount,
-        tax_amount: tax.taxAmount,
-        cgst_amount: tax.cgstAmount,
-        sgst_amount: tax.sgstAmount,
-        igst_amount: tax.igstAmount,
+        tax_amount: 0,
+        cgst_amount: 0,
+        sgst_amount: 0,
+        igst_amount: 0,
         total_amount: totalAmount,
         currency,
       },

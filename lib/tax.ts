@@ -24,37 +24,19 @@ function roundMoney(value: number): number {
  */
 export function calculateTax(
   items: TaxItem[],
-  customerState: string
+  _customerState?: string
 ): TaxCalculation {
-  const businessState = (process.env.FARM_SMITH_STATE ?? "Tamil Nadu").trim().toLowerCase();
-  const normalizedCustomerState = customerState.trim().toLowerCase();
-
   const taxableAmount = roundMoney(items.reduce((sum, item) => sum + item.subtotal, 0));
-  const taxAmount = roundMoney(
-    items.reduce((sum, item) => sum + item.subtotal * (item.gstRate / 100), 0)
-  );
-
-  if (normalizedCustomerState === businessState) {
-    const cgstAmount = roundMoney(taxAmount / 2);
-    const sgstAmount = roundMoney(taxAmount - cgstAmount);
-    return {
-      taxableAmount,
-      taxAmount,
-      cgstAmount,
-      sgstAmount,
-      igstAmount: 0,
-    };
-  }
-
   return {
     taxableAmount,
-    taxAmount,
+    taxAmount: 0,
     cgstAmount: 0,
     sgstAmount: 0,
-    igstAmount: taxAmount,
+    igstAmount: 0,
   };
 }
 
-export function calculateItemTax(subtotal: number, gstRate: number): number {
-  return roundMoney(subtotal * (gstRate / 100));
+export function calculateItemTax(_subtotal: number, _gstRate?: number): number {
+  return 0;
 }
+

@@ -434,7 +434,7 @@ export default function OrderConfirmationClient() {
               {[
                 { label: "Subtotal", value: formatPrice(order.subtotal_amount, order.currency) },
                 { label: "Shipping", value: order.shipping_amount === 0 ? "Free" : formatPrice(order.shipping_amount, order.currency) },
-                { label: "GST (Taxes Included)", value: formatPrice(order.tax_amount, order.currency) },
+                ...(order.tax_amount > 0 ? [{ label: "GST (Taxes Included)", value: formatPrice(order.tax_amount, order.currency) }] : []),
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
                   <span style={{ color: "var(--color-muted)", fontFamily: "var(--font-body)" }}>{label}</span>
