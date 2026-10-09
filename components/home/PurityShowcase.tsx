@@ -258,7 +258,7 @@ export default function PurityShowcase() {
           }}
         >
           <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.12em" }}>
-            OUR STANDARD • BATCH TRANSPARENCY
+            TRANSPARENCY & HARVEST HERITAGE
           </p>
           <h2
             style={{
@@ -266,14 +266,14 @@ export default function PurityShowcase() {
               fontSize: "clamp(1.85rem, 4vw, 2.65rem)",
               fontWeight: 600,
               color: "#FAF6EE",
-              lineHeight: 1.2,
+              lineHeight: 1.25,
               marginBottom: "1rem",
             }}
           >
-            YOU check the quality of YOUR product
+            Traceable to the Soil. Tested for Absolute Purity.
           </h2>
           <p style={{ color: "#D4C7B5", fontSize: "1.0625rem", fontFamily: "var(--font-body)", fontWeight: 400, lineHeight: 1.75 }}>
-            Here is how FarmSmith redefines purity with batch-specific third-party testing.
+            Every harvest carries an identity. From indigenous Kandhamal organic soils to accredited third-party laboratory verification — complete transparency on every pack.
           </p>
         </div>
 
@@ -298,39 +298,62 @@ export default function PurityShowcase() {
               transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
             }}
           >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                background: "rgba(217, 164, 65, 0.15)",
+                border: "1px solid rgba(217, 164, 65, 0.35)",
+                padding: "0.3rem 0.75rem",
+                borderRadius: "100px",
+                fontSize: "0.8125rem",
+                color: "#F6E05E",
+                fontWeight: 600,
+                marginBottom: "1rem",
+              }}
+            >
+              <span>🌱</span>
+              <span>Geographical Indication (GI) Certified Heritage</span>
+            </div>
+
             <h3
               style={{
                 fontFamily: "var(--font-heading)",
-                fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
+                fontSize: "clamp(1.65rem, 3.2vw, 2.15rem)",
                 fontWeight: 600,
                 color: "#FAF6EE",
-                lineHeight: 1.2,
+                lineHeight: 1.25,
                 marginBottom: "1.25rem",
                 letterSpacing: "-0.01em",
               }}
             >
-              Know the origin
+              Grown by Tribal Farmers in the Pristine Hills of Kandhamal
             </h3>
 
             <p
               style={{
                 color: "#E2D9CC",
-                fontSize: "1.0625rem",
+                fontSize: "0.95rem",
                 lineHeight: 1.8,
                 marginBottom: "1.5rem",
               }}
             >
-              Nestled in the picturesque eastern ghats of Odisha, kandhamal treasures fertile and pristine environment that holds nature’s some of the most finest treasures. The GI tagged golden turmeric of kandhamal glows with purity. It is a heritage of health, nurtured by generations of farmers.
+              Our turmeric is exclusively cultivated in the high-altitude forested regions of Kandhamal, Odisha — a region blessed with rich organic soil, unpolluted mountain mist, and centuries-old tribal traditional farming.
             </p>
 
-            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", paddingTop: "0.5rem" }}>
-              <div style={{ borderLeft: "2px solid #D9A441", paddingLeft: "0.85rem" }}>
-                <span style={{ display: "block", fontSize: "1.125rem", fontWeight: 700, color: "#D9A441" }}>Eastern Ghats</span>
-                <span style={{ fontSize: "0.8125rem", color: "#B8ADA0" }}>Kandhamal, Odisha</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.875rem", color: "#FAF6EE" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                <span style={{ color: "#D9A441", fontWeight: 700 }}>✓</span>
+                <span><strong>100% Zero Chemicals:</strong> No synthetic urea, pesticides, or chemical ripening agents.</span>
               </div>
-              <div style={{ borderLeft: "2px solid #D9A441", paddingLeft: "0.85rem" }}>
-                <span style={{ display: "block", fontSize: "1.125rem", fontWeight: 700, color: "#D9A441" }}>Traditionally cultivated on</span>
-                <span style={{ fontSize: "0.8125rem", color: "#B8ADA0" }}>Generational Soil</span>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                <span style={{ color: "#D9A441", fontWeight: 700 }}>✓</span>
+                <span><strong>High Curcumin Potency:</strong> Naturally elevated bioactive curcumin content tested in accredited labs.</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                <span style={{ color: "#D9A441", fontWeight: 700 }}>✓</span>
+                <span><strong>Fair Farmer Partnership:</strong> Directly sourced supporting tribal agricultural livelihoods.</span>
               </div>
             </div>
           </div>
