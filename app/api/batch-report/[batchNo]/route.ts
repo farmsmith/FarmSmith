@@ -10,37 +10,17 @@ export async function GET(
     const { batchNo } = await params;
     const cleanBatchNo = batchNo.replace(/[^a-zA-Z0-9_-]/g, "");
 
-    // Check possible locations for the PDF
-    const candidates = [
-      path.join(process.cwd(), "public", "batchtest", `${cleanBatchNo}.pdf`),
-      path.join(process.cwd(), "farmsmith", "public", "batchtest", `${cleanBatchNo}.pdf`),
-      path.join(process.cwd(), "public", `${cleanBatchNo}.pdf`),
-    ];
+    const publicBatchDir = path.join(process.cwd(), "public", "batchtest");
+    const filePath = path.join(publicBatchDir, `${cleanBatchNo}.pdf`);
 
-    let targetFile = "";
-    for (const c of candidates) {
-      if (fs.existsSync(c)) {
-        targetFile = c;
-        break;
-      }
-    }
-
-    // Default fallback if not found directly
-    if (!targetFile) {
-      const fallback = path.join(process.cwd(), "public", "batchtest", "FS00001.pdf");
-      if (fs.existsSync(fallback)) {
-        targetFile = fallback;
-      }
-    }
-
-    if (!targetFile || !fs.existsSync(targetFile)) {
+    if (!fs.existsSync(filePath)) {
       return NextResponse.json(
         { error: "Batch report certificate not found." },
         { status: 404 }
       );
     }
 
-    const fileBuffer = fs.readFileSync(targetFile);
+    const fileBuffer = fs.readFileSync(filePath);
 
     return new NextResponse(fileBuffer, {
       status: 200,

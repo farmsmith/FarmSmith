@@ -1,14 +1,61 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { X, ShieldCheck, FileText, Lock, Award } from "lucide-react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
+import {
+  X,
+  ShieldCheck,
+  FileText,
+  Lock,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Loader2,
+  AlertCircle,
+  Award,
+  ChevronUp,
+  ChevronDown
+} from "lucide-react";
 
 interface BatchReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   batchNo: string;
-  pdfUrl?: string;
   totalPages?: number;
+}
+
+// Dynamically load PDF.js browser script
+function loadPdfJsScript(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("SSR not supported"));
+  if ((window as any).pdfjsLib) {
+    return Promise.resolve((window as any).pdfjsLib);
+  }
+
+  return new Promise((resolve, reject) => {
+    const existingScript = document.querySelector('script[src="/pdf.min.js"]');
+    if (existingScript) {
+      existingScript.addEventListener("load", () => {
+        resolve((window as any).pdfjsLib);
+      });
+      existingScript.addEventListener("error", (e) => reject(e));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "/pdf.min.js";
+    script.async = true;
+    script.onload = () => {
+      const lib = (window as any).pdfjsLib;
+      if (lib) {
+        lib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+        resolve(lib);
+      } else {
+        reject(new Error("pdfjsLib not found on window"));
+      }
+    };
+    script.onerror = (e) => reject(e);
+    document.head.appendChild(script);
+  });
 }
 
 export default function BatchReportModal({
@@ -17,6 +64,22 @@ export default function BatchReportModal({
   batchNo,
   totalPages = 12,
 }: BatchReportModalProps) {
+  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [numPages, setNumPages] = useState<number>(totalPages);
+  const [scale, setScale] = useState<number>(1.0);
+  const [pdfDoc, setPdfDoc] = useState<any>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+
+  // Ensure portal only mounts on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Keyboard shortcut interception & escape to close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -41,18 +104,144 @@ export default function BatchReportModal({
       }
     };
 
+    // Lock page body scroll
+    const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown, true);
 
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = originalOverflow || "unset";
       window.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  // Load PDF via PDF.js when modal opens
+  useEffect(() => {
+    if (!isOpen) {
+      setPdfDoc(null);
+      setLoading(true);
+      setError(null);
+      return;
+    }
 
-  return (
+    let isCancelled = false;
+
+    async function fetchAndRenderPdf() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const pdfjsLib = await loadPdfJsScript();
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+
+        // Fetch PDF binary from protected API route or public fallback
+        const pdfUrl = `/api/batch-report/${batchNo}`;
+        
+        const loadingTask = pdfjsLib.getDocument({
+          url: pdfUrl,
+          cMapPacked: true,
+        });
+
+        const doc = await loadingTask.promise;
+        if (!isCancelled) {
+          setPdfDoc(doc);
+          setNumPages(doc.numPages);
+          setLoading(false);
+        }
+      } catch (err: any) {
+        console.error("Error loading PDF with PDF.js:", err);
+        if (!isCancelled) {
+          setError(
+            err?.message || "Failed to load the lab quality check report. Please verify the batch code."
+          );
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchAndRenderPdf();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isOpen, batchNo]);
+
+  // Render all pages onto canvas elements whenever doc or scale changes
+  const renderPages = useCallback(async () => {
+    if (!pdfDoc) return;
+
+    for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+        const canvas = canvasRefs.current[pageNum - 1];
+        if (!canvas) continue;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) continue;
+
+        // Base viewport for current scale
+        const viewport = page.getViewport({ scale: scale * 1.35 });
+        
+        // Use devicePixelRatio for super-crisp rendering on Retina/HiDPI screens
+        const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+
+        canvas.width = viewport.width * dpr;
+        canvas.height = viewport.height * dpr;
+
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: viewport,
+        };
+
+        await page.render(renderContext).promise;
+      } catch (pageErr) {
+        console.warn(`Error rendering page ${pageNum}:`, pageErr);
+      }
+    }
+  }, [pdfDoc, scale]);
+
+  useEffect(() => {
+    if (pdfDoc && !loading) {
+      renderPages();
+    }
+  }, [pdfDoc, scale, loading, renderPages]);
+
+  // Zoom control handlers
+  const handleZoomIn = () => {
+    setScale((prev) => Math.min(prev + 0.15, 2.0));
+  };
+
+  const handleZoomOut = () => {
+    setScale((prev) => Math.max(prev - 0.15, 0.6));
+  };
+
+  const handleResetZoom = () => {
+    setScale(1.0);
+  };
+
+  const scrollToTop = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  if (!isOpen || !mounted) return null;
+
+  const modalContent = (
     <div
       role="dialog"
       aria-modal="true"
@@ -60,14 +249,14 @@ export default function BatchReportModal({
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 99999,
-        background: "rgba(18, 28, 22, 0.92)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
+        zIndex: 999999,
+        background: "rgba(10, 18, 14, 0.88)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "clamp(0.5rem, 2vw, 1.5rem)",
+        padding: "clamp(0.5rem, 2vw, 1.25rem)",
         userSelect: "none",
         WebkitUserSelect: "none",
       }}
@@ -82,21 +271,19 @@ export default function BatchReportModal({
     >
       <div
         style={{
-          background: "#FAF8F2",
+          background: "#1E2A24",
           border: "1.5px solid rgba(217, 164, 65, 0.4)",
           borderRadius: "1.25rem",
           width: "100%",
-          maxWidth: "1020px",
-          height: "92vh",
-          maxHeight: "920px",
+          maxWidth: "1160px",
+          height: "94vh",
+          maxHeight: "960px",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
+          boxShadow: "0 28px 70px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05)",
           position: "relative",
-          animation: "modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-          userSelect: "none",
-          WebkitUserSelect: "none",
+          animation: "modalSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         onClick={(e) => e.stopPropagation()}
         onContextMenu={(e) => e.preventDefault()}
@@ -105,89 +292,122 @@ export default function BatchReportModal({
           @keyframes modalSlideUp {
             from {
               opacity: 0;
-              transform: translateY(24px) scale(0.98);
+              transform: translateY(28px) scale(0.97);
             }
             to {
               opacity: 1;
               transform: translateY(0) scale(1);
             }
           }
-          .pdf-watermark-grid {
+          .pdf-watermark-overlay {
             position: absolute;
             inset: 0;
             pointer-events: none;
-            z-index: 20;
+            z-index: 15;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            opacity: 0.08;
+            opacity: 0.07;
             user-select: none;
             overflow: hidden;
           }
-          .watermark-item {
+          .pdf-watermark-overlay span {
             display: flex;
             align-items: center;
             justifyContent: center;
-            transform: rotate(-25deg);
-            font-size: clamp(0.75rem, 1.5vw, 1.1rem);
+            transform: rotate(-24deg);
+            font-size: clamp(0.7rem, 1.2vw, 0.95rem);
             font-weight: 800;
             color: #1F3A2E;
             font-family: monospace;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.12em;
             text-align: center;
             white-space: nowrap;
           }
+          .pdf-doc-page {
+            position: relative;
+            background: #FFFFFF;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            border-radius: 4px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            display: inline-block;
+          }
+          .toolbar-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #FAF6EE;
+            border-radius: 8px;
+            padding: 0.4rem 0.65rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.15s ease;
+          }
+          .toolbar-btn:hover {
+            background: rgba(217, 164, 65, 0.25);
+            border-color: rgba(217, 164, 65, 0.5);
+            color: #F6E05E;
+          }
+          .toolbar-btn:active {
+            transform: scale(0.96);
+          }
         `}</style>
 
-        {/* Modal Header */}
+        {/* Modal Top Header Bar */}
         <div
           style={{
-            background: "linear-gradient(135deg, #1F3A2E 0%, #152820 100%)",
-            color: "#FFFFFF",
-            padding: "1rem 1.5rem",
+            background: "linear-gradient(135deg, #16241C 0%, #0F1A14 100%)",
+            color: "#FAF6EE",
+            padding: "0.875rem 1.25rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: "0.75rem",
-            borderBottom: "1px solid rgba(217, 164, 65, 0.3)",
+            borderBottom: "1px solid rgba(217, 164, 65, 0.25)",
+            zIndex: 30,
           }}
         >
+          {/* Left: Document details */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div
               style={{
-                background: "rgba(217, 164, 65, 0.18)",
+                background: "rgba(217, 164, 65, 0.15)",
                 border: "1px solid rgba(217, 164, 65, 0.4)",
-                padding: "0.5rem",
-                borderRadius: "0.6rem",
+                padding: "0.45rem",
+                borderRadius: "0.55rem",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <FileText size={20} style={{ color: "#D9A441" }} />
+              <FileText size={19} style={{ color: "#D9A441" }} />
             </div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <h3
                   style={{
                     fontFamily: "var(--font-heading)",
-                    fontSize: "1.1rem",
+                    fontSize: "1.05rem",
                     margin: 0,
                     fontWeight: 700,
-                    color: "#FFFFFF",
+                    color: "#FAF6EE",
                   }}
                 >
                   Official Lab Quality Check Report
                 </h3>
                 <span
                   style={{
-                    background: "rgba(217, 164, 65, 0.25)",
-                    border: "1px solid rgba(217, 164, 65, 0.5)",
+                    background: "rgba(217, 164, 65, 0.22)",
+                    border: "1px solid rgba(217, 164, 65, 0.45)",
                     color: "#F6E05E",
-                    fontSize: "0.75rem",
-                    padding: "0.15rem 0.55rem",
+                    fontSize: "0.72rem",
+                    padding: "0.15rem 0.5rem",
                     borderRadius: "100px",
                     fontWeight: 700,
                     fontFamily: "monospace",
@@ -200,38 +420,89 @@ export default function BatchReportModal({
                 style={{
                   margin: "0.15rem 0 0",
                   fontSize: "0.75rem",
-                  color: "#D1D5DB",
+                  color: "#A7B3AB",
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.5rem",
+                  gap: "0.45rem",
                 }}
               >
                 <span>NABL Accredited Laboratory Analysis</span>
                 <span>•</span>
-                <span>{totalPages} Pages Complete Certificate</span>
+                <span>{numPages} Pages Complete Certificate</span>
               </p>
             </div>
           </div>
 
-          {/* Right Header: Security Notice & Close Button */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {/* Center: Controls Toolbar */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+            <button
+              onClick={handleZoomOut}
+              className="toolbar-btn"
+              title="Zoom Out"
+              aria-label="Zoom Out"
+            >
+              <ZoomOut size={15} />
+            </button>
+
+            <button
+              onClick={handleResetZoom}
+              className="toolbar-btn"
+              title="Reset Zoom / Fit Width"
+              style={{ minWidth: "62px", justifyContent: "center" }}
+            >
+              <Maximize2 size={13} />
+              <span>{Math.round(scale * 100)}%</span>
+            </button>
+
+            <button
+              onClick={handleZoomIn}
+              className="toolbar-btn"
+              title="Zoom In"
+              aria-label="Zoom In"
+            >
+              <ZoomIn size={15} />
+            </button>
+
+            <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.15)", marginInline: "0.25rem" }} />
+
+            <button
+              onClick={scrollToTop}
+              className="toolbar-btn"
+              title="Scroll to Top"
+              aria-label="Scroll to Top"
+            >
+              <ChevronUp size={15} />
+            </button>
+
+            <button
+              onClick={scrollToBottom}
+              className="toolbar-btn"
+              title="Scroll to Bottom"
+              aria-label="Scroll to Bottom"
+            >
+              <ChevronDown size={15} />
+            </button>
+          </div>
+
+          {/* Right: Protected badge & Close Button */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
             <div
               style={{
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
                 gap: "0.35rem",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
+                background: "rgba(16, 185, 129, 0.12)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
                 padding: "0.35rem 0.75rem",
                 borderRadius: "100px",
                 fontSize: "0.75rem",
                 color: "#10B981",
                 fontWeight: 600,
               }}
-              title="Protected Document: Copying, downloading, printing, and screenshots are disabled."
+              title="Protected Document: Text selection, saving, and printing are disabled."
             >
-              <Lock size={13} style={{ color: "#10B981" }} />
-              <span>Protected Preview Mode</span>
+              <Lock size={12} style={{ color: "#10B981" }} />
+              <span>Protected Viewer</span>
             </div>
 
             <button
@@ -240,7 +511,7 @@ export default function BatchReportModal({
               style={{
                 background: "rgba(255, 255, 255, 0.12)",
                 border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "#FFFFFF",
+                color: "#FAF6EE",
                 borderRadius: "50%",
                 width: "2.25rem",
                 height: "2.25rem",
@@ -264,87 +535,163 @@ export default function BatchReportModal({
           </div>
         </div>
 
-        {/* Purity Highlights Bar */}
+        {/* Purity Highlights Sub-header Bar */}
         <div
           style={{
-            background: "#F3EFE6",
-            borderBottom: "1px solid rgba(217, 164, 65, 0.25)",
-            padding: "0.6rem 1.5rem",
+            background: "rgba(30, 42, 36, 0.95)",
+            borderBottom: "1px solid rgba(217, 164, 65, 0.2)",
+            padding: "0.55rem 1.25rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: "0.75rem",
             fontSize: "0.8125rem",
+            zIndex: 25,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#065F46", fontWeight: 700 }}>
-              <ShieldCheck size={16} style={{ color: "#059669" }} /> Dyes: Absent
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#34D399", fontWeight: 700 }}>
+              <ShieldCheck size={15} style={{ color: "#10B981" }} /> Dyes: Absent
             </span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#065F46", fontWeight: 700 }}>
-              <ShieldCheck size={16} style={{ color: "#059669" }} /> Heavy Metals: Absent
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#34D399", fontWeight: 700 }}>
+              <ShieldCheck size={15} style={{ color: "#10B981" }} /> Heavy Metals: Absent
             </span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#065F46", fontWeight: 700 }}>
-              <ShieldCheck size={16} style={{ color: "#059669" }} /> Pesticides: Absent
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#34D399", fontWeight: 700 }}>
+              <ShieldCheck size={15} style={{ color: "#10B981" }} /> Pesticides: Absent
             </span>
           </div>
 
-          <span style={{ color: "#78350F", fontWeight: 600, fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+          <span style={{ color: "#F6E05E", fontWeight: 600, fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
             <Award size={14} style={{ color: "#D9A441" }} /> 100% Purity Verified & Certified
           </span>
         </div>
 
-        {/* Document Frame Area with Watermark Layer */}
+        {/* Scrollable Document Canvas View Area */}
         <div
+          ref={containerRef}
           style={{
             flex: 1,
             position: "relative",
-            background: "#525659",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
+            background: "#2D3732",
+            overflowY: "auto",
+            overflowX: "auto",
+            padding: "2rem 1rem",
+            textAlign: "center",
+            scrollBehavior: "smooth",
           }}
         >
-          {/* Security Diagonal Watermarks (Prevents Clean Screenshots) */}
-          <div className="pdf-watermark-grid" aria-hidden="true">
-            {Array.from({ length: 8 }).map((_, idx) => (
-              <div key={idx} className="watermark-item">
-                FARMSMITH QUALITY REPORT • BATCH #{batchNo} • VIEW ONLY
+          {loading && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "450px",
+                gap: "1rem",
+                color: "#FAF6EE",
+              }}
+            >
+              <Loader2 size={36} className="animate-spin" style={{ color: "#D9A441" }} />
+              <div>
+                <p style={{ fontWeight: 600, margin: 0, fontSize: "1rem", color: "#FAF6EE" }}>
+                  Rendering Lab Quality Certificate...
+                </p>
+                <p style={{ margin: "0.25rem 0 0", fontSize: "0.8125rem", color: "#A7B3AB" }}>
+                  Retrieving complete 12-page verification for Batch #{batchNo}
+                </p>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
 
-          {/* Embedded Protected PDF Iframe */}
-          <iframe
-            src={`/api/batch-report/${batchNo}#toolbar=0&navpanes=0&scrollbar=1&statusbar=0&messages=0`}
-            title={`Quality Check Report for Batch ${batchNo}`}
-            style={{
-              width: "100%",
-              height: "100%",
-              border: "none",
-              background: "#FFFFFF",
-              display: "block",
-            }}
-          />
+          {error && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "400px",
+                gap: "1rem",
+                color: "#FAF6EE",
+                maxWidth: "480px",
+                margin: "0 auto",
+                textAlign: "center",
+              }}
+            >
+              <AlertCircle size={44} style={{ color: "#EF4444" }} />
+              <h4 style={{ margin: 0, fontSize: "1.125rem", color: "#FAF6EE" }}>
+                Unable to Load Certificate
+              </h4>
+              <p style={{ margin: 0, fontSize: "0.875rem", color: "#D1D5DB", lineHeight: 1.6 }}>
+                {error}
+              </p>
+              <button
+                onClick={onClose}
+                style={{
+                  background: "#D9A441",
+                  color: "#1F3A2E",
+                  border: "none",
+                  padding: "0.6rem 1.5rem",
+                  borderRadius: "0.5rem",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  cursor: "pointer",
+                  marginTop: "0.5rem",
+                }}
+              >
+                Close Viewer
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <div style={{ display: "inline-block", textAlign: "center" }}>
+              {Array.from({ length: numPages }).map((_, idx) => (
+                <div key={idx} className="pdf-doc-page">
+                  {/* Subtle Diagonal Watermark on every canvas page */}
+                  <div className="pdf-watermark-overlay" aria-hidden="true">
+                    {Array.from({ length: 8 }).map((_, wIdx) => (
+                      <span key={wIdx}>
+                        FARMSMITH QUALITY REPORT • BATCH #{batchNo} • VIEW ONLY
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* HTML5 Canvas element rendered with PDF.js */}
+                  <canvas
+                    ref={(el) => {
+                      canvasRefs.current[idx] = el;
+                    }}
+                    style={{
+                      display: "block",
+                      background: "#FFFFFF",
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Footer Bar */}
+        {/* Modal Bottom Footer Bar */}
         <div
           style={{
-            background: "#FAF8F2",
+            background: "linear-gradient(135deg, #16241C 0%, #0F1A14 100%)",
             borderTop: "1px solid rgba(217, 164, 65, 0.25)",
-            padding: "0.75rem 1.5rem",
+            padding: "0.75rem 1.25rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: "0.5rem",
+            gap: "0.75rem",
             fontSize: "0.75rem",
-            color: "#6B7280",
+            color: "#A7B3AB",
+            zIndex: 30,
           }}
         >
-          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
             <Lock size={13} style={{ color: "#D9A441" }} />
             <span>
               <strong>Protected Document:</strong> Copying, screenshots, and unauthorized distribution are strictly restricted.
@@ -353,15 +700,18 @@ export default function BatchReportModal({
           <button
             onClick={onClose}
             style={{
-              background: "var(--color-primary)",
-              color: "#FFFFFF",
+              background: "#D9A441",
+              color: "#1F3A2E",
               border: "none",
               padding: "0.45rem 1.25rem",
               borderRadius: "0.5rem",
-              fontWeight: 600,
+              fontWeight: 700,
               fontSize: "0.8125rem",
               cursor: "pointer",
+              transition: "opacity 0.15s ease",
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
             Close Viewer
           </button>
@@ -369,4 +719,6 @@ export default function BatchReportModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
