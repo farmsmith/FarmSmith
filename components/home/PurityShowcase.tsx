@@ -250,7 +250,7 @@ export default function PurityShowcase() {
             transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
           }}
         >
-          <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.12em" }}>
+          <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.75rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.14em" }}>
             OUR STANDARD • BATCH TRANSPARENCY
           </p>
           <h2
