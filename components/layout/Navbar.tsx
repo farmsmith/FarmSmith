@@ -15,7 +15,6 @@ const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/#featured-harvest", label: "Shop" },
   { href: "/#standards", label: "Our Standards" },
-  { href: "/about-us", label: "Our Story" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -35,40 +34,43 @@ export default function Navbar() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const handleNavLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    closeAllMenus();
-    if (href === "/" && pathname === "/") {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else if (href === "/#featured-harvest" && pathname === "/") {
-      e.preventDefault();
-      const el = document.getElementById("featured-harvest");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-    } else if (href === "/#standards" && pathname === "/") {
-      e.preventDefault();
-      const el = document.getElementById("standards");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  };
-
   const closeAllMenus = () => {
     setMenuOpen(false);
     setAccountMenuOpen(false);
-    closeDrawer();
   };
 
-  // Auto-close menus and drawer whenever the route changes
-  useEffect(() => {
+  const handleNavLinkClick = (href: string, e: React.MouseEvent<HTMLAnchorElement>) => {
     closeAllMenus();
-    if (pathname !== "/") {
-      document.documentElement.classList.add("farmsmith-intro-hidden");
+    if (href.startsWith("/#") && pathname === "/") {
+      e.preventDefault();
+      const targetId = href.substring(2);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth" });
+      }
     }
-  }, [pathname]);
+  };
 
+  // Close account dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    if (accountMenuOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [accountMenuOpen]);
+
+  // Close menus on route change
+  useEffect(() => {
+    setMenuOpen(false);
+    setAccountMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
@@ -103,18 +105,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  // Close account menu on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
-        setAccountMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Auto-close mobile menu when resizing to desktop view
+  // Close mobile menu on resize to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 900) {
@@ -151,7 +142,7 @@ export default function Navbar() {
         .nav-container {
           width: 100%;
           max-width: 100%;
-          padding-inline: 1rem;
+          padding-inline: 0.75rem;
           position: relative;
         }
         @media (min-width: 768px) {
@@ -174,6 +165,28 @@ export default function Navbar() {
           .nav-mobile-toggle,
           .nav-mobile-dropdown {
             display: none !important;
+          }
+          .nav-brand-link {
+            position: static !important;
+            transform: none !important;
+          }
+        }
+        @media (max-width: 899px) {
+          .nav-mobile-toggle {
+            display: inline-flex !important;
+            order: 1;
+            margin-right: auto;
+          }
+          .nav-brand-link {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+          }
+          .nav-actions {
+            order: 3;
+            margin-left: auto;
+            gap: 0.35rem;
           }
         }
         .nav-link {
@@ -294,21 +307,40 @@ export default function Navbar() {
               alignItems: "center",
               justifyContent: "space-between",
               height: "4.25rem",
+              position: "relative",
             }}
           >
-            {/* Left: Brand Logo & Title */}
+            {/* 1. Mobile Hamburger Toggle (Far Left Corner on Mobile, Hidden on Desktop) */}
+            <button
+              onClick={() => {
+                setMenuOpen((prev) => {
+                  const next = !prev;
+                  if (next) setAccountMenuOpen(false);
+                  return next;
+                });
+              }}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              className="nav-icon-link nav-mobile-toggle"
+              style={{ background: "none", border: "none", cursor: "pointer", padding: "0.4rem" }}
+            >
+              {menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
+            </button>
+
+            {/* 2. Brand Logo & Title (Centered on Mobile, Left on Desktop) */}
             <Link
               href="/"
               onClick={(e) => handleNavLinkClick("/", e)}
-              aria-label="FarmSmith Foods — go to home"
+              aria-label="FarmSmith Foods - go to home"
+              className="nav-brand-link"
               style={{ display: "flex", alignItems: "center", gap: "0.675rem", textDecoration: "none" }}
             >
-              <div id="nav-brand-logo" style={{ position: "relative", width: "46px", height: "46px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div id="nav-brand-logo" style={{ position: "relative", width: "42px", height: "42px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Image
                   src="/images/farmsmith_logo_v2.png"
                   alt="FarmSmith Foods"
-                  width={46}
-                  height={46}
+                  width={42}
+                  height={42}
                   priority
                   style={{ width: "100%", height: "100%", objectFit: "contain" }}
                 />
@@ -320,7 +352,7 @@ export default function Navbar() {
                 style={{
                   fontFamily: "var(--font-serif-brand)",
                   fontWeight: 700,
-                  fontSize: "1.3125rem",
+                  fontSize: "1.25rem",
                   color: "var(--color-primary)",
                   letterSpacing: "0.02em",
                 }}
@@ -329,7 +361,7 @@ export default function Navbar() {
               </span>
             </Link>
 
-            {/* Center: Navigation Links */}
+            {/* 3. Center: Desktop Navigation Links */}
             <div id="nav-center-links" className="nav-center-links">
               {NAV_LINKS.map((link, i) => {
                 const active = isActive(link.href);
@@ -354,18 +386,18 @@ export default function Navbar() {
               })}
             </div>
 
-            {/* Right: Actions (Language FIRST -> Cart SECOND -> Account THIRD) */}
+            {/* 4. Right: Actions (Language FIRST -> Cart SECOND -> Account THIRD) */}
             <div className="nav-actions">
-              {/* 1. Language Selector (Left of Cart) */}
+              {/* 1. Language Selector */}
               <LanguageSelector />
 
-              {/* 2. Cart Trolley Button (Middle) */}
+              {/* 2. Cart Trolley Button */}
               <button
                 onClick={() => {
                   closeAllMenus();
                   openDrawer();
                 }}
-                aria-label={`Open cart — ${count} ${count === 1 ? "item" : "items"}`}
+                aria-label={`Open cart - ${count} ${count === 1 ? "item" : "items"}`}
                 className="nav-icon-link"
                 id="navbar-cart-button"
                 style={{
@@ -407,7 +439,7 @@ export default function Navbar() {
                 )}
               </button>
 
-              {/* 3. Account Dropdown Button (Right) */}
+              {/* 3. Account Dropdown Button */}
               <div ref={accountRef} style={{ position: "relative" }}>
                 <button
                   onClick={() => {
@@ -507,28 +539,11 @@ export default function Navbar() {
                   </button>
                 </div>
               </div>
-
-              {/* Mobile Hamburger Toggle */}
-              <button
-                onClick={() => {
-                  setMenuOpen((prev) => {
-                    const next = !prev;
-                    if (next) setAccountMenuOpen(false);
-                    return next;
-                  });
-                }}
-                aria-label={menuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={menuOpen}
-                className="nav-icon-link nav-mobile-toggle"
-                style={{ background: "none", border: "none", cursor: "pointer" }}
-              >
-                {menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
-              </button>
             </div>
           </nav>
         </div>
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu Dropdown (Cleaned without duplicate My Orders link) */}
         <div
           className="nav-mobile-dropdown"
           style={{
@@ -574,27 +589,6 @@ export default function Navbar() {
               </Link>
             );
           })}
-
-          <div style={{ height: "1px", background: "var(--color-border)", margin: "0.5rem 0" }} />
-
-          <Link
-            href={userName ? "/account/orders" : "/track"}
-            onClick={closeAllMenus}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.625rem 0.875rem",
-              fontSize: "0.9375rem",
-              fontWeight: 500,
-              color: "var(--color-primary)",
-              borderRadius: "var(--radius-sm)",
-              textDecoration: "none",
-            }}
-          >
-            <Package size={17} color="var(--color-accent)" />
-            <span>{userName ? "My Orders" : "Track Order"}</span>
-          </Link>
         </div>
       </header>
 
