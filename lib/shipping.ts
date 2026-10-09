@@ -115,6 +115,11 @@ export function getLocalShippingCalculation(
 
 /**
  * Calculates shipping fee based on state, district/city, pincode, and subtotal.
+ * Authoritative business rules:
+ * 1. Orders >= ₹645 -> FREE (₹0)
+ * 2. Paradeep (city or pincode 754142) -> FREE Local Delivery (₹0)
+ * 3. Cuttack, Khordha/Khurda/Bhubaneswar, Dhenkanal, Jagatsinghpur -> ₹59
+ * 4. Rest of India -> ₹80
  */
 export async function calculateShipping(
   state: string,
@@ -126,7 +131,7 @@ export async function calculateShipping(
   const normalizedCity = (city || "").trim().toLowerCase();
   const normalizedPincode = (pincode || "").trim();
 
-  // 1. Check free shipping threshold first
+  // Tier 1: Free shipping on orders >= ₹645
   if (subtotal >= 645) {
     return {
       amount: 0,
@@ -135,6 +140,45 @@ export async function calculateShipping(
     };
   }
 
+  // Tier 2: Free local delivery in Paradeep (by city/area name or pincode)
+  const isParadeep =
+    PARADEEP_IDENTIFIERS.some((p) => normalizedCity.includes(p)) ||
+    PARADEEP_PINCODES.includes(normalizedPincode);
+
+  if (isParadeep) {
+    return {
+      amount: 0,
+      rateId: null,
+      rateName: "Free Local Delivery (Paradeep)",
+    };
+  }
+
+  // Tier 3: ₹59 for Cuttack, Khorda, Dhenkanal, Jagatsinghpur districts
+  const isOdishaState =
+    normalizedState.includes("odisha") ||
+    normalizedState.includes("orissa");
+
+  const districtMatch = ODISHA_SPECIAL_DISTRICTS.some((dist) =>
+    normalizedCity.includes(dist)
+  );
+
+  const odishaSpecialPincode =
+    isOdishaState &&
+    (normalizedPincode.startsWith("751") || // Bhubaneswar / Khordha
+      normalizedPincode.startsWith("752") || // Khordha / Puri rural border
+      normalizedPincode.startsWith("753") || // Cuttack
+      normalizedPincode.startsWith("754") || // Cuttack / Jagatsinghpur rural
+      normalizedPincode.startsWith("759")); // Dhenkanal
+
+  if (districtMatch || odishaSpecialPincode) {
+    return {
+      amount: 59,
+      rateId: null,
+      rateName: "Odisha District Delivery (₹59)",
+    };
+  }
+
+  // Tier 4: Query DB for any custom active rates, otherwise standard ₹80 for Rest of India
   try {
     const supabase = createAdminSupabaseClient();
     const { data } = await supabase
@@ -143,9 +187,11 @@ export async function calculateShipping(
       .eq("is_active", true);
 
     if (data && data.length > 0) {
+      // Exclude legacy/stale 60 rate
       const matches = (data as ShippingRate[]).filter((rate) => {
         const rateAmount = Number(rate.shipping_amount);
         if (isNaN(rateAmount) || rateAmount < 0) return false;
+        if (rateAmount === 60) return false; // Ignore obsolete ₹60 standard rate
 
         const minOrder = Number(rate.min_order_amount || 0);
         if (subtotal < minOrder) return false;
@@ -162,31 +208,7 @@ export async function calculateShipping(
       });
 
       if (matches.length > 0) {
-        matches.sort((a, b) => {
-          // Priority 1: Higher min_order_amount (qualifying discounts take precedence)
-          const minA = Number(a.min_order_amount || 0);
-          const minB = Number(b.min_order_amount || 0);
-          if (minA !== minB) return minB - minA;
-
-          // Priority 2: Pincode prefix match
-          const aPrefix = a.pincode_prefix ? 1 : 0;
-          const bPrefix = b.pincode_prefix ? 1 : 0;
-          if (aPrefix !== bPrefix) return bPrefix - aPrefix;
-
-          // Priority 3: District match
-          const aDist = a.district ? 1 : 0;
-          const bDist = b.district ? 1 : 0;
-          if (aDist !== bDist) return bDist - aDist;
-
-          // Priority 4: State match
-          const aState = a.state ? 1 : 0;
-          const bState = b.state ? 1 : 0;
-          if (aState !== bState) return bState - aState;
-
-          // Priority 5: Lowest shipping amount (customer favorable)
-          return Number(a.shipping_amount) - Number(b.shipping_amount);
-        });
-
+        matches.sort((a, b) => Number(a.shipping_amount) - Number(b.shipping_amount));
         const selected = matches[0];
         return {
           amount: Number(Number(selected.shipping_amount).toFixed(2)),
@@ -199,6 +221,10 @@ export async function calculateShipping(
     console.warn("Using local shipping calculation fallback:", err);
   }
 
-  // Fallback to local rule evaluator
-  return getLocalShippingCalculation(state, pincode, subtotal, city);
+  // Tier 4 Default: ₹80 for Rest of India
+  return {
+    amount: 80,
+    rateId: null,
+    rateName: "Rest of India Standard Shipping (₹80)",
+  };
 }
