@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import {
+  Cormorant_Garamond,
+  Manrope,
+  Cinzel,
+  Playfair_Display,
+  Plus_Jakarta_Sans,
+  Inter,
+} from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart/context";
 import Navbar from "@/components/layout/Navbar";
@@ -8,8 +16,56 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
 import { OfflineBanner } from "@/components/ui/states";
 
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-heading",
+  display: "swap",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-cinzel",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 function getSafeSiteUrl(): { siteUrlStr: string; siteUrlObj: URL } {
-  let raw = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://www.farmsmithfoods.com";
+  let raw =
+    process.env.SITE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://www.farmsmithfoods.com";
   raw = raw.replace(/^"|"$/g, "").trim();
   if (!raw.startsWith("http://") && !raw.startsWith("https://")) {
     raw = `https://${raw}`;
@@ -72,18 +128,13 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      className={`h-full ${cormorant.variable} ${manrope.variable} ${cinzel.variable} ${playfair.variable} ${plusJakarta.variable} ${inter.variable}`}
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Manrope:wght@400;500;600;700;800&family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         <Script
           id="farmsmith-intro-init"
           strategy="beforeInteractive"

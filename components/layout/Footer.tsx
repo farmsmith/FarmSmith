@@ -307,6 +307,7 @@ export default function Footer() {
                       href="https://www.instagram.com/farmsmithfoods/#"
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label="Follow FarmSmith Foods on Instagram"
                       className="footer-link"
                     >
                       <InstagramIcon size={16} style={{ color: "var(--color-accent)" }} />

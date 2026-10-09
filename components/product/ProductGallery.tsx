@@ -273,9 +273,7 @@ export default function ProductGallery({
 
       {/* Thumbnail strip */}
       {displayImages.length > 1 && (
-        <div
-          role="list"
-          aria-label="Product image thumbnails"
+        <div role="tablist" aria-label="Product image thumbnails"
           style={{
             display: "flex",
             gap: "0.75rem",
@@ -288,10 +286,10 @@ export default function ProductGallery({
           {displayImages.map((img, idx) => (
             <button
               key={img.id}
-              role="listitem"
+              role="tab"
+              aria-selected={idx === activeIdx}
               onClick={() => setActiveIdx(idx)}
               aria-label={`View image ${idx + 1}: ${img.alt_text ?? productName}`}
-              aria-pressed={idx === activeIdx}
               style={{
                 width: "72px",
                 height: "72px",

@@ -313,9 +313,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
 
             {/* Thumbnail Selector Strip to click and move to next images */}
             {slides.length > 1 && (
-              <div
-                role="list"
-                aria-label="Product images selector"
+              <div role="tablist" aria-label="Product images selector"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -330,12 +328,13 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                     <button
                       key={imgUrl + idx}
                       type="button"
+                      role="tab"
+                      aria-selected={isActive}
                       onClick={(e) => {
                         e.preventDefault();
                         setCurrentIdx(idx);
                       }}
                       aria-label={`View image ${idx + 1}`}
-                      aria-pressed={isActive}
                       style={{
                         position: "relative",
                         width: "68px",

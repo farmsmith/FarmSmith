@@ -8,7 +8,7 @@ import TrustTicker from "@/components/home/TrustTicker";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export default function HomeHeroSection() {
-  const [isHeroVisible, setIsHeroVisible] = useState(false);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
 
@@ -94,8 +94,8 @@ export default function HomeHeroSection() {
           paddingBottom: "2rem",
           opacity: isHeroVisible ? 1 : 0,
           transform: isHeroVisible ? "translateY(0) scale(1)" : "translateY(40px) scale(0.97)",
-          filter: isHeroVisible ? "blur(0px)" : "blur(8px)",
-          transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1)",
+          
+          transition: "opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         <div style={{ maxWidth: "680px" }}>
@@ -109,7 +109,7 @@ export default function HomeHeroSection() {
               marginBottom: "1rem",
               opacity: isHeroVisible ? 1 : 0,
               transform: isHeroVisible ? "translateX(0)" : "translateX(-30px)",
-              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
+              transition: "opacity 0.6s ease 0.05s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s",
             }}
           >
             SINGLE ORIGIN &bull; BATCH TESTED &bull; TRACEABLE
@@ -126,7 +126,7 @@ export default function HomeHeroSection() {
               letterSpacing: "-0.01em",
               opacity: isHeroVisible ? 1 : 0,
               transform: isHeroVisible ? "translateY(0)" : "translateY(25px)",
-              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
+              transition: "opacity 0.6s ease 0.1s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s",
             }}
           >
             Food crafted with{" "}
@@ -144,7 +144,7 @@ export default function HomeHeroSection() {
               maxWidth: "560px",
               opacity: isHeroVisible ? 1 : 0,
               transform: isHeroVisible ? "translateY(0)" : "translateY(20px)",
-              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s",
+              transition: "opacity 0.6s ease 0.15s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
             }}
           >
             Carefully sourced foods from where they grow best, Batch Tested for quality and made easier to trust — one batch at a time.
@@ -158,7 +158,7 @@ export default function HomeHeroSection() {
               gap: "1rem",
               opacity: isHeroVisible ? 1 : 0,
               transform: isHeroVisible ? "translateY(0)" : "translateY(15px)",
-              transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s",
+              transition: "opacity 0.6s ease 0.2s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s",
             }}
           >
             <Link
