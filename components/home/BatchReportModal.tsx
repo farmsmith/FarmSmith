@@ -4,14 +4,11 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
-  ShieldCheck,
-  FileText,
   ZoomIn,
   ZoomOut,
   Maximize2,
   Loader2,
-  AlertCircle,
-  Award
+  AlertCircle
 } from "lucide-react";
 
 interface BatchReportModalProps {
@@ -227,7 +224,7 @@ export default function BatchReportModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Official Lab Quality Check Report - Batch ${batchNo}`}
+      aria-label="Quality Report Preview"
       style={{
         position: "fixed",
         inset: 0,
@@ -340,52 +337,20 @@ export default function BatchReportModal({
           }
         `}</style>
 
-        {/* Modal Top Header Bar */}
+        {/* Clean Minimalist Top Header Bar */}
         <div
           style={{
             background: "linear-gradient(135deg, #16241C 0%, #0F1A14 100%)",
             color: "#FAF6EE",
-            padding: "0.875rem 1.25rem",
+            padding: "0.75rem 1.25rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "0.75rem",
             borderBottom: "1px solid rgba(217, 164, 65, 0.25)",
             zIndex: 30,
           }}
         >
-          {/* Left: Document details (Clean Title) */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div
-              style={{
-                background: "rgba(217, 164, 65, 0.15)",
-                border: "1px solid rgba(217, 164, 65, 0.4)",
-                padding: "0.45rem",
-                borderRadius: "0.55rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <FileText size={19} style={{ color: "#D9A441" }} />
-            </div>
-            <div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "1.05rem",
-                  margin: 0,
-                  fontWeight: 700,
-                  color: "#FAF6EE",
-                }}
-              >
-                Official Lab Quality Check Report
-              </h3>
-            </div>
-          </div>
-
-          {/* Center: Zoom Controls Toolbar */}
+          {/* Left / Center: Zoom Controls */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <button
               onClick={handleZoomOut}
@@ -448,38 +413,6 @@ export default function BatchReportModal({
           </div>
         </div>
 
-        {/* Purity Highlights Sub-header Bar */}
-        <div
-          style={{
-            background: "rgba(30, 42, 36, 0.95)",
-            borderBottom: "1px solid rgba(217, 164, 65, 0.2)",
-            padding: "0.55rem 1.25rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-            fontSize: "0.8125rem",
-            zIndex: 25,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#34D399", fontWeight: 700 }}>
-              <ShieldCheck size={15} style={{ color: "#10B981" }} /> Dyes: Absent
-            </span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#34D399", fontWeight: 700 }}>
-              <ShieldCheck size={15} style={{ color: "#10B981" }} /> Heavy Metals: Absent
-            </span>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", color: "#34D399", fontWeight: 700 }}>
-              <ShieldCheck size={15} style={{ color: "#10B981" }} /> Pesticides: Absent
-            </span>
-          </div>
-
-          <span style={{ color: "#F6E05E", fontWeight: 600, fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
-            <Award size={14} style={{ color: "#D9A441" }} /> 100% Purity Verified & Certified
-          </span>
-        </div>
-
         {/* Scrollable Document Canvas View Area */}
         <div
           ref={containerRef}
@@ -512,7 +445,7 @@ export default function BatchReportModal({
                   Rendering Lab Quality Certificate...
                 </p>
                 <p style={{ margin: "0.25rem 0 0", fontSize: "0.8125rem", color: "#A7B3AB" }}>
-                  Retrieving complete 12-page verification for Batch #{batchNo}
+                  Retrieving complete verification for Batch #{batchNo}
                 </p>
               </div>
             </div>
