@@ -562,13 +562,14 @@ export default function CheckoutClient() {
     (shippingAddress.state.trim() && shippingAddress.city.trim())
   );
 
+  const rawSubtotal = items.reduce((acc, item) => acc + (item.price ?? (item as any).unitPrice ?? 0) * item.quantity, 0);
+
   const calculatedShipping = quote
     ? quote.shipping
-    : hasAddress
-    ? 60
+    : rawSubtotal >= 645
+    ? 0
     : null;
 
-  const rawSubtotal = items.reduce((acc, item) => acc + (item.price ?? (item as any).unitPrice ?? 0) * item.quantity, 0);
   const calculatedTax = quote ? quote.tax : 0;
   const calculatedTotal = rawSubtotal + (calculatedShipping ?? 0) + calculatedTax;
 
@@ -1398,9 +1399,13 @@ export default function CheckoutClient() {
                 <div style={{ display: "flex", justifyContent: "space-between", color: "var(--color-muted)" }}>
                   <span>Delivery Fee</span>
                   <span style={{ fontWeight: calculatedShipping === null ? 500 : 700 }}>
-                    {calculatedShipping === null
-                      ? "Calculated at next step"
-                      : formatPrice(calculatedShipping)}
+                    {calculatedShipping === null ? (
+                      "Calculated at next step"
+                    ) : calculatedShipping === 0 ? (
+                      <span style={{ color: "#16a34a", fontWeight: 700 }}>FREE</span>
+                    ) : (
+                      formatPrice(calculatedShipping)
+                    )}
                   </span>
                 </div>
                 {calculatedTax > 0 && (

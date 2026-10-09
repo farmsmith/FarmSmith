@@ -492,8 +492,18 @@ grant execute on function public.increment_site_metric(text, int) to anon, authe
 -- 22. SEED DATA: Shipping rates
 -- ==============================================================================
 truncate table shipping_rates;
-insert into shipping_rates (name, state, min_order_amount, shipping_amount, is_active)
-values ('All India Standard Shipping (Rs.60)', null, 0, 60.00, true);
+insert into shipping_rates (name, state, district, pincode_prefix, min_order_amount, shipping_amount, is_active)
+values
+  ('Free Shipping (Orders above Rs.645)', null, null, null, 645.00, 0.00, true),
+  ('Free Local Delivery (Paradeep)', 'Odisha', 'Paradeep', '754142', 0.00, 0.00, true),
+  ('Free Local Delivery (Paradip)', 'Odisha', 'Paradip', null, 0.00, 0.00, true),
+  ('Odisha District Delivery (Cuttack)', 'Odisha', 'Cuttack', null, 0.00, 59.00, true),
+  ('Odisha District Delivery (Khordha)', 'Odisha', 'Khordha', null, 0.00, 59.00, true),
+  ('Odisha District Delivery (Khurda)', 'Odisha', 'Khurda', null, 0.00, 59.00, true),
+  ('Odisha District Delivery (Bhubaneswar)', 'Odisha', 'Bhubaneswar', null, 0.00, 59.00, true),
+  ('Odisha District Delivery (Dhenkanal)', 'Odisha', 'Dhenkanal', null, 0.00, 59.00, true),
+  ('Odisha District Delivery (Jagatsinghpur)', 'Odisha', 'Jagatsinghpur', null, 0.00, 59.00, true),
+  ('Rest of India Standard Shipping (Rs.80)', null, null, null, 0.00, 80.00, true);
 
 -- ==============================================================================
 -- 23. SEED DATA: Products (Turmeric Powder only)
