@@ -74,8 +74,8 @@ export async function POST(request: Request) {
 
   // Calculate pricing totals
   const subtotal_amount = order.subtotal_amount ?? 0;
-  const shipping_amount = order.shipping_amount ?? 60;
-  const tax_amount = order.tax_amount ?? Math.round(subtotal_amount * 0.05);
+  const shipping_amount = order.shipping_amount ?? 0;
+  const tax_amount = order.tax_amount ?? 0;
   const total_amount = order.total_amount ?? (subtotal_amount + shipping_amount + tax_amount);
 
   if (tokenMatch) {
