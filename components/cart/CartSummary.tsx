@@ -60,6 +60,47 @@ export default function CartSummary({ onClose }: CartSummaryProps) {
           {formatPrice(subtotal)}
         </span>
       </div>
+      {subtotal >= 645 ? (
+        <div
+          style={{
+            fontSize: "0.8125rem",
+            color: "#15803D",
+            background: "#F0FDF4",
+            border: "1px solid #BBF7D0",
+            padding: "0.5rem 0.75rem",
+            borderRadius: "var(--radius-md)",
+            marginBottom: "0.75rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.375rem",
+            fontWeight: 600,
+          }}
+        >
+          <span>🚚</span>
+          <span>You&apos;ve unlocked <strong>FREE Shipping</strong>!</span>
+        </div>
+      ) : (
+        <div
+          style={{
+            fontSize: "0.8125rem",
+            color: "#9A3412",
+            background: "#FFFBEB",
+            border: "1px solid #FED7AA",
+            padding: "0.5rem 0.75rem",
+            borderRadius: "var(--radius-md)",
+            marginBottom: "0.75rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.375rem",
+          }}
+        >
+          <span>🚚</span>
+          <span>
+            Add <strong>{formatPrice(645 - subtotal)}</strong> more for <strong>FREE Shipping</strong> (Free in Paradeep)
+          </span>
+        </div>
+      )}
+
       <p
         style={{
           fontSize: "0.75rem",
@@ -67,7 +108,7 @@ export default function CartSummary({ onClose }: CartSummaryProps) {
           marginBottom: "1rem",
         }}
       >
-        Shipping calculated at checkout.
+        Delivery charges calculated automatically based on your location.
       </p>
 
       <Button
