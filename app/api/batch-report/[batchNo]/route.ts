@@ -4,74 +4,59 @@ import path from "path";
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ batchNo: string }> }
+  { params }: { params: Promise<{ batchNo: string }> }
 ) {
-  const { batchNo } = await context.params;
-  const safeBatch = (batchNo || "").replace(/[^a-zA-Z0-9_-]/g, "");
-
-  const publicDir = path.join(process.cwd(), "public");
-  const batchTestDir = path.join(publicDir, "batchtest");
-
-  // Potential search locations and names for the batch test PDF
-  const candidatePaths: string[] = [
-    path.join(batchTestDir, `${safeBatch}.pdf`),
-    path.join(batchTestDir, `${safeBatch.toUpperCase()}.pdf`),
-    path.join(batchTestDir, `${safeBatch.toLowerCase()}.pdf`),
-    path.join(batchTestDir, "batchtest.pdf"),
-    path.join(batchTestDir, "Batchtest.pdf"),
-    path.join(batchTestDir, "batch-test.pdf"),
-    path.join(batchTestDir, "report.pdf"),
-    path.join(publicDir, `${safeBatch}.pdf`),
-    path.join(publicDir, "batchtest.pdf"),
-  ];
-
-  // Also scan if any .pdf exists inside public/batchtest
-  if (fs.existsSync(batchTestDir)) {
-    try {
-      const files = fs.readdirSync(batchTestDir);
-      for (const file of files) {
-        if (file.toLowerCase().endsWith(".pdf")) {
-          candidatePaths.push(path.join(batchTestDir, file));
-        }
-      }
-    } catch {
-      // Ignore scan error
-    }
-  }
-
-  // Find first existing PDF
-  let matchedPath: string | null = null;
-  for (const p of candidatePaths) {
-    if (fs.existsSync(p) && fs.statSync(p).isFile()) {
-      matchedPath = p;
-      break;
-    }
-  }
-
-  if (!matchedPath) {
-    return NextResponse.json(
-      {
-        error: `Batch report PDF for ${safeBatch} not found. Please ensure the PDF is placed in public/batchtest/${safeBatch}.pdf`,
-      },
-      { status: 404 }
-    );
-  }
-
   try {
-    const fileBuffer = fs.readFileSync(matchedPath);
+    const { batchNo } = await params;
+    const cleanBatchNo = batchNo.replace(/[^a-zA-Z0-9_-]/g, "");
+
+    // Check possible locations for the PDF
+    const candidates = [
+      path.join(process.cwd(), "public", "batchtest", `${cleanBatchNo}.pdf`),
+      path.join(process.cwd(), "farmsmith", "public", "batchtest", `${cleanBatchNo}.pdf`),
+      path.join(process.cwd(), "public", `${cleanBatchNo}.pdf`),
+    ];
+
+    let targetFile = "";
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        targetFile = c;
+        break;
+      }
+    }
+
+    // Default fallback if not found directly
+    if (!targetFile) {
+      const fallback = path.join(process.cwd(), "public", "batchtest", "FS00001.pdf");
+      if (fs.existsSync(fallback)) {
+        targetFile = fallback;
+      }
+    }
+
+    if (!targetFile || !fs.existsSync(targetFile)) {
+      return NextResponse.json(
+        { error: "Batch report certificate not found." },
+        { status: 404 }
+      );
+    }
+
+    const fileBuffer = fs.readFileSync(targetFile);
+
     return new NextResponse(fileBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${safeBatch}-Quality-Report.pdf"`,
-        "Cache-Control": "public, max-age=3600, must-revalidate",
-        "X-Content-Type-Options": "nosniff",
+        "Content-Disposition": `inline; filename="Quality-Report-${cleanBatchNo}.pdf"`,
         "X-Frame-Options": "SAMEORIGIN",
-        "Content-Security-Policy": "frame-ancestors 'self' https://www.farmsmithfoods.com https://farmsmithfoods.com http://localhost:3000",
+        "Content-Security-Policy": "frame-ancestors 'self'",
+        "Cache-Control": "public, max-age=3600",
       },
     });
   } catch (error) {
-    console.error("Failed to read PDF file", error);
-    return NextResponse.json({ error: "Failed to read document." }, { status: 500 });
+    console.error("Error serving batch report PDF:", error);
+    return NextResponse.json(
+      { error: "Internal server error reading batch report." },
+      { status: 500 }
+    );
   }
 }

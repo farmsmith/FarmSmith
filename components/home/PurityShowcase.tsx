@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight, ShieldCheck, FileText, Lock } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 import BatchReportModal from "./BatchReportModal";
 
 const ORIGIN_SLIDES = [
@@ -20,8 +20,6 @@ interface SampleBatch {
   heavyMetals: string;
   pesticides: string;
   harvestDate: string;
-  reportUrl?: string;
-  totalPages?: number;
 }
 
 const SAMPLE_BATCHES: SampleBatch[] = [
@@ -33,8 +31,6 @@ const SAMPLE_BATCHES: SampleBatch[] = [
     heavyMetals: "Absent",
     pesticides: "Absent",
     harvestDate: "Jan 2026",
-    reportUrl: "/api/batch-report/FS00001",
-    totalPages: 12,
   },
   {
     code: "FS00002",
@@ -44,8 +40,6 @@ const SAMPLE_BATCHES: SampleBatch[] = [
     heavyMetals: "Absent",
     pesticides: "Absent",
     harvestDate: "Dec 2025",
-    reportUrl: "/api/batch-report/FS00002",
-    totalPages: 12,
   },
 ];
 
@@ -57,7 +51,6 @@ export default function PurityShowcase() {
   const [isReportVisible, setIsReportVisible] = useState(false);
   const [verifyPulseKey, setVerifyPulseKey] = useState(0);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
-  const [isPdfUnlocked, setIsPdfUnlocked] = useState(false);
 
   // Live Verify Quality click counter state (Real database count starting from 0)
   const [verificationCount, setVerificationCount] = useState<number>(0);
@@ -166,7 +159,7 @@ export default function PurityShowcase() {
       setErrorMessage(null);
       setVerifyPulseKey((prev) => prev + 1);
       setIsReportVisible(true);
-      setIsPdfUnlocked(true); // Reveal the 12-page PDF report upon verifying batch code
+      setIsPdfModalOpen(true);
     } else {
       setErrorMessage("Invalid Batch Code. Please check the code printed on your packaging and try again.");
     }
@@ -258,7 +251,7 @@ export default function PurityShowcase() {
           }}
         >
           <p className="eyebrow" style={{ color: "#D9A441", marginBottom: "0.6rem", fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 600, letterSpacing: "0.12em" }}>
-            TRANSPARENCY & HARVEST HERITAGE
+            OUR STANDARD • BATCH TRANSPARENCY
           </p>
           <h2
             style={{
@@ -266,14 +259,14 @@ export default function PurityShowcase() {
               fontSize: "clamp(1.85rem, 4vw, 2.65rem)",
               fontWeight: 600,
               color: "#FAF6EE",
-              lineHeight: 1.25,
+              lineHeight: 1.2,
               marginBottom: "1rem",
             }}
           >
-            Traceable to the Soil. Tested for Absolute Purity.
+            YOU check the quality of YOUR product
           </h2>
           <p style={{ color: "#D4C7B5", fontSize: "1.0625rem", fontFamily: "var(--font-body)", fontWeight: 400, lineHeight: 1.75 }}>
-            Every harvest carries an identity. From indigenous Kandhamal organic soils to accredited third-party laboratory verification — complete transparency on every pack.
+            Here is how FarmSmith redefines purity with batch-specific third-party testing.
           </p>
         </div>
 
@@ -298,62 +291,39 @@ export default function PurityShowcase() {
               transition: "all 2.75s cubic-bezier(0.16, 1, 0.3, 1) 0.15s",
             }}
           >
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                background: "rgba(217, 164, 65, 0.15)",
-                border: "1px solid rgba(217, 164, 65, 0.35)",
-                padding: "0.3rem 0.75rem",
-                borderRadius: "100px",
-                fontSize: "0.8125rem",
-                color: "#F6E05E",
-                fontWeight: 600,
-                marginBottom: "1rem",
-              }}
-            >
-              <span>🌱</span>
-              <span>Geographical Indication (GI) Certified Heritage</span>
-            </div>
-
             <h3
               style={{
                 fontFamily: "var(--font-heading)",
-                fontSize: "clamp(1.65rem, 3.2vw, 2.15rem)",
+                fontSize: "clamp(1.75rem, 3.5vw, 2.35rem)",
                 fontWeight: 600,
                 color: "#FAF6EE",
-                lineHeight: 1.25,
+                lineHeight: 1.2,
                 marginBottom: "1.25rem",
                 letterSpacing: "-0.01em",
               }}
             >
-              Grown by Tribal Farmers in the Pristine Hills of Kandhamal
+              Know the origin
             </h3>
 
             <p
               style={{
                 color: "#E2D9CC",
-                fontSize: "0.95rem",
+                fontSize: "1.0625rem",
                 lineHeight: 1.8,
                 marginBottom: "1.5rem",
               }}
             >
-              Our turmeric is exclusively cultivated in the high-altitude forested regions of Kandhamal, Odisha — a region blessed with rich organic soil, unpolluted mountain mist, and centuries-old tribal traditional farming.
+              Nestled in the picturesque eastern ghats of Odisha, kandhamal treasures fertile and pristine environment that holds nature's some of the most finest treasures. The GI tagged golden turmeric of kandhamal glows with purity. It is a heritage of health, nurtured by generations of farmers.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.875rem", color: "#FAF6EE" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                <span style={{ color: "#D9A441", fontWeight: 700 }}>✓</span>
-                <span><strong>100% Zero Chemicals:</strong> No synthetic urea, pesticides, or chemical ripening agents.</span>
+            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap", paddingTop: "0.5rem" }}>
+              <div style={{ borderLeft: "2px solid #D9A441", paddingLeft: "0.85rem" }}>
+                <span style={{ display: "block", fontSize: "1.125rem", fontWeight: 700, color: "#D9A441" }}>Eastern Ghats</span>
+                <span style={{ fontSize: "0.8125rem", color: "#B8ADA0" }}>Kandhamal, Odisha</span>
               </div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                <span style={{ color: "#D9A441", fontWeight: 700 }}>✓</span>
-                <span><strong>High Curcumin Potency:</strong> Naturally elevated bioactive curcumin content tested in accredited labs.</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                <span style={{ color: "#D9A441", fontWeight: 700 }}>✓</span>
-                <span><strong>Fair Farmer Partnership:</strong> Directly sourced supporting tribal agricultural livelihoods.</span>
+              <div style={{ borderLeft: "2px solid #D9A441", paddingLeft: "0.85rem" }}>
+                <span style={{ display: "block", fontSize: "1.125rem", fontWeight: 700, color: "#D9A441" }}>Traditionally cultivated on</span>
+                <span style={{ fontSize: "0.8125rem", color: "#B8ADA0" }}>Generational Soil</span>
               </div>
             </div>
           </div>
@@ -916,185 +886,17 @@ export default function PurityShowcase() {
                     </span>
                   </div>
                 </div>
-
-                {/* Direct 12-Page Protected Document Viewer - Only Visible After Verifying Batch Code */}
-                {isPdfUnlocked && activeBatch && (
-                  <div
-                    style={{
-                      gridColumn: "1 / -1",
-                      marginTop: "0.75rem",
-                      background: "#FAF8F2",
-                      border: "1.5px solid rgba(217, 164, 65, 0.45)",
-                      borderRadius: "1rem",
-                      overflow: "hidden",
-                      boxShadow: "0 8px 24px rgba(31, 58, 46, 0.08)",
-                      animation: "fadeIn 0.35s ease-in-out",
-                    }}
-                  >
-                  {/* Viewer Header */}
-                  <div
-                    style={{
-                      background: "linear-gradient(135deg, #1F3A2E 0%, #152820 100%)",
-                      color: "#FFFFFF",
-                      padding: "0.875rem 1.25rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      flexWrap: "wrap",
-                      gap: "0.75rem",
-                      borderBottom: "1px solid rgba(217, 164, 65, 0.3)",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-                      <FileText size={18} style={{ color: "#D9A441" }} />
-                      <div>
-                        <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#FFFFFF" }}>
-                          Official 12-Page Lab Quality Certificate
-                        </span>
-                        <span
-                          style={{
-                            marginLeft: "0.5rem",
-                            background: "rgba(217, 164, 65, 0.25)",
-                            border: "1px solid rgba(217, 164, 65, 0.5)",
-                            color: "#F6E05E",
-                            fontSize: "0.72rem",
-                            padding: "0.1rem 0.45rem",
-                            borderRadius: "100px",
-                            fontFamily: "monospace",
-                            fontWeight: 700,
-                          }}
-                        >
-                          Batch #{activeBatch.batchNo}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.75rem", color: "#9CA3AF" }}>
-                        <Lock size={12} style={{ color: "#10B981" }} />
-                        <span>Protected Document</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsPdfModalOpen(true)}
-                        style={{
-                          background: "rgba(217, 164, 65, 0.25)",
-                          border: "1px solid rgba(217, 164, 65, 0.5)",
-                          color: "#F6E05E",
-                          padding: "0.35rem 0.8rem",
-                          borderRadius: "0.4rem",
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          cursor: "pointer",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.3rem",
-                        }}
-                      >
-                        Fullscreen ⛶
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* PDF Document Container */}
-                  <div
-                    style={{
-                      position: "relative",
-                      height: "680px",
-                      background: "#525659",
-                      userSelect: "none",
-                      WebkitUserSelect: "none",
-                      overflow: "hidden",
-                    }}
-                    onContextMenu={(e) => e.preventDefault()}
-                  >
-                    {/* Security Diagonal Watermarks */}
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        pointerEvents: "none",
-                        zIndex: 10,
-                        display: "grid",
-                        gridTemplateColumns: "repeat(2, 1fr)",
-                        gridTemplateRows: "repeat(3, 1fr)",
-                        opacity: 0.08,
-                        userSelect: "none",
-                        overflow: "hidden",
-                      }}
-                      aria-hidden="true"
-                    >
-                      {Array.from({ length: 6 }).map((_, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            transform: "rotate(-25deg)",
-                            fontSize: "1rem",
-                            fontWeight: 800,
-                            color: "#1F3A2E",
-                            fontFamily: "monospace",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.15em",
-                            textAlign: "center",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          FARMSMITH QUALITY REPORT • BATCH #{activeBatch.batchNo} • VIEW ONLY
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Embedded PDF Viewer */}
-                    <iframe
-                      src={`/api/batch-report/${activeBatch.batchNo}#toolbar=0&navpanes=0&scrollbar=1&statusbar=0`}
-                      title={`Official Lab Quality Check Report for Batch ${activeBatch.batchNo}`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        border: "none",
-                        background: "#FFFFFF",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-
-                  {/* Viewer Sub-footer */}
-                  <div
-                    style={{
-                      background: "#F3EFE6",
-                      padding: "0.6rem 1.25rem",
-                      fontSize: "0.75rem",
-                      color: "#4B5563",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      borderTop: "1px solid rgba(217, 164, 65, 0.25)",
-                    }}
-                  >
-                    <span>
-                      🔒 <strong>Protected NABL Certificate:</strong> 12 Pages Complete Analysis for Batch #{activeBatch.batchNo}.
-                    </span>
-                    <span style={{ color: "#065F46", fontWeight: 600 }}>
-                      ✓ 100% Purity Certified
-                    </span>
-                  </div>
-                </div>
-                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Protected 12-Page Lab Certificate Modal */}
+        {/* Protected 12-Page Lab Certificate Modal - Opens when Verify Quality is clicked with a valid batch */}
         <BatchReportModal
           isOpen={isPdfModalOpen}
           onClose={() => setIsPdfModalOpen(false)}
           batchNo={activeBatch?.batchNo || "FS00001"}
-          pdfUrl={activeBatch?.reportUrl || "/batchtest/FS00001.pdf"}
-          totalPages={activeBatch?.totalPages || 12}
+          totalPages={12}
         />
 
       </div>

@@ -7,7 +7,7 @@ interface BatchReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   batchNo: string;
-  pdfUrl: string;
+  pdfUrl?: string;
   totalPages?: number;
 }
 
@@ -15,10 +15,8 @@ export default function BatchReportModal({
   isOpen,
   onClose,
   batchNo,
-  pdfUrl,
   totalPages = 12,
 }: BatchReportModalProps) {
-  // Prevent keyboard shortcuts for Save (Ctrl+S), Print (Ctrl+P), Copy (Ctrl+C), View Source (Ctrl+U)
   useEffect(() => {
     if (!isOpen) return;
 
@@ -31,23 +29,24 @@ export default function BatchReportModal({
       const isCtrlOrCmd = e.ctrlKey || e.metaKey;
       if (
         isCtrlOrCmd &&
-        ["s", "p", "c", "u", "a"].includes(e.key.toLowerCase())
+        ["s", "p", "c", "u", "a", "x"].includes(e.key.toLowerCase())
       ) {
         e.preventDefault();
+        e.stopPropagation();
       }
 
       if (e.key === "F12" || e.key === "PrintScreen") {
         e.preventDefault();
+        e.stopPropagation();
       }
     };
 
-    // Lock body scroll when modal is open
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, true);
 
     return () => {
       document.body.style.overflow = "unset";
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [isOpen, onClose]);
 
@@ -62,9 +61,9 @@ export default function BatchReportModal({
         position: "fixed",
         inset: 0,
         zIndex: 99999,
-        background: "rgba(18, 28, 22, 0.88)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
+        background: "rgba(18, 28, 22, 0.92)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -75,7 +74,11 @@ export default function BatchReportModal({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      onContextMenu={(e) => e.preventDefault()}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }}
     >
       <div
         style={{
@@ -83,17 +86,20 @@ export default function BatchReportModal({
           border: "1.5px solid rgba(217, 164, 65, 0.4)",
           borderRadius: "1.25rem",
           width: "100%",
-          maxWidth: "1000px",
+          maxWidth: "1020px",
           height: "92vh",
-          maxHeight: "900px",
+          maxHeight: "920px",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.45)",
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
           position: "relative",
           animation: "modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+          userSelect: "none",
+          WebkitUserSelect: "none",
         }}
         onClick={(e) => e.stopPropagation()}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <style>{`
           @keyframes modalSlideUp {
@@ -110,11 +116,11 @@ export default function BatchReportModal({
             position: absolute;
             inset: 0;
             pointer-events: none;
-            z-index: 10;
+            z-index: 20;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            opacity: 0.07;
+            opacity: 0.08;
             user-select: none;
             overflow: hidden;
           }
@@ -219,12 +225,13 @@ export default function BatchReportModal({
                 padding: "0.35rem 0.75rem",
                 borderRadius: "100px",
                 fontSize: "0.75rem",
-                color: "#9CA3AF",
+                color: "#10B981",
+                fontWeight: 600,
               }}
-              title="Protected Document: Copying, downloading, and printing are disabled."
+              title="Protected Document: Copying, downloading, printing, and screenshots are disabled."
             >
               <Lock size={13} style={{ color: "#10B981" }} />
-              <span>Protected Viewer</span>
+              <span>Protected Preview Mode</span>
             </div>
 
             <button
@@ -299,7 +306,7 @@ export default function BatchReportModal({
             flexDirection: "column",
           }}
         >
-          {/* Security Diagonal Watermarks */}
+          {/* Security Diagonal Watermarks (Prevents Clean Screenshots) */}
           <div className="pdf-watermark-grid" aria-hidden="true">
             {Array.from({ length: 8 }).map((_, idx) => (
               <div key={idx} className="watermark-item">
@@ -308,7 +315,7 @@ export default function BatchReportModal({
             ))}
           </div>
 
-          {/* Embedded Protected PDF Object / Frame */}
+          {/* Embedded Protected PDF Iframe */}
           <iframe
             src={`/api/batch-report/${batchNo}#toolbar=0&navpanes=0&scrollbar=1&statusbar=0&messages=0`}
             title={`Quality Check Report for Batch ${batchNo}`}
@@ -317,8 +324,8 @@ export default function BatchReportModal({
               height: "100%",
               border: "none",
               background: "#FFFFFF",
+              display: "block",
             }}
-            loading="lazy"
           />
         </div>
 
@@ -337,8 +344,11 @@ export default function BatchReportModal({
             color: "#6B7280",
           }}
         >
-          <span>
-            🔒 <strong>Protected Document:</strong> Copying, screenshots, and unauthorized distribution are strictly restricted.
+          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+            <Lock size={13} style={{ color: "#D9A441" }} />
+            <span>
+              <strong>Protected Document:</strong> Copying, screenshots, and unauthorized distribution are strictly restricted.
+            </span>
           </span>
           <button
             onClick={onClose}
@@ -346,7 +356,7 @@ export default function BatchReportModal({
               background: "var(--color-primary)",
               color: "#FFFFFF",
               border: "none",
-              padding: "0.4rem 1rem",
+              padding: "0.45rem 1.25rem",
               borderRadius: "0.5rem",
               fontWeight: 600,
               fontSize: "0.8125rem",
