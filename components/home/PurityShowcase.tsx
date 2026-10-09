@@ -57,6 +57,7 @@ export default function PurityShowcase() {
   const [isReportVisible, setIsReportVisible] = useState(false);
   const [verifyPulseKey, setVerifyPulseKey] = useState(0);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isPdfUnlocked, setIsPdfUnlocked] = useState(false);
 
   // Live Verify Quality click counter state (Real database count starting from 0)
   const [verificationCount, setVerificationCount] = useState<number>(0);
@@ -165,7 +166,7 @@ export default function PurityShowcase() {
       setErrorMessage(null);
       setVerifyPulseKey((prev) => prev + 1);
       setIsReportVisible(true);
-      setIsPdfModalOpen(true); // Open the protected 12-page report modal immediately
+      setIsPdfUnlocked(true); // Reveal the 12-page PDF report upon verifying batch code
     } else {
       setErrorMessage("Invalid Batch Code. Please check the code printed on your packaging and try again.");
     }
@@ -893,18 +894,20 @@ export default function PurityShowcase() {
                   </div>
                 </div>
 
-                {/* Direct 12-Page Protected Document Viewer Embedded on the Page */}
-                <div
-                  style={{
-                    gridColumn: "1 / -1",
-                    marginTop: "0.75rem",
-                    background: "#FAF8F2",
-                    border: "1.5px solid rgba(217, 164, 65, 0.45)",
-                    borderRadius: "1rem",
-                    overflow: "hidden",
-                    boxShadow: "0 8px 24px rgba(31, 58, 46, 0.08)",
-                  }}
-                >
+                {/* Direct 12-Page Protected Document Viewer - Only Visible After Verifying Batch Code */}
+                {isPdfUnlocked && activeBatch && (
+                  <div
+                    style={{
+                      gridColumn: "1 / -1",
+                      marginTop: "0.75rem",
+                      background: "#FAF8F2",
+                      border: "1.5px solid rgba(217, 164, 65, 0.45)",
+                      borderRadius: "1rem",
+                      overflow: "hidden",
+                      boxShadow: "0 8px 24px rgba(31, 58, 46, 0.08)",
+                      animation: "fadeIn 0.35s ease-in-out",
+                    }}
+                  >
                   {/* Viewer Header */}
                   <div
                     style={{
@@ -1056,6 +1059,7 @@ export default function PurityShowcase() {
                     </span>
                   </div>
                 </div>
+                )}
               </div>
             )}
           </div>
