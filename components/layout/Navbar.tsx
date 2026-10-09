@@ -159,23 +159,41 @@ export default function Navbar() {
           transform: translateX(-50%);
         }
         @media (min-width: 900px) {
-          .nav-center-links {
-            display: flex;
+          .nav-left-group {
+            order: 3;
+            margin-left: auto;
           }
-          .nav-mobile-toggle,
-          .nav-mobile-dropdown {
+          .nav-mobile-toggle {
             display: none !important;
           }
           .nav-brand-link {
+            order: 1;
             position: static !important;
             transform: none !important;
           }
+          .nav-center-links {
+            order: 2;
+            display: flex;
+          }
+          .nav-actions {
+            order: 4;
+            margin-left: 0.625rem;
+            gap: 1rem;
+          }
+          .nav-mobile-dropdown {
+            display: none !important;
+          }
         }
         @media (max-width: 899px) {
+          .nav-left-group {
+            order: 1;
+            display: flex !important;
+            align-items: center;
+            gap: 0.25rem;
+            z-index: 10;
+          }
           .nav-mobile-toggle {
             display: inline-flex !important;
-            order: 1;
-            margin-right: auto;
           }
           .nav-brand-link {
             position: absolute;
@@ -187,6 +205,7 @@ export default function Navbar() {
             order: 3;
             margin-left: auto;
             gap: 0.35rem;
+            z-index: 10;
           }
         }
         .nav-link {
@@ -233,17 +252,6 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           gap: 0.35rem;
-          margin-left: auto;
-        }
-        @media (min-width: 480px) {
-          .nav-actions {
-            gap: 0.625rem;
-          }
-        }
-        @media (min-width: 640px) {
-          .nav-actions {
-            gap: 1rem;
-          }
         }
         @media (max-width: 380px) {
           .nav-brand-text {
@@ -310,22 +318,25 @@ export default function Navbar() {
               position: "relative",
             }}
           >
-            {/* 1. Mobile Hamburger Toggle (Far Left Corner on Mobile, Hidden on Desktop) */}
-            <button
-              onClick={() => {
-                setMenuOpen((prev) => {
-                  const next = !prev;
-                  if (next) setAccountMenuOpen(false);
-                  return next;
-                });
-              }}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
-              className="nav-icon-link nav-mobile-toggle"
-              style={{ background: "none", border: "none", cursor: "pointer", padding: "0.4rem" }}
-            >
-              {menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
-            </button>
+            {/* 1. Left Group (Hamburger Toggle + Language Selector on Mobile; on Desktop Language sits right) */}
+            <div className="nav-left-group" style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              <button
+                onClick={() => {
+                  setMenuOpen((prev) => {
+                    const next = !prev;
+                    if (next) setAccountMenuOpen(false);
+                    return next;
+                  });
+                }}
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={menuOpen}
+                className="nav-icon-link nav-mobile-toggle"
+                style={{ background: "none", border: "none", cursor: "pointer", padding: "0.4rem" }}
+              >
+                {menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
+              </button>
+              <LanguageSelector />
+            </div>
 
             {/* 2. Brand Logo & Title (Centered on Mobile, Left on Desktop) */}
             <Link
@@ -386,12 +397,9 @@ export default function Navbar() {
               })}
             </div>
 
-            {/* 4. Right: Actions (Language FIRST -> Cart SECOND -> Account THIRD) */}
+            {/* 4. Right: Cart & Account */}
             <div className="nav-actions">
-              {/* 1. Language Selector */}
-              <LanguageSelector />
-
-              {/* 2. Cart Trolley Button */}
+              {/* Cart Trolley Button */}
               <button
                 onClick={() => {
                   closeAllMenus();
@@ -439,7 +447,7 @@ export default function Navbar() {
                 )}
               </button>
 
-              {/* 3. Account Dropdown Button */}
+              {/* Account Dropdown Button */}
               <div ref={accountRef} style={{ position: "relative" }}>
                 <button
                   onClick={() => {
@@ -543,7 +551,7 @@ export default function Navbar() {
           </nav>
         </div>
 
-        {/* Mobile Menu Dropdown (Cleaned without duplicate My Orders link) */}
+        {/* Mobile Menu Dropdown */}
         <div
           className="nav-mobile-dropdown"
           style={{
