@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Globe, ChevronDown } from "lucide-react";
+import { Globe } from "lucide-react";
 
 interface Language {
   code: string;
@@ -173,25 +173,29 @@ export default function LanguageSelector() {
   };
 
   return (
-    <div ref={dropdownRef} className="notranslate" translate="no" style={{ position: "relative", display: "inline-block" }}>
+    <div ref={dropdownRef} className="notranslate" translate="no" style={{ position: "relative", display: "inline-flex", alignItems: "center", height: "38px" }}>
       <style>{`
         .lang-btn {
           display: inline-flex;
           align-items: center;
-          gap: 0.4rem;
+          justify-content: center;
+          gap: 0.25rem;
           background: rgba(31, 58, 46, 0.05);
           border: 1px solid rgba(31, 58, 46, 0.18);
           color: var(--color-primary);
           font-size: 0.8125rem;
           font-weight: 600;
           cursor: pointer;
-          padding: 0.35rem 0.65rem;
+          height: 32px;
+          padding: 0 0.5rem;
           border-radius: var(--radius-full);
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           white-space: nowrap;
           outline: none;
           user-select: none;
+          box-sizing: border-box;
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+          line-height: 1;
         }
         .lang-btn:hover {
           background: rgba(31, 58, 46, 0.1);
@@ -232,7 +236,7 @@ export default function LanguageSelector() {
         }
         @media (min-width: 640px) {
           .lang-btn {
-            padding: 0.375rem 0.75rem;
+            padding: 0.3rem 0.55rem;
           }
           .lang-text {
             max-width: none;
@@ -253,15 +257,7 @@ export default function LanguageSelector() {
       >
         <Globe size={15} strokeWidth={1.85} aria-hidden="true" style={{ opacity: 0.9, flexShrink: 0 }} />
         <span className="notranslate lang-text" translate="no">{selectedLang.shortLabel}</span>
-        <ChevronDown size={13} strokeWidth={1.85} aria-hidden="true"
-          style={{
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-            opacity: 0.7,
-            flexShrink: 0,
-          }}
-        />
-      </button>
+        </button>
 
       {/* Tightly Fitted Compact Dropdown Menu */}
       {isOpen && (

@@ -140,6 +140,7 @@ export default function Navbar() {
   return (
     <>
       <style>{`
+        
         .nav-container {
           width: 100%;
           max-width: 100%;
@@ -191,22 +192,30 @@ export default function Navbar() {
             display: flex !important;
             align-items: center;
             gap: 0.25rem;
-            z-index: 10;
+            flex-shrink: 0;
           }
           .nav-mobile-toggle {
             display: inline-flex !important;
           }
           .nav-brand-link {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 5;
+            order: 2;
+            position: static !important;
+            transform: none !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 auto;
+            margin: 0 auto;
+            min-width: 0;
+            gap: 0.45rem !important;
           }
           .nav-actions {
             order: 3;
-            margin-left: auto;
+            display: flex !important;
+            align-items: center;
             gap: 0.35rem;
-            z-index: 10;
+            flex-shrink: 0;
+            margin-left: 0 !important;
           }
         }
         .nav-link {
@@ -254,9 +263,22 @@ export default function Navbar() {
           align-items: center;
           gap: 0.35rem;
         }
+        .nav-brand-text {
+          font-family: var(--font-serif-brand);
+          font-weight: 700;
+          font-size: 1.45rem;
+          color: var(--color-primary);
+          letter-spacing: 0.02em;
+          line-height: 1;
+        }
+        @media (max-width: 899px) {
+          .nav-brand-text {
+            font-size: 1.35rem;
+          }
+        }
         @media (max-width: 380px) {
           .nav-brand-text {
-            font-size: 1.05rem !important;
+            font-size: 1.18rem !important;
           }
         }
         .nav-icon-link {
@@ -264,10 +286,16 @@ export default function Navbar() {
           align-items: center;
           justify-content: center;
           color: var(--color-primary);
-          padding: 0.45rem;
+          width: 38px;
+          height: 38px;
+          padding: 0;
           border-radius: var(--radius-md);
           transition: color 0.15s, background-color 0.15s;
           text-decoration: none;
+          box-sizing: border-box;
+          flex-shrink: 0;
+          vertical-align: middle;
+          line-height: 1;
         }
         .nav-icon-link:hover {
           color: var(--color-accent);
@@ -308,6 +336,7 @@ export default function Navbar() {
           boxShadow: scrolled || menuOpen ? "0 4px 20px -2px rgba(0, 0, 0, 0.08)" : "none",
         }}
       >
+        
         <div className="nav-container">
           <nav
             aria-label="Main navigation"
@@ -332,7 +361,7 @@ export default function Navbar() {
                 aria-label={menuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={menuOpen}
                 className="nav-icon-link nav-mobile-toggle"
-                style={{ background: "none", border: "none", cursor: "pointer", padding: "0.4rem" }}
+                style={{ background: "none", border: "none", cursor: "pointer" }}
               >
                 {menuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
               </button>
@@ -361,13 +390,6 @@ export default function Navbar() {
                 id="nav-brand-text"
                 className="notranslate nav-brand-text"
                 translate="no"
-                style={{
-                  fontFamily: "var(--font-serif-brand)",
-                  fontWeight: 700,
-                  fontSize: "1.25rem",
-                  color: "var(--color-primary)",
-                  letterSpacing: "0.02em",
-                }}
               >
                 FarmSmith
               </span>
@@ -414,11 +436,6 @@ export default function Navbar() {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  padding: "0.4rem",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "var(--color-primary)",
                 }}
               >
                 <ShoppingCart size={21} strokeWidth={1.85} aria-hidden="true" />
@@ -449,7 +466,7 @@ export default function Navbar() {
               </button>
 
               {/* Account Dropdown Button */}
-              <div ref={accountRef} style={{ position: "relative" }}>
+              <div ref={accountRef} style={{ position: "relative", display: "inline-flex", alignItems: "center", height: "38px" }}>
                 <button
                   onClick={() => {
                     setAccountMenuOpen((prev) => {
@@ -466,9 +483,6 @@ export default function Navbar() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                   }}
                 >
                   {firstInitial ? (

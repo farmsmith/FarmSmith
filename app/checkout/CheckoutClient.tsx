@@ -832,30 +832,7 @@ export default function CheckoutClient() {
                     </button>
                   </div>
 
-                  {/* Delivery Charges Notice */}
-                  <div
-                    style={{
-                      background: "#F8FAF8",
-                      border: "1px solid #D1E7DD",
-                      borderRadius: "var(--radius-md)",
-                      padding: "0.75rem 1rem",
-                      fontSize: "0.8125rem",
-                      color: "#1C3121",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.25rem",
-                    }}
-                  >
-                    <div style={{ fontWeight: 600, display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <span>🚚</span>
-                      <span>Delivery Rates:</span>
-                    </div>
-                    <ul style={{ margin: 0, paddingLeft: "1.25rem", color: "#4B5563", fontSize: "0.75rem", lineHeight: 1.5 }}>
-                      <li><strong>FREE Local Delivery</strong> in Paradeep & on all orders above ₹645</li>
-                      <li><strong>₹59/-</strong> for Cuttack, Khordha, Dhenkanal & Jagatsinghpur districts</li>
-                      <li><strong>₹80/-</strong> for Rest of India</li>
-                    </ul>
-                  </div>
+                  
 
                   {/* Saved Address Cards */}
                   {savedAddresses.map((addr) => {

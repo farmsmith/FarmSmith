@@ -96,7 +96,7 @@ export default function CartSummary({ onClose }: CartSummaryProps) {
         >
           <span>🚚</span>
           <span>
-            Add <strong>{formatPrice(645 - subtotal)}</strong> more for <strong>FREE Shipping</strong> (Free in Paradeep)
+            Add <strong>{formatPrice(645 - subtotal)}</strong> more for <strong>FREE Shipping</strong>
           </span>
         </div>
       )}
