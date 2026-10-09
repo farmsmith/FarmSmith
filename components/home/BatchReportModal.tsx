@@ -8,7 +8,8 @@ import {
   ZoomOut,
   Maximize2,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ShieldAlert
 } from "lucide-react";
 
 interface BatchReportModalProps {
@@ -64,6 +65,7 @@ export default function BatchReportModal({
   const [numPages, setNumPages] = useState<number>(totalPages);
   const [scale, setScale] = useState<number>(1.0);
   const [pdfDoc, setPdfDoc] = useState<any>(null);
+  const [isWindowObscured, setIsWindowObscured] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
@@ -95,17 +97,46 @@ export default function BatchReportModal({
       if (e.key === "F12" || e.key === "PrintScreen") {
         e.preventDefault();
         e.stopPropagation();
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText("FARMSMITH - PROTECTED DOCUMENT");
+          }
+        } catch {}
+      }
+    };
+
+    // Obscure document when window loses focus (e.g. Snipping tool activation, tab switch, app switcher)
+    const handleBlur = () => {
+      setIsWindowObscured(true);
+    };
+
+    const handleFocus = () => {
+      setIsWindowObscured(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsWindowObscured(true);
+      } else {
+        setIsWindowObscured(false);
       }
     };
 
     // Lock page body scroll
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("blur", handleBlur);
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       document.body.style.overflow = originalOverflow || "unset";
       window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isOpen, onClose]);
 
@@ -192,12 +223,32 @@ export default function BatchReportModal({
           viewport: viewport,
         };
 
+        // Render PDF Page
         await page.render(renderContext).promise;
+
+        // BURN-IN WATERMARK DIRECTLY ON CANVAS PIXELS
+        // This renders indelible watermarks into the canvas buffer so dev tools cannot remove them
+        ctx.save();
+        ctx.rotate((-24 * Math.PI) / 180);
+        ctx.fillStyle = "rgba(31, 58, 46, 0.09)";
+        ctx.font = "bold 13px monospace";
+        ctx.textAlign = "center";
+
+        const stepX = 260;
+        const stepY = 140;
+        const text = `FARMSMITH QUALITY REPORT • BATCH #${batchNo} • VIEW ONLY`;
+
+        for (let x = -viewport.width; x < viewport.width * 2; x += stepX) {
+          for (let y = -viewport.height; y < viewport.height * 2; y += stepY) {
+            ctx.fillText(text, x, y);
+          }
+        }
+        ctx.restore();
       } catch (pageErr) {
         console.warn(`Error rendering page ${pageNum}:`, pageErr);
       }
     }
-  }, [pdfDoc, scale]);
+  }, [pdfDoc, scale, batchNo]);
 
   useEffect(() => {
     if (pdfDoc && !loading) {
@@ -229,9 +280,9 @@ export default function BatchReportModal({
         position: "fixed",
         inset: 0,
         zIndex: 999999,
-        background: "rgba(10, 18, 14, 0.88)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
+        background: "rgba(10, 18, 14, 0.90)",
+        backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -247,7 +298,90 @@ export default function BatchReportModal({
         e.stopPropagation();
         return false;
       }}
+      onDragStart={(e) => e.preventDefault()}
     >
+      <style>{`
+        @media print {
+          body * {
+            display: none !important;
+            visibility: hidden !important;
+          }
+          html, body {
+            background: #000000 !important;
+            display: none !important;
+          }
+        }
+        @keyframes modalSlideUp {
+          from {
+            opacity: 0;
+            transform: translateY(28px) scale(0.97);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .pdf-watermark-overlay {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 15;
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: repeat(4, 1fr);
+          opacity: 0.08;
+          user-select: none;
+          overflow: hidden;
+        }
+        .pdf-watermark-overlay span {
+          display: flex;
+          align-items: center;
+          justifyContent: center;
+          transform: rotate(-24deg);
+          font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+          font-weight: 800;
+          color: #1F3A2E;
+          font-family: monospace;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          text-align: center;
+          white-space: nowrap;
+        }
+        .pdf-doc-page {
+          position: relative;
+          background: #FFFFFF;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+          border-radius: 4px;
+          margin-bottom: 24px;
+          overflow: hidden;
+          display: inline-block;
+          user-select: none;
+          -webkit-user-select: none;
+        }
+        .toolbar-btn {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: #FAF6EE;
+          border-radius: 8px;
+          padding: 0.45rem 0.75rem;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          transition: all 0.15s ease;
+        }
+        .toolbar-btn:hover {
+          background: rgba(217, 164, 65, 0.25);
+          border-color: rgba(217, 164, 65, 0.5);
+          color: #F6E05E;
+        }
+        .toolbar-btn:active {
+          transform: scale(0.96);
+        }
+      `}</style>
+
       <div
         style={{
           background: "#1E2A24",
@@ -267,75 +401,35 @@ export default function BatchReportModal({
         onClick={(e) => e.stopPropagation()}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <style>{`
-          @keyframes modalSlideUp {
-            from {
-              opacity: 0;
-              transform: translateY(28px) scale(0.97);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-          .pdf-watermark-overlay {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 15;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            opacity: 0.07;
-            user-select: none;
-            overflow: hidden;
-          }
-          .pdf-watermark-overlay span {
-            display: flex;
-            align-items: center;
-            justifyContent: center;
-            transform: rotate(-24deg);
-            font-size: clamp(0.7rem, 1.2vw, 0.95rem);
-            font-weight: 800;
-            color: #1F3A2E;
-            font-family: monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            text-align: center;
-            white-space: nowrap;
-          }
-          .pdf-doc-page {
-            position: relative;
-            background: #FFFFFF;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-            border-radius: 4px;
-            margin-bottom: 24px;
-            overflow: hidden;
-            display: inline-block;
-          }
-          .toolbar-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #FAF6EE;
-            border-radius: 8px;
-            padding: 0.45rem 0.75rem;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            transition: all 0.15s ease;
-          }
-          .toolbar-btn:hover {
-            background: rgba(217, 164, 65, 0.25);
-            border-color: rgba(217, 164, 65, 0.5);
-            color: #F6E05E;
-          }
-          .toolbar-btn:active {
-            transform: scale(0.96);
-          }
-        `}</style>
+        {/* Anti-snoop / Loss of Focus Blur Shield */}
+        {isWindowObscured && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 999,
+              background: "rgba(18, 28, 22, 0.96)",
+              backdropFilter: "blur(28px)",
+              WebkitBackdropFilter: "blur(28px)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1rem",
+              color: "#FAF6EE",
+              textAlign: "center",
+              padding: "2rem",
+            }}
+          >
+            <ShieldAlert size={48} style={{ color: "#D9A441" }} />
+            <h3 style={{ margin: 0, fontSize: "1.25rem", color: "#FAF6EE" }}>
+              Protected Document Preview Paused
+            </h3>
+            <p style={{ margin: 0, fontSize: "0.875rem", color: "#A7B3AB", maxWidth: "420px" }}>
+              Click back into the browser window to continue viewing the quality verification report.
+            </p>
+          </div>
+        )}
 
         {/* Clean Minimalist Top Header Bar */}
         <div
@@ -350,7 +444,7 @@ export default function BatchReportModal({
             zIndex: 30,
           }}
         >
-          {/* Left / Center: Zoom Controls */}
+          {/* Left: Zoom Controls */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <button
               onClick={handleZoomOut}
@@ -513,6 +607,7 @@ export default function BatchReportModal({
                     style={{
                       display: "block",
                       background: "#FFFFFF",
+                      pointerEvents: "none",
                     }}
                   />
                 </div>
