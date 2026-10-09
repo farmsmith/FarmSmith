@@ -893,75 +893,168 @@ export default function PurityShowcase() {
                   </div>
                 </div>
 
-                {/* Official 12-Page Lab Certificate CTA */}
+                {/* Direct 12-Page Protected Document Viewer Embedded on the Page */}
                 <div
                   style={{
                     gridColumn: "1 / -1",
-                    marginTop: "0.5rem",
-                    background: "linear-gradient(135deg, rgba(31, 58, 46, 0.04) 0%, rgba(217, 164, 65, 0.1) 100%)",
-                    border: "1.5px dashed rgba(217, 164, 65, 0.5)",
-                    borderRadius: "0.875rem",
-                    padding: "1rem 1.25rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: "1rem",
+                    marginTop: "0.75rem",
+                    background: "#FAF8F2",
+                    border: "1.5px solid rgba(217, 164, 65, 0.45)",
+                    borderRadius: "1rem",
+                    overflow: "hidden",
+                    boxShadow: "0 8px 24px rgba(31, 58, 46, 0.08)",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <div
-                      style={{
-                        background: "#FFFFFF",
-                        padding: "0.5rem",
-                        borderRadius: "0.5rem",
-                        border: "1px solid rgba(217, 164, 65, 0.35)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <FileText size={22} style={{ color: "var(--color-primary)" }} />
+                  {/* Viewer Header */}
+                  <div
+                    style={{
+                      background: "linear-gradient(135deg, #1F3A2E 0%, #152820 100%)",
+                      color: "#FFFFFF",
+                      padding: "0.875rem 1.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: "0.75rem",
+                      borderBottom: "1px solid rgba(217, 164, 65, 0.3)",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+                      <FileText size={18} style={{ color: "#D9A441" }} />
+                      <div>
+                        <span style={{ fontWeight: 700, fontSize: "0.95rem", color: "#FFFFFF" }}>
+                          Official 12-Page Lab Quality Certificate
+                        </span>
+                        <span
+                          style={{
+                            marginLeft: "0.5rem",
+                            background: "rgba(217, 164, 65, 0.25)",
+                            border: "1px solid rgba(217, 164, 65, 0.5)",
+                            color: "#F6E05E",
+                            fontSize: "0.72rem",
+                            padding: "0.1rem 0.45rem",
+                            borderRadius: "100px",
+                            fontFamily: "monospace",
+                            fontWeight: 700,
+                          }}
+                        >
+                          Batch #{activeBatch.batchNo}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <p style={{ margin: 0, fontWeight: 700, fontSize: "0.95rem", color: "var(--color-primary)" }}>
-                        Complete 12-Page NABL Laboratory Analysis Certificate
-                      </p>
-                      <p style={{ margin: "0.15rem 0 0", fontSize: "0.8rem", color: "#4B5563" }}>
-                        Batch #{activeBatch.batchNo} • Heavy Metals, Pesticides, Curcumin Purity & Microbial Testing
-                      </p>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.75rem", color: "#9CA3AF" }}>
+                        <Lock size={12} style={{ color: "#10B981" }} />
+                        <span>Protected Document</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsPdfModalOpen(true)}
+                        style={{
+                          background: "rgba(217, 164, 65, 0.25)",
+                          border: "1px solid rgba(217, 164, 65, 0.5)",
+                          color: "#F6E05E",
+                          padding: "0.35rem 0.8rem",
+                          borderRadius: "0.4rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        Fullscreen ⛶
+                      </button>
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setIsPdfModalOpen(true)}
+                  {/* PDF Document Container */}
+                  <div
                     style={{
-                      background: "var(--color-primary)",
-                      color: "#FFFFFF",
-                      border: "none",
-                      padding: "0.65rem 1.35rem",
-                      borderRadius: "0.65rem",
-                      fontWeight: 700,
-                      fontSize: "0.875rem",
-                      cursor: "pointer",
-                      display: "inline-flex",
+                      position: "relative",
+                      height: "680px",
+                      background: "#525659",
+                      userSelect: "none",
+                      WebkitUserSelect: "none",
+                      overflow: "hidden",
+                    }}
+                    onContextMenu={(e) => e.preventDefault()}
+                  >
+                    {/* Security Diagonal Watermarks */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        pointerEvents: "none",
+                        zIndex: 10,
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, 1fr)",
+                        gridTemplateRows: "repeat(3, 1fr)",
+                        opacity: 0.08,
+                        userSelect: "none",
+                        overflow: "hidden",
+                      }}
+                      aria-hidden="true"
+                    >
+                      {Array.from({ length: 6 }).map((_, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transform: "rotate(-25deg)",
+                            fontSize: "1rem",
+                            fontWeight: 800,
+                            color: "#1F3A2E",
+                            fontFamily: "monospace",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.15em",
+                            textAlign: "center",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          FARMSMITH QUALITY REPORT • BATCH #{activeBatch.batchNo} • VIEW ONLY
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Embedded PDF Viewer */}
+                    <iframe
+                      src={`/batchtest/${activeBatch.batchNo}.pdf#toolbar=0&navpanes=0&scrollbar=1&statusbar=0`}
+                      title={`Official Lab Quality Check Report for Batch ${activeBatch.batchNo}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        border: "none",
+                        background: "#FFFFFF",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+
+                  {/* Viewer Sub-footer */}
+                  <div
+                    style={{
+                      background: "#F3EFE6",
+                      padding: "0.6rem 1.25rem",
+                      fontSize: "0.75rem",
+                      color: "#4B5563",
+                      display: "flex",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      gap: "0.45rem",
-                      boxShadow: "0 2px 8px rgba(31, 58, 46, 0.2)",
-                      transition: "transform 0.15s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
+                      borderTop: "1px solid rgba(217, 164, 65, 0.25)",
                     }}
                   >
-                    <FileText size={16} />
-                    View 12-Page Report →
-                  </button>
+                    <span>
+                      🔒 <strong>Protected NABL Certificate:</strong> 12 Pages Complete Analysis for Batch #{activeBatch.batchNo}.
+                    </span>
+                    <span style={{ color: "#065F46", fontWeight: 600 }}>
+                      ✓ 100% Purity Certified
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
