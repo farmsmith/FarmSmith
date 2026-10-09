@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "X-Frame-Options",
-            value: "DENY",
+            value: "SAMEORIGIN",
           },
           {
             key: "Referrer-Policy",
@@ -38,6 +38,32 @@ const nextConfig: NextConfig = {
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains",
+          },
+        ],
+      },
+      {
+        source: "/batchtest/:path*",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://www.farmsmithfoods.com https://farmsmithfoods.com http://localhost:3000",
+          },
+        ],
+      },
+      {
+        source: "/api/batch-report/:path*",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://www.farmsmithfoods.com https://farmsmithfoods.com http://localhost:3000",
           },
         ],
       },

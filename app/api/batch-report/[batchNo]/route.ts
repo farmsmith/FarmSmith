@@ -66,6 +66,8 @@ export async function GET(
         "Content-Disposition": `inline; filename="${safeBatch}-Quality-Report.pdf"`,
         "Cache-Control": "public, max-age=3600, must-revalidate",
         "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "SAMEORIGIN",
+        "Content-Security-Policy": "frame-ancestors 'self' https://www.farmsmithfoods.com https://farmsmithfoods.com http://localhost:3000",
       },
     });
   } catch (error) {

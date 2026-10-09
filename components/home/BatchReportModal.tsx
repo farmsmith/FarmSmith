@@ -310,7 +310,7 @@ export default function BatchReportModal({
 
           {/* Embedded Protected PDF Object / Frame */}
           <iframe
-            src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1&statusbar=0&messages=0`}
+            src={`/api/batch-report/${batchNo}#toolbar=0&navpanes=0&scrollbar=1&statusbar=0&messages=0`}
             title={`Quality Check Report for Batch ${batchNo}`}
             style={{
               width: "100%",

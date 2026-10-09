@@ -1026,7 +1026,7 @@ export default function PurityShowcase() {
 
                     {/* Embedded PDF Viewer */}
                     <iframe
-                      src={`/batchtest/${activeBatch.batchNo}.pdf#toolbar=0&navpanes=0&scrollbar=1&statusbar=0`}
+                      src={`/api/batch-report/${activeBatch.batchNo}#toolbar=0&navpanes=0&scrollbar=1&statusbar=0`}
                       title={`Official Lab Quality Check Report for Batch ${activeBatch.batchNo}`}
                       style={{
                         width: "100%",
