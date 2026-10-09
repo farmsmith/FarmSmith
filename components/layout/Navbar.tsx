@@ -380,7 +380,7 @@ export default function Navbar() {
                   color: "var(--color-primary)",
                 }}
               >
-                <ShoppingCart size={22} aria-hidden="true" />
+                <ShoppingCart size={21} strokeWidth={1.85} aria-hidden="true" />
                 {count > 0 && (
                   <span
                     aria-hidden="true"
@@ -450,7 +450,7 @@ export default function Navbar() {
                       {firstInitial}
                     </div>
                   ) : (
-                    <User size={20} aria-hidden="true" />
+                    <User size={21} strokeWidth={1.85} aria-hidden="true" />
                   )}
                 </button>
 

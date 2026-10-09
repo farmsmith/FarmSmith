@@ -251,11 +251,9 @@ export default function LanguageSelector() {
         className={`notranslate lang-btn ${isOpen ? "is-open" : ""}`}
         translate="no"
       >
-        <Globe size={14} aria-hidden="true" style={{ opacity: 0.85, flexShrink: 0 }} />
+        <Globe size={15} strokeWidth={1.85} aria-hidden="true" style={{ opacity: 0.9, flexShrink: 0 }} />
         <span className="notranslate lang-text" translate="no">{selectedLang.shortLabel}</span>
-        <ChevronDown
-          size={12}
-          aria-hidden="true"
+        <ChevronDown size={13} strokeWidth={1.85} aria-hidden="true"
           style={{
             transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
