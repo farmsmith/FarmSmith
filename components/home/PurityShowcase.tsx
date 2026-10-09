@@ -33,7 +33,7 @@ const SAMPLE_BATCHES: SampleBatch[] = [
     heavyMetals: "Absent",
     pesticides: "Absent",
     harvestDate: "Jan 2026",
-    reportUrl: "/batchtest/FS00001.pdf",
+    reportUrl: "/api/batch-report/FS00001",
     totalPages: 12,
   },
   {
@@ -44,7 +44,7 @@ const SAMPLE_BATCHES: SampleBatch[] = [
     heavyMetals: "Absent",
     pesticides: "Absent",
     harvestDate: "Dec 2025",
-    reportUrl: "/batchtest/FS00002.pdf",
+    reportUrl: "/api/batch-report/FS00002",
     totalPages: 12,
   },
 ];
@@ -165,6 +165,7 @@ export default function PurityShowcase() {
       setErrorMessage(null);
       setVerifyPulseKey((prev) => prev + 1);
       setIsReportVisible(true);
+      setIsPdfModalOpen(true); // Open the protected 12-page report modal immediately
     } else {
       setErrorMessage("Invalid Batch Code. Please check the code printed on your packaging and try again.");
     }
