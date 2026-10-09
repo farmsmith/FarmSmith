@@ -6,15 +6,12 @@ import {
   X,
   ShieldCheck,
   FileText,
-  Lock,
   ZoomIn,
   ZoomOut,
   Maximize2,
   Loader2,
   AlertCircle,
-  Award,
-  ChevronUp,
-  ChevronDown
+  Award
 } from "lucide-react";
 
 interface BatchReportModalProps {
@@ -134,7 +131,7 @@ export default function BatchReportModal({
         const pdfjsLib = await loadPdfJsScript();
         pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 
-        // Fetch PDF binary from protected API route or public fallback
+        // Fetch PDF binary from protected API route
         const pdfUrl = `/api/batch-report/${batchNo}`;
         
         const loadingTask = pdfjsLib.getDocument({
@@ -222,21 +219,6 @@ export default function BatchReportModal({
 
   const handleResetZoom = () => {
     setScale(1.0);
-  };
-
-  const scrollToTop = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
-  const scrollToBottom = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
   };
 
   if (!isOpen || !mounted) return null;
@@ -339,7 +321,7 @@ export default function BatchReportModal({
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: #FAF6EE;
             border-radius: 8px;
-            padding: 0.4rem 0.65rem;
+            padding: 0.45rem 0.75rem;
             font-size: 0.8125rem;
             font-weight: 600;
             cursor: pointer;
@@ -373,7 +355,7 @@ export default function BatchReportModal({
             zIndex: 30,
           }}
         >
-          {/* Left: Document details */}
+          {/* Left: Document details (Clean Title) */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div
               style={{
@@ -389,66 +371,36 @@ export default function BatchReportModal({
               <FileText size={19} style={{ color: "#D9A441" }} />
             </div>
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <h3
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "1.05rem",
-                    margin: 0,
-                    fontWeight: 700,
-                    color: "#FAF6EE",
-                  }}
-                >
-                  Official Lab Quality Check Report
-                </h3>
-                <span
-                  style={{
-                    background: "rgba(217, 164, 65, 0.22)",
-                    border: "1px solid rgba(217, 164, 65, 0.45)",
-                    color: "#F6E05E",
-                    fontSize: "0.72rem",
-                    padding: "0.15rem 0.5rem",
-                    borderRadius: "100px",
-                    fontWeight: 700,
-                    fontFamily: "monospace",
-                  }}
-                >
-                  Batch #{batchNo}
-                </span>
-              </div>
-              <p
+              <h3
                 style={{
-                  margin: "0.15rem 0 0",
-                  fontSize: "0.75rem",
-                  color: "#A7B3AB",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.45rem",
+                  fontFamily: "var(--font-heading)",
+                  fontSize: "1.05rem",
+                  margin: 0,
+                  fontWeight: 700,
+                  color: "#FAF6EE",
                 }}
               >
-                <span>NABL Accredited Laboratory Analysis</span>
-                <span>•</span>
-                <span>{numPages} Pages Complete Certificate</span>
-              </p>
+                Official Lab Quality Check Report
+              </h3>
             </div>
           </div>
 
-          {/* Center: Controls Toolbar */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+          {/* Center: Zoom Controls Toolbar */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <button
               onClick={handleZoomOut}
               className="toolbar-btn"
               title="Zoom Out"
               aria-label="Zoom Out"
             >
-              <ZoomOut size={15} />
+              <ZoomOut size={16} />
             </button>
 
             <button
               onClick={handleResetZoom}
               className="toolbar-btn"
               title="Reset Zoom / Fit Width"
-              style={{ minWidth: "62px", justifyContent: "center" }}
+              style={{ minWidth: "66px", justifyContent: "center" }}
             >
               <Maximize2 size={13} />
               <span>{Math.round(scale * 100)}%</span>
@@ -460,51 +412,12 @@ export default function BatchReportModal({
               title="Zoom In"
               aria-label="Zoom In"
             >
-              <ZoomIn size={15} />
-            </button>
-
-            <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.15)", marginInline: "0.25rem" }} />
-
-            <button
-              onClick={scrollToTop}
-              className="toolbar-btn"
-              title="Scroll to Top"
-              aria-label="Scroll to Top"
-            >
-              <ChevronUp size={15} />
-            </button>
-
-            <button
-              onClick={scrollToBottom}
-              className="toolbar-btn"
-              title="Scroll to Bottom"
-              aria-label="Scroll to Bottom"
-            >
-              <ChevronDown size={15} />
+              <ZoomIn size={16} />
             </button>
           </div>
 
-          {/* Right: Protected badge & Close Button */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.35rem",
-                background: "rgba(16, 185, 129, 0.12)",
-                border: "1px solid rgba(16, 185, 129, 0.3)",
-                padding: "0.35rem 0.75rem",
-                borderRadius: "100px",
-                fontSize: "0.75rem",
-                color: "#10B981",
-                fontWeight: 600,
-              }}
-              title="Protected Document: Text selection, saving, and printing are disabled."
-            >
-              <Lock size={12} style={{ color: "#10B981" }} />
-              <span>Protected Viewer</span>
-            </div>
-
+          {/* Right: Close Button */}
+          <div style={{ display: "flex", alignItems: "center" }}>
             <button
               onClick={onClose}
               aria-label="Close Report Viewer"
@@ -673,48 +586,6 @@ export default function BatchReportModal({
               ))}
             </div>
           )}
-        </div>
-
-        {/* Modal Bottom Footer Bar */}
-        <div
-          style={{
-            background: "linear-gradient(135deg, #16241C 0%, #0F1A14 100%)",
-            borderTop: "1px solid rgba(217, 164, 65, 0.25)",
-            padding: "0.75rem 1.25rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-            fontSize: "0.75rem",
-            color: "#A7B3AB",
-            zIndex: 30,
-          }}
-        >
-          <span style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-            <Lock size={13} style={{ color: "#D9A441" }} />
-            <span>
-              <strong>Protected Document:</strong> Copying, screenshots, and unauthorized distribution are strictly restricted.
-            </span>
-          </span>
-          <button
-            onClick={onClose}
-            style={{
-              background: "#D9A441",
-              color: "#1F3A2E",
-              border: "none",
-              padding: "0.45rem 1.25rem",
-              borderRadius: "0.5rem",
-              fontWeight: 700,
-              fontSize: "0.8125rem",
-              cursor: "pointer",
-              transition: "opacity 0.15s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            Close Viewer
-          </button>
         </div>
       </div>
     </div>
