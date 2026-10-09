@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/#featured-harvest", label: "Shop" },
   { href: "/#standards", label: "Our Standards" },
+  { href: "/about-us", label: "Our Story" },
   { href: "/contact", label: "Contact" },
 ];
 
