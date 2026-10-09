@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight, ShieldCheck, FileText, Lock } from "lucide-react";
+import BatchReportModal from "./BatchReportModal";
 
 const ORIGIN_SLIDES = [
   { src: "/images/Know the origin 0.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 0" },
@@ -19,6 +20,8 @@ interface SampleBatch {
   heavyMetals: string;
   pesticides: string;
   harvestDate: string;
+  reportUrl?: string;
+  totalPages?: number;
 }
 
 const SAMPLE_BATCHES: SampleBatch[] = [
@@ -30,6 +33,8 @@ const SAMPLE_BATCHES: SampleBatch[] = [
     heavyMetals: "Absent",
     pesticides: "Absent",
     harvestDate: "Jan 2026",
+    reportUrl: "/batchtest/FS00001.pdf",
+    totalPages: 12,
   },
   {
     code: "FS00002",
@@ -39,6 +44,8 @@ const SAMPLE_BATCHES: SampleBatch[] = [
     heavyMetals: "Absent",
     pesticides: "Absent",
     harvestDate: "Dec 2025",
+    reportUrl: "/batchtest/FS00002.pdf",
+    totalPages: 12,
   },
 ];
 
@@ -49,6 +56,7 @@ export default function PurityShowcase() {
   const [isAssembled, setIsAssembled] = useState(false);
   const [isReportVisible, setIsReportVisible] = useState(false);
   const [verifyPulseKey, setVerifyPulseKey] = useState(0);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   // Live Verify Quality click counter state (Real database count starting from 0)
   const [verificationCount, setVerificationCount] = useState<number>(0);
@@ -883,10 +891,90 @@ export default function PurityShowcase() {
                     </span>
                   </div>
                 </div>
+
+                {/* Official 12-Page Lab Certificate CTA */}
+                <div
+                  style={{
+                    gridColumn: "1 / -1",
+                    marginTop: "0.5rem",
+                    background: "linear-gradient(135deg, rgba(31, 58, 46, 0.04) 0%, rgba(217, 164, 65, 0.1) 100%)",
+                    border: "1.5px dashed rgba(217, 164, 65, 0.5)",
+                    borderRadius: "0.875rem",
+                    padding: "1rem 1.25rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: "1rem",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div
+                      style={{
+                        background: "#FFFFFF",
+                        padding: "0.5rem",
+                        borderRadius: "0.5rem",
+                        border: "1px solid rgba(217, 164, 65, 0.35)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <FileText size={22} style={{ color: "var(--color-primary)" }} />
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontWeight: 700, fontSize: "0.95rem", color: "var(--color-primary)" }}>
+                        Complete 12-Page NABL Laboratory Analysis Certificate
+                      </p>
+                      <p style={{ margin: "0.15rem 0 0", fontSize: "0.8rem", color: "#4B5563" }}>
+                        Batch #{activeBatch.batchNo} • Heavy Metals, Pesticides, Curcumin Purity & Microbial Testing
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPdfModalOpen(true)}
+                    style={{
+                      background: "var(--color-primary)",
+                      color: "#FFFFFF",
+                      border: "none",
+                      padding: "0.65rem 1.35rem",
+                      borderRadius: "0.65rem",
+                      fontWeight: 700,
+                      fontSize: "0.875rem",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.45rem",
+                      boxShadow: "0 2px 8px rgba(31, 58, 46, 0.2)",
+                      transition: "transform 0.15s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }}
+                  >
+                    <FileText size={16} />
+                    View 12-Page Report →
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Protected 12-Page Lab Certificate Modal */}
+        <BatchReportModal
+          isOpen={isPdfModalOpen}
+          onClose={() => setIsPdfModalOpen(false)}
+          batchNo={activeBatch?.batchNo || "FS00001"}
+          pdfUrl={activeBatch?.reportUrl || "/batchtest/FS00001.pdf"}
+          totalPages={activeBatch?.totalPages || 12}
+        />
 
       </div>
     </section>
