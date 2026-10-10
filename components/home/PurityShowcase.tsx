@@ -183,19 +183,19 @@ export default function PurityShowcase() {
           }
         }
         @keyframes livePulseDot {
-          0% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            0% {
+              transform: scale(0.95);
+              opacity: 0.9;
+            }
+            70% {
+              transform: scale(1.6);
+              opacity: 0;
+            }
+            100% {
+              transform: scale(1.6);
+              opacity: 0;
+            }
           }
-          70% {
-            transform: scale(1.6);
-            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-          }
-          100% {
-            transform: scale(0.95);
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-          }
-        }
         @keyframes labTileStampIn {
           0% {
             opacity: 0;
@@ -369,7 +369,7 @@ export default function PurityShowcase() {
                       src={slide.src}
                       alt={slide.alt}
                       fill
-                      sizes="(max-width: 768px) 100vw, 560px"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 480px" quality={75}
                       style={{
                         objectFit: "cover",
                         objectPosition: idx === 0 ? "top center" : "center",

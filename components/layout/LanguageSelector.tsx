@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Globe } from "lucide-react";
 
 interface Language {
   code: string;
-  name: string;
+  label: string;
   nativeName: string;
   shortLabel: string;
 }
 
 const LANGUAGES: Language[] = [
-  { code: "en", name: "English", nativeName: "English", shortLabel: "En" },
-  { code: "hi", name: "Hindi", nativeName: "हिन्दी", shortLabel: "हिन्दी" },
-  { code: "ta", name: "Tamil", nativeName: "தமிழ்", shortLabel: "தமிழ்" },
-  { code: "mr", name: "Marathi", nativeName: "मराठी", shortLabel: "मराठी" },
-  { code: "te", name: "Telugu", nativeName: "తెలుగు", shortLabel: "తెలుగు" },
-  { code: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ", shortLabel: "ಕನ್ನಡ" },
-  { code: "ml", name: "Malayalam", nativeName: "മലയാളം", shortLabel: "മലയാളം" },
-  { code: "gu", name: "Gujarati", nativeName: "ગુજરાતી", shortLabel: "ગુજરાતી" },
-  { code: "bn", name: "Bengali", nativeName: "বাংলা", shortLabel: "বাংলা" },
-  { code: "or", name: "Odia", nativeName: "ଓଡ଼ିଆ", shortLabel: "ଓଡ଼ିଆ" },
+  { code: "en", label: "English", nativeName: "English", shortLabel: "En" },
+  { code: "hi", label: "Hindi", nativeName: "हिन्दी", shortLabel: "हि" },
+  { code: "or", label: "Odia", nativeName: "ଓଡ଼ିଆ", shortLabel: "ଓଡ଼ି" },
+  { code: "ta", label: "Tamil", nativeName: "தமிழ்", shortLabel: "தம" },
+  { code: "te", label: "Telugu", nativeName: "తెలుగు", shortLabel: "తె" },
+  { code: "kn", label: "Kannada", nativeName: "ಕನ್ನಡ", shortLabel: "ಕನ್ನ" },
+  { code: "ml", label: "Malayalam", nativeName: "മലയാളം", shortLabel: "മല" },
+  { code: "mr", label: "Marathi", nativeName: "मराठी", shortLabel: "मरा" },
+  { code: "gu", label: "Gujarati", nativeName: "ગુજરાતી", shortLabel: "ગુજ" },
+  { code: "bn", label: "Bengali", nativeName: "বাংলা", shortLabel: "বাং" },
 ];
 
 export default function LanguageSelector() {
@@ -28,23 +28,22 @@ export default function LanguageSelector() {
   const [selectedLang, setSelectedLang] = useState<Language>(LANGUAGES[0]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Helper to clear all variations of Google Translate cookies
   const clearGoogleTranslateCookies = () => {
     const host = window.location.hostname;
     const hostParts = host.split(".");
-    const domains = ["", host, `.${host}`];
+    const domains = ["", "." + host];
     if (hostParts.length > 2) {
       const rootDomain = hostParts.slice(-2).join(".");
-      domains.push(rootDomain, `.${rootDomain}`);
+      domains.push(rootDomain, "." + rootDomain);
     }
     const paths = ["/", window.location.pathname];
 
     domains.forEach((d) => {
       paths.forEach((p) => {
-        const domainAttr = d ? `; domain=${d}` : "";
-        const pathAttr = p ? `; path=${p}` : "; path=/";
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT${pathAttr}${domainAttr};`;
-        document.cookie = `googtrans_sync=; expires=Thu, 01 Jan 1970 00:00:00 GMT${pathAttr}${domainAttr};`;
+        const domainAttr = d ? "; domain=" + d : "";
+        const pathAttr = p ? "; path=" + p : "; path=/";
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + pathAttr + domainAttr + ";";
+        document.cookie = "googtrans_sync=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + pathAttr + domainAttr + ";";
       });
     });
 
@@ -54,45 +53,45 @@ export default function LanguageSelector() {
     } catch (_) {}
   };
 
-  // Initialize Google Translate Script dynamically
+  const loadGoogleTranslateScript = useCallback(() => {
+    if (typeof window === "undefined" || (window as any).googleTranslateLoaded) return;
+    (window as any).googleTranslateLoaded = true;
+
+    (window as any).googleTranslateInit = () => {
+      if ((window as any).google && (window as any).google.translate) {
+        new (window as any).google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            includedLanguages: "en,hi,ta,mr,te,kn,ml,gu,bn,or",
+            autoDisplay: false,
+          },
+          "google_translate_element"
+        );
+      }
+    };
+
+    const script = document.createElement("script");
+    script.id = "google-translate-script";
+    script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateInit";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  // Check if non-English language was previously chosen
   useEffect(() => {
-    // Check if script already exists
-    if (!document.getElementById("google-translate-script")) {
-      const script = document.createElement("script");
-      script.id = "google-translate-script";
-      script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateInit";
-      script.async = true;
-      document.body.appendChild(script);
-
-      (window as any).googleTranslateInit = () => {
-        if ((window as any).google && (window as any).google.translate) {
-          new (window as any).google.translate.TranslateElement(
-            {
-              pageLanguage: "en",
-              includedLanguages: "en,hi,ta,mr,te,kn,ml,gu,bn,or",
-              autoDisplay: false,
-            },
-            "google_translate_element"
-          );
-        }
-      };
-    }
-
-    // Read current cookie if set
     const match = document.cookie.match(/(?:^|;) ?googtrans=([^;]*)(?:;|$)/);
     if (match && match[1]) {
       const parts = match[1].split("/");
       const currentCode = parts[parts.length - 1];
-      if (currentCode === "en" || !currentCode) {
-        setSelectedLang(LANGUAGES[0]);
-      } else {
+      if (currentCode && currentCode !== "en") {
         const found = LANGUAGES.find((l) => l.code === currentCode);
-        if (found) setSelectedLang(found);
+        if (found) {
+          setSelectedLang(found);
+          loadGoogleTranslateScript();
+        }
       }
-    } else {
-      setSelectedLang(LANGUAGES[0]);
     }
-  }, []);
+  }, [loadGoogleTranslateScript]);
 
   // Close dropdown on outside click/tap
   useEffect(() => {
@@ -110,6 +109,7 @@ export default function LanguageSelector() {
   }, []);
 
   const changeLanguage = (lang: Language) => {
+    loadGoogleTranslateScript();
     setSelectedLang(lang);
     setIsOpen(false);
 
@@ -123,7 +123,7 @@ export default function LanguageSelector() {
       document.cookie = "googtrans=/en/en; path=/;";
       document.cookie = "googtrans=/auto/en; path=/;";
       if (host && host !== "localhost" && !/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
-        document.cookie = `googtrans=/en/en; path=/; domain=.${host};`;
+        document.cookie = "googtrans=/en/en; path=/; domain=." + host + ";";
       }
 
       // 3. Reset Google Translate combo in DOM if loaded
@@ -152,10 +152,10 @@ export default function LanguageSelector() {
     // Setting a non-English language
     clearGoogleTranslateCookies();
 
-    const cookieVal = `/en/${lang.code}`;
-    document.cookie = `googtrans=${cookieVal}; path=/;`;
+    const cookieVal = "/en/" + lang.code;
+    document.cookie = "googtrans=" + cookieVal + "; path=/;";
     if (host && host !== "localhost" && !/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
-      document.cookie = `googtrans=${cookieVal}; path=/; domain=.${host};`;
+      document.cookie = "googtrans=" + cookieVal + "; path=/; domain=." + host + ";";
     }
 
     // Trigger select element in hidden container if available
@@ -250,14 +250,19 @@ export default function LanguageSelector() {
       {/* Styled Premium Language Button */}
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onMouseEnter={loadGoogleTranslateScript}
+        onFocus={loadGoogleTranslateScript}
+        onClick={() => {
+          loadGoogleTranslateScript();
+          setIsOpen((prev) => !prev);
+        }}
         aria-label="Select Language"
         className={`notranslate lang-btn ${isOpen ? "is-open" : ""}`}
         translate="no"
       >
         <Globe size={15} strokeWidth={1.85} aria-hidden="true" style={{ opacity: 0.9, flexShrink: 0 }} />
         <span className="notranslate lang-text" translate="no">{selectedLang.shortLabel}</span>
-        </button>
+      </button>
 
       {/* Tightly Fitted Compact Dropdown Menu */}
       {isOpen && (
