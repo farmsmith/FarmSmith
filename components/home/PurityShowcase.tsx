@@ -6,10 +6,10 @@ import { AlertTriangle, CheckCircle2, Search, ChevronLeft, ChevronRight, ShieldC
 import BatchReportModal from "./BatchReportModal";
 
 const ORIGIN_SLIDES = [
-  { src: "/images/Know the origin 0.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 0" },
-  { src: "/images/Know the origin 1.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 1" },
-  { src: "/images/Know the origin 2.PNG", alt: "Know the origin - Kandhamal Turmeric Heritage 2" },
-  { src: "/images/Know the Origin 3.jpg", alt: "Know the origin - Kandhamal Turmeric Heritage 3" },
+  { src: "/images/Know the origin 0.PNG", alt: "Fertile organic farming landscape in the Eastern Ghats of Kandhamal, Odisha" },
+  { src: "/images/Know the origin 1.PNG", alt: "Traditional harvesting of GI-tagged heirloom turmeric roots in Kandhamal" },
+  { src: "/images/Know the origin 2.PNG", alt: "Sun-drying process of pure golden Kandhamal turmeric rhizomes" },
+  { src: "/images/Know the Origin 3.jpg", alt: "Freshly harvested organic Kandhamal turmeric rhizomes showing vibrant golden hue" },
 ];
 
 interface SampleBatch {

@@ -120,9 +120,10 @@ export const getProductBySlug = cache(async (slug: string): Promise<Product | nu
 
     const rawProduct = product as Product & { product_images?: ProductImage[] };
     const images = (rawProduct.product_images ?? []).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    const canonicalSlug = rawProduct.slug === "kandhamal-turmeric-powder" ? "turmeric-powder" : rawProduct.slug;
     return {
       ...rawProduct,
-      slug: "turmeric-powder",
+      slug: canonicalSlug,
       images,
     };
   } catch (err) {

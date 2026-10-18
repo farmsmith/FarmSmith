@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { formatPrice } from "@/lib/utils/cn";
 import ProductGallery from "@/components/product/ProductGallery";
 import TrustBadge, { TURMERIC_TRUST_BADGES } from "@/components/product/TrustBadge";
 import ProductFactsGrid from "@/components/product/ProductFactsGrid";
 import ProductReviewsList from "@/components/product/ProductReviewsList";
 import QuantitySelector from "@/components/product/QuantitySelector";
+import JsonLd from "@/components/seo/JsonLd";
 import type { Product } from "@/types/product";
 import { getProductBySlug, getActiveProducts } from "@/lib/data/products";
 
@@ -36,11 +37,46 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (slug === "kandhamal-turmeric-powder") {
+    permanentRedirect("/shop/turmeric-powder");
+  }
   const product = await getProductBySlug(slug);
-  if (!product) return { title: "Product Not Found" };
+  if (!product) {
+    return {
+      title: "Product Not Found | FarmSmith Foods",
+      robots: { index: false, follow: false },
+    };
+  }
+  const canonicalUrl = `https://www.farmsmithfoods.com/shop/${product.slug || slug}`;
+  const description = product.short_description ?? product.description ?? undefined;
+  const imageUrl = product.image_url?.startsWith("http")
+    ? product.image_url
+    : `https://www.farmsmithfoods.com${product.image_url || "/images/Product 1.PNG"}`;
+
   return {
     title: product.name,
-    description: product.short_description ?? product.description ?? undefined,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${product.name} | FarmSmith Foods`,
+      description,
+      url: canonicalUrl,
+      images: [
+        {
+          url: imageUrl,
+          alt: product.name,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | FarmSmith Foods`,
+      description,
+      images: [imageUrl],
+    },
   };
 }
 
@@ -88,11 +124,67 @@ function buildProductFacts(product: Product) {
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
   if (slug === "kandhamal-turmeric-powder") {
-    redirect("/shop/turmeric-powder");
+    permanentRedirect("/shop/turmeric-powder");
   }
   const product = await getProductBySlug(slug);
 
   if (!product) notFound();
+
+  const baseUrl = "https://www.farmsmithfoods.com";
+  const productUrl = `${baseUrl}/shop/${product.slug || slug}`;
+  const images = (product.images && product.images.length > 0)
+    ? product.images.map((img) => img.image_url.startsWith("http") ? img.image_url : `${baseUrl}${img.image_url}`)
+    : [product.image_url?.startsWith("http") ? product.image_url : `${baseUrl}${product.image_url || "/images/Product 1.PNG"}`];
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: baseUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Shop",
+        item: `${baseUrl}/#featured-harvest`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
+
+  const productJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: images,
+    description: product.description || product.short_description || undefined,
+    sku: product.sku || undefined,
+    brand: {
+      "@type": "Brand",
+      name: "FarmSmith Foods",
+    },
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: product.currency || "INR",
+      price: product.price,
+      itemCondition: "https://schema.org/NewCondition",
+      availability: product.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      seller: {
+        "@type": "Organization",
+        name: "FarmSmith Foods",
+      },
+    },
+  };
 
   const facts = buildProductFacts(product);
   const inStock = product.stock_quantity > 0;
@@ -103,6 +195,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return (
     <div style={{ background: "var(--color-background)" }}>
+      <JsonLd data={[breadcrumbJsonLd, productJsonLd]} />
       <div className="container" style={{ paddingBlock: "3rem" }}>
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" style={{ marginBottom: "2rem" }}>

@@ -179,8 +179,13 @@ export default function Navbar() {
           }
           .nav-actions {
             order: 4;
-            margin-left: 0.625rem;
-            gap: 1rem;
+            margin-left: 1.35rem;
+            gap: 1.15rem;
+          }
+          .nav-icon-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
           }
           .nav-mobile-dropdown {
             display: none !important;
@@ -261,7 +266,6 @@ export default function Navbar() {
         .nav-actions {
           display: flex;
           align-items: center;
-          gap: 0.35rem;
         }
         .nav-brand-text {
           font-family: var(--font-serif-brand);
@@ -379,7 +383,7 @@ export default function Navbar() {
               <div id="nav-brand-logo" style={{ position: "relative", width: "42px", height: "42px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Image
                   src="/images/farmsmith_logo_v2.png"
-                  alt="FarmSmith Foods"
+                  alt="FarmSmith Foods logo"
                   width={42}
                   height={42}
                   priority

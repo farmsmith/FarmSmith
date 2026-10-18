@@ -1,14 +1,38 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
     "Read FarmSmith Foods terms and conditions regarding website usage, product ordering, delivery, and customer account policies.",
+  alternates: {
+    canonical: "https://www.farmsmithfoods.com/terms",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://www.farmsmithfoods.com",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Terms & Conditions",
+      item: "https://www.farmsmithfoods.com/terms",
+    },
+  ],
 };
 
 export default function TermsPage() {
   return (
     <div style={{ background: "var(--color-background)", minHeight: "85vh" }}>
+      <JsonLd data={breadcrumbJsonLd} />
       {/* Header Banner */}
       <section
         style={{

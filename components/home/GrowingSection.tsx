@@ -216,7 +216,7 @@ export default function GrowingSection() {
             <div style={{ position: "relative", width: "100%", aspectRatio: "4/5", maxHeight: "420px" }}>
               <Image
                 src="/images/farmsmith_growing_tree.jpg"
-                alt="Everyday grocery staples but cleaner — FarmSmith organic staples growing"
+                alt="Young plant sapling in fertile soil representing FarmSmith sustainable farming and clean grocery staples"
                 fill
                 sizes="(max-width: 768px) 100vw, 340px"
                 style={{

@@ -115,7 +115,7 @@ export default function Footer() {
                 >
                   <Image
                     src="/images/farmsmith_logo_white_tm.png"
-                    alt="FarmSmith Foods"
+                    alt="FarmSmith Foods logo"
                     width={48}
                     height={48}
                     style={{ width: "100%", height: "100%", objectFit: "contain" }}

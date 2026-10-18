@@ -9,10 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/account",
         "/account/*",
-        "/checkout",
-        "/login",
-        "/signup",
-        "/reset-password",
         "/order/*",
         "/api/*",
       ],

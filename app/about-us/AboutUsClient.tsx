@@ -6,11 +6,11 @@ import Link from "next/link";
 import { ArrowRight, Apple, ChevronLeft, ChevronRight } from "lucide-react";
 
 const STORY_SLIDES = [
-  { src: "/images/Our story 1.PNG", alt: "FarmSmith Story - 1: The Origin" },
-  { src: "/images/Our story 2.PNG", alt: "FarmSmith Story - 2: Sourcing with Care" },
-  { src: "/images/Our story 3.PNG", alt: "FarmSmith Story - 3: Working with Farmers" },
-  { src: "/images/Our story 4.PNG", alt: "FarmSmith Story - 4: Batch Testing & Purity" },
-  { src: "/images/Our story 5.PNG", alt: "FarmSmith Story - 5: Wholesome Harvest" },
+  { src: "/images/Our story 1.PNG", alt: "FarmSmith founder questioning food transparency and purity in Indian households" },
+  { src: "/images/Our story 2.PNG", alt: "FarmSmith field sourcing from organic turmeric farming clusters in Odisha" },
+  { src: "/images/Our story 3.PNG", alt: "Partnering directly with local farmers for fair, chemical-free agricultural produce" },
+  { src: "/images/Our story 4.PNG", alt: "Independent NABL lab batch testing verifying absence of synthetic dyes and heavy metals" },
+  { src: "/images/Our story 5.PNG", alt: "Finished pure GI-tagged turmeric packages ready for conscious consumers" },
 ];
 
 const JOURNEY_STEPS = [
@@ -157,7 +157,7 @@ export default function AboutUsClient() {
             >
               <Image
                 src="/images/farmsmith_logo_white_tm.png"
-                alt="FarmSmith Logo"
+                alt="FarmSmith Foods brand emblem"
                 width={150}
                 height={150}
                 unoptimized

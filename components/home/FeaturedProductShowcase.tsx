@@ -60,6 +60,13 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
           "/images/Product 4.PNG",
         ];
 
+  const slideAltTexts = [
+    `${product.name} packaging front with certified GI-tag mark and net weight details`,
+    `${product.name} pouch perspective angle showing seal of purity and origin details`,
+    `${product.name} nutrition facts, ingredients table, and storage instructions`,
+    `${product.name} third-party NABL batch test certification and verification overview`,
+  ];
+
   useEffect(() => {
     if (isHovered || slides.length <= 1) return;
     const timer = setInterval(() => {
@@ -189,7 +196,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                       >
                         <Image
                           src={imgUrl}
-                          alt={`${product.name} - View ${idx + 1}`}
+                          alt={slideAltTexts[idx] ?? `${product.name} - View ${idx + 1}`}
                           fill
                           sizes="(max-width: 768px) 100vw, 480px"
                           style={{ objectFit: "cover" }}
@@ -334,7 +341,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                         e.preventDefault();
                         setCurrentIdx(idx);
                       }}
-                      aria-label={`View image ${idx + 1}`}
+                      aria-label={`View image ${idx + 1}: ${slideAltTexts[idx] ?? `${product.name} view ${idx + 1}`}`}
                       style={{
                         position: "relative",
                         width: "68px",
@@ -358,7 +365,7 @@ export default function FeaturedProductShowcase({ product }: FeaturedProductShow
                     >
                       <Image
                         src={imgUrl}
-                        alt={`${product.name} thumbnail ${idx + 1}`}
+                        alt={slideAltTexts[idx] ?? `${product.name} thumbnail ${idx + 1}`}
                         fill
                         sizes="68px"
                         style={{ objectFit: "cover" }}

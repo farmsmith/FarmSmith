@@ -9,37 +9,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
       url: `${baseUrl}/why-us`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/about-us`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.4,
     },
     {
       url: `${baseUrl}/terms`,
-      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/track`,
       changeFrequency: "monthly",
       priority: 0.4,
     },
@@ -47,7 +46,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const supabase = createAdminSupabaseClient();
-    const allProducts: Array<{ id: string; slug: string; updated_at?: string | null }> = [];
+    const allProducts: Array<{
+      id: string;
+      slug: string | null;
+      short_description?: string | null;
+      description?: string | null;
+      updated_at?: string | null;
+    }> = [];
     let from = 0;
     let hasMore = true;
 
@@ -55,7 +60,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const to = from + BATCH_SIZE - 1;
       const { data: batch, error } = await supabase
         .from("products")
-        .select("id, slug, updated_at")
+        .select("id, slug, short_description, description, updated_at")
         .eq("is_active", true)
         .order("id", { ascending: true })
         .range(from, to);
@@ -82,25 +87,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    const productRoutes: MetadataRoute.Sitemap = allProducts
-      .filter((product) => product.slug || product.id)
-      .map((product) => {
-        const rawSlug = product.slug || product.id;
-        const finalSlug = rawSlug === "kandhamal-turmeric-powder" ? "turmeric-powder" : rawSlug;
-        return {
-          url: `${baseUrl}/shop/${finalSlug}`,
-          lastModified: product.updated_at
-            ? new Date(product.updated_at)
-            : new Date(),
-          changeFrequency: "weekly",
-          priority: 0.8,
-        };
-      });
+    const seenSlugs = new Set<string>();
+    const productRoutes: MetadataRoute.Sitemap = [];
+
+    for (const product of allProducts) {
+      // Filter out launching soon items
+      const isLaunchingSoon =
+        product.short_description?.toLowerCase().includes("launching soon") ||
+        product.description?.toLowerCase().includes("launching soon");
+      if (isLaunchingSoon) continue;
+
+      const rawSlug = product.slug;
+      if (!rawSlug) continue;
+
+      const finalSlug =
+        rawSlug === "kandhamal-turmeric-powder" ? "turmeric-powder" : rawSlug;
+
+      if (seenSlugs.has(finalSlug)) continue;
+      seenSlugs.add(finalSlug);
+
+      const entry: MetadataRoute.Sitemap[number] = {
+        url: `${baseUrl}/shop/${finalSlug}`,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      };
+
+      if (product.updated_at) {
+        const parsedDate = new Date(product.updated_at);
+        if (!isNaN(parsedDate.getTime())) {
+          entry.lastModified = parsedDate;
+        }
+      }
+
+      productRoutes.push(entry);
+    }
 
     if (productRoutes.length === 0) {
       productRoutes.push({
         url: `${baseUrl}/shop/turmeric-powder`,
-        lastModified: new Date(),
         changeFrequency: "weekly",
         priority: 0.8,
       });

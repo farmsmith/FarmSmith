@@ -15,6 +15,7 @@ import Footer from "@/components/layout/Footer";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
 import { OfflineBanner } from "@/components/ui/states";
+import JsonLd from "@/components/seo/JsonLd";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -61,17 +62,9 @@ const inter = Inter({
 });
 
 function getSafeSiteUrl(): { siteUrlStr: string; siteUrlObj: URL } {
-  let raw =
-    process.env.SITE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "https://www.farmsmithfoods.com";
-  raw = raw.replace(/^"|"$/g, "").trim();
-  if (!raw.startsWith("http://") && !raw.startsWith("https://")) {
-    raw = `https://${raw}`;
-  }
+  const officialUrl = "https://www.farmsmithfoods.com";
   try {
-    const urlObj = new URL(raw);
+    const urlObj = new URL(officialUrl);
     return { siteUrlStr: urlObj.origin, siteUrlObj: urlObj };
   } catch {
     const fallback = new URL("https://www.farmsmithfoods.com");
@@ -80,6 +73,41 @@ function getSafeSiteUrl(): { siteUrlStr: string; siteUrlObj: URL } {
 }
 
 const { siteUrlStr, siteUrlObj } = getSafeSiteUrl();
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "FarmSmith Foods",
+  url: siteUrlStr,
+  logo: `${siteUrlStr}/images/farmsmith_org_logo.jpeg`,
+  email: "farmsmith6@gmail.com",
+  telephone: "+91 82962 10991",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Plot No. 458, Bijayachandrapur",
+    addressLocality: "Paradeep, Jagatsinghpur",
+    addressRegion: "Odisha",
+    postalCode: "754120",
+    addressCountry: "IN",
+  },
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      telephone: "+91 82962 10991",
+      contactType: "customer service",
+      email: "farmsmith6@gmail.com",
+      areaServed: "IN",
+      availableLanguage: ["English", "Hindi", "Odia"],
+    },
+  ],
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "FarmSmith Foods",
+  url: siteUrlStr,
+};
 
 export const metadata: Metadata = {
   metadataBase: siteUrlObj,
@@ -135,6 +163,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
+        <JsonLd data={[organizationJsonLd, websiteJsonLd]} />
         <Script
           id="farmsmith-intro-init"
           strategy="beforeInteractive"

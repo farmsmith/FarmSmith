@@ -71,6 +71,15 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           "/images/Product 4.PNG",
         ];
 
+  const cardSlideAltTexts = isTurmeric
+    ? [
+        `${product.name} pouch front view with GI-tag label`,
+        `${product.name} purity seal and angle view`,
+        `${product.name} nutrition facts and origin information`,
+        `${product.name} third-party NABL test certificate report`,
+      ]
+    : [];
+
   // Auto-slide on hover pause
   useEffect(() => {
     if (isHovered || slides.length <= 1) return;
@@ -182,7 +191,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                 >
                   <Image
                     src={imgUrl}
-                    alt={`${product.name} view ${idx + 1}`}
+                    alt={cardSlideAltTexts[idx] ?? `${product.name} view ${idx + 1}`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     priority={priority && idx === 0}

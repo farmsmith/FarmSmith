@@ -242,6 +242,14 @@ export default function LanguageSelector() {
             max-width: none;
           }
         }
+        @media (min-width: 900px) {
+          .lang-btn {
+            height: 36px;
+            padding: 0 0.75rem;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+          }
+        }
       `}</style>
 
       {/* Hidden Google Translate Container */}

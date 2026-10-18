@@ -1,11 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Award, Leaf, Search, Truck, HeartHandshake, ArrowRight, Sparkles, FileText, CheckCircle2 } from "lucide-react";
+import JsonLd from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
   title: "Why FarmSmith — Our Purity & Sourcing Promise",
   description:
     "Discover why FarmSmith Foods offers India's most trustworthy, 100% pure, GI-tagged turmeric and organic spices. Pure origin, zero adulteration.",
+  alternates: {
+    canonical: "https://www.farmsmithfoods.com/why-us",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://www.farmsmithfoods.com",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Why FarmSmith",
+      item: "https://www.farmsmithfoods.com/why-us",
+    },
+  ],
 };
 
 const PILLARS = [
@@ -84,6 +107,7 @@ const STEPS = [
 export default function WhyUsPage() {
   return (
     <div style={{ background: "var(--color-background)", minHeight: "85vh" }}>
+      <JsonLd data={breadcrumbJsonLd} />
       
       {/* ───── 1. HERO BANNER ───── */}
       <section

@@ -1,14 +1,38 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Learn about how FarmSmith Foods collects, stores, protects, and handles your personal information, account data, and order details.",
+  alternates: {
+    canonical: "https://www.farmsmithfoods.com/privacy-policy",
+  },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://www.farmsmithfoods.com",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Privacy Policy",
+      item: "https://www.farmsmithfoods.com/privacy-policy",
+    },
+  ],
 };
 
 export default function PrivacyPolicyPage() {
   return (
     <div style={{ background: "var(--color-background)", minHeight: "85vh" }}>
+      <JsonLd data={breadcrumbJsonLd} />
       {/* Header Banner */}
       <section
         style={{

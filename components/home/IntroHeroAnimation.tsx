@@ -267,7 +267,7 @@ export default function IntroHeroAnimation({
         >
           <Image
             src="/images/farmsmith_logo_v2.png"
-            alt="FarmSmith Foods"
+            alt="FarmSmith Foods emblem"
             width={255}
             height={255}
             priority
