@@ -79,7 +79,7 @@ const organizationJsonLd = {
   "@type": "Organization",
   name: "FarmSmith Foods",
   url: siteUrlStr,
-  logo: `${siteUrlStr}/images/farmsmith_org_logo.jpeg`,
+  logo: `${siteUrlStr}/images/farmsmith_logo_v2.png`,
   email: "farmsmith6@gmail.com",
   telephone: "+91 82962 10991",
   address: {
@@ -118,9 +118,14 @@ export const metadata: Metadata = {
   description:
     "FarmSmith Foods creates carefully crafted foods built around a mother's quest for transparency, food awareness, batch testing, and GI-tagged turmeric.",
   icons: {
-    icon: "/images/farmsmith_org_logo.jpeg",
-    shortcut: "/images/farmsmith_org_logo.jpeg",
-    apple: "/images/farmsmith_org_logo.jpeg",
+    icon: [
+      { url: "/images/farmsmith_logo_v2.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/images/farmsmith_logo_v2.png",
+    apple: [
+      { url: "/images/farmsmith_logo_v2.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   openGraph: {
     title: "FarmSmith Foods — Organic Food Crafted with a Mother's Care",
