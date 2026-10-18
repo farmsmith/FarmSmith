@@ -22,9 +22,14 @@ function money(value: number): number {
 }
 
 export async function POST(request: Request) {
+  const reqStart = performance.now();
   const headers = withSecurityHeaders();
   const ip = getClientIp(request);
+
+  const tRLStart = performance.now();
   const rl = await rateLimit(`checkout-quote:${ip}`, 20, 60_000);
+  const tRL = Math.round(performance.now() - tRLStart);
+
   if (!rl.success) return NextResponse.json({ error: "Too many requests." }, { status: 429, headers });
 
   const body = await request.json().catch(() => null);
@@ -41,12 +46,14 @@ export async function POST(request: Request) {
 
   try {
     const supabase = createAdminSupabaseClient();
-    let productIds = items.map((item) => item.productId);
+    const tProdStart = performance.now();
 
-    let { data: products, error } = await supabase
+    const { data: products, error } = await supabase
       .from("products")
       .select("id, name, price, currency, gst_rate, is_active, stock_quantity")
       .in("id", productIds);
+
+    const tProd = Math.round(performance.now() - tProdStart);
 
     if (error || !products || products.length === 0) {
       return NextResponse.json(
@@ -77,12 +84,19 @@ export async function POST(request: Request) {
     });
 
     const subtotal = money(orderItems.reduce((sum, item) => sum + item.subtotal, 0));
+    const tShipStart = performance.now();
     const shipping = await calculateShipping(shippingAddress.state, shippingAddress.pincode, subtotal, shippingAddress.city);
     const tax = calculateTax(
       orderItems.map((item) => ({ subtotal: item.subtotal, gstRate: item.gstRate })),
       shippingAddress.state
     );
+    const tShip = Math.round(performance.now() - tShipStart);
     const total = money(subtotal + shipping.amount);
+    const tTotal = Math.round(performance.now() - reqStart);
+
+    if (process.env.NODE_ENV !== "production" || tTotal > 500) {
+      console.log(`[Quote Timing] rate_limit=${tRL}ms products=${tProd}ms shipping_tax=${tShip}ms total=${tTotal}ms items=${items.length}`);
+    }
 
     return NextResponse.json(
       {

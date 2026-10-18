@@ -15,10 +15,14 @@ function money(value: number): number {
 }
 
 export async function POST(request: Request) {
+  const reqStart = performance.now();
   const headers = withSecurityHeaders();
 
   const ip = getClientIp(request);
+  const tRLStart = performance.now();
   const rl = await rateLimit(`checkout:${ip}`, 10, 60_000);
+  const tRL = Math.round(performance.now() - tRLStart);
+
   if (!rl.success) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment and try again." },
@@ -38,7 +42,6 @@ export async function POST(request: Request) {
   }
 
   const { items, customer, shippingAddress } = parsed.data;
-  const user = await getAuthenticatedUser(request);
 
   const uniqueProductIds = new Set(items.map((item) => item.productId));
   if (uniqueProductIds.size !== items.length) {
@@ -54,36 +57,41 @@ export async function POST(request: Request) {
   const validUuids = Array.from(new Set(items.map((item) => item.productId).filter((id) => uuidRegex.test(id))));
   const nonUuidIds = Array.from(new Set(items.map((item) => item.productId).filter((id) => !uuidRegex.test(id))));
 
+  // Fetch authenticated user and product details concurrently to eliminate sequential network latency
+  const tAuthProdStart = performance.now();
+  const [user, byIdResult, bySlugResult] = await Promise.all([
+    getAuthenticatedUser(request),
+    validUuids.length > 0
+      ? supabase
+          .from("products")
+          .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
+          .in("id", validUuids)
+      : Promise.resolve({ data: [] as any[], error: null }),
+    nonUuidIds.length > 0
+      ? supabase
+          .from("products")
+          .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
+          .in("slug", nonUuidIds)
+      : Promise.resolve({ data: [] as any[], error: null }),
+  ]);
+  const tAuthProducts = Math.round(performance.now() - tAuthProdStart);
+
   let products: any[] = [];
 
-  if (validUuids.length > 0) {
-    const { data: byId, error: errorById } = await supabase
-      .from("products")
-      .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
-      .in("id", validUuids);
-
-    if (errorById) {
-      console.error("Failed to load products by ID", errorById);
-    } else if (byId) {
-      products.push(...byId);
-    }
+  if (byIdResult.error) {
+    console.error("Failed to load products by ID", byIdResult.error);
+  } else if (byIdResult.data) {
+    products.push(...byIdResult.data);
   }
 
-  if (nonUuidIds.length > 0) {
-    const { data: bySlug, error: errorBySlug } = await supabase
-      .from("products")
-      .select("id, name, price, currency, gst_rate, is_active, stock_quantity, slug")
-      .in("slug", nonUuidIds);
-
-    if (errorBySlug) {
-      console.error("Failed to load products by slug", errorBySlug);
-    } else if (bySlug) {
-      bySlug.forEach((p) => {
-        if (!products.some((existing) => existing.id === p.id)) {
-          products.push(p);
-        }
-      });
-    }
+  if (bySlugResult.error) {
+    console.error("Failed to load products by slug", bySlugResult.error);
+  } else if (bySlugResult.data) {
+    bySlugResult.data.forEach((p: any) => {
+      if (!products.some((existing) => existing.id === p.id)) {
+        products.push(p);
+      }
+    });
   }
 
   // Create a clean server-side mapped representation of cart items without mutating original request data
@@ -154,6 +162,7 @@ export async function POST(request: Request) {
     orderItems.reduce((sum, item) => sum + item.subtotal, 0)
   );
 
+  const tShipStart = performance.now();
   let shipping;
   try {
     shipping = await calculateShipping(
@@ -174,12 +183,14 @@ export async function POST(request: Request) {
     orderItems.map((item) => ({ subtotal: item.subtotal, gstRate: item.gst_rate })),
     shippingAddress.state
   );
+  const tShip = Math.round(performance.now() - tShipStart);
 
   const totalAmount = money(subtotalAmount + shipping.amount);
 
   const orderNumber = generateOrderNumber();
   const trackingToken = generateTrackingToken();
 
+  const tOrderStart = performance.now();
   const { data: orderId, error: createOrderError } = await supabase.rpc(
     "create_pending_order",
     {
@@ -204,6 +215,7 @@ export async function POST(request: Request) {
       p_items: orderItems,
     }
   );
+  const tOrder = Math.round(performance.now() - tOrderStart);
 
   if (createOrderError || !orderId) {
     console.error("Supabase create_pending_order failed:", {
@@ -236,6 +248,7 @@ export async function POST(request: Request) {
   }
 
   let razorpayOrder;
+  const tRPStart = performance.now();
   try {
     razorpayOrder = await createRazorpayOrder(totalAmount, orderNumber, String(orderId));
   } catch (error: any) {
@@ -251,12 +264,15 @@ export async function POST(request: Request) {
       { status: 500, headers }
     );
   }
+  const tRP = Math.round(performance.now() - tRPStart);
 
+  const tUpdateStart = performance.now();
   const { error: updateError } = await supabase
     .from("orders")
     .update({ razorpay_order_id: razorpayOrder.id })
     .eq("id", orderId)
     .eq("status", "pending_payment");
+  const tUpdate = Math.round(performance.now() - tUpdateStart);
 
   if (updateError) {
     const { data: rolledBack, error: rollbackError } = await supabase.rpc(
@@ -275,6 +291,11 @@ export async function POST(request: Request) {
       { error: "Failed to finalize payment setup. Please try again." },
       { status: 502, headers }
     );
+  }
+
+  const tTotal = Math.round(performance.now() - reqStart);
+  if (process.env.NODE_ENV !== "production" || tTotal > 1000) {
+    console.log(`[Checkout Timing] rate_limit=${tRL}ms auth_products=${tAuthProducts}ms shipping_tax=${tShip}ms db_order=${tOrder}ms razorpay=${tRP}ms db_finalize=${tUpdate}ms total=${tTotal}ms items=${items.length}`);
   }
 
   const response: CheckoutResponse = {

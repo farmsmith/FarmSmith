@@ -140,6 +140,8 @@ export default function CheckoutClient() {
   const [checkoutResponse, setCheckoutResponse] = useState<CheckoutResponse | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastQuoteKeyRef = useRef<string>("");
+  const quoteAbortControllerRef = useRef<AbortController | null>(null);
 
   // Auto-fill logged in user info & fetch saved addresses from localStorage / profile
   useEffect(() => {
@@ -241,13 +243,33 @@ export default function CheckoutClient() {
   }, []);
 
   // Fetch Shipping & Tax Quote
+  const getQuoteKey = useCallback((address: typeof shippingAddress, cartItems: typeof items) => {
+    const itemsPart = cartItems
+      .map((i) => `${i.productId}:${i.quantity}`)
+      .sort()
+      .join(",");
+    return `${itemsPart}_${address.state?.trim().toLowerCase()}_${address.pincode?.trim()}_${address.city?.trim().toLowerCase()}`;
+  }, []);
+
   const fetchQuote = useCallback(
-    async (address: typeof shippingAddress) => {
+    async (address: typeof shippingAddress, force = false) => {
       if (!items.length || !address.line1 || !address.city || !address.state || !address.pincode) return;
+      const key = getQuoteKey(address, items);
+      if (!force && key === lastQuoteKeyRef.current) {
+        return; // Already up-to-date quote
+      }
+
+      if (quoteAbortControllerRef.current) {
+        quoteAbortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      quoteAbortControllerRef.current = controller;
+
       try {
         const res = await fetch("/api/checkout/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
           body: JSON.stringify({
             items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
             shippingAddress: address,
@@ -255,6 +277,7 @@ export default function CheckoutClient() {
         });
         if (!res.ok) return;
         const data = await res.json();
+        lastQuoteKeyRef.current = key;
         setQuote({
           subtotal: data.subtotal as number,
           shipping: data.shipping as number,
@@ -262,21 +285,34 @@ export default function CheckoutClient() {
           total: data.total as number,
           currency: data.currency as string,
         });
-      } catch {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
         // Fallback calculation will handle
       }
     },
-    [items]
+    [items, getQuoteKey]
   );
 
   useEffect(() => {
     if (shippingAddress.pincode.length === 6 && shippingAddress.line1 && shippingAddress.state && shippingAddress.city) {
+      const key = getQuoteKey(shippingAddress, items);
+      if (key === lastQuoteKeyRef.current) return;
+
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         void fetchQuote(shippingAddress);
       }, 400);
     }
-  }, [shippingAddress, fetchQuote]);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [items, shippingAddress.pincode, shippingAddress.state, shippingAddress.city, shippingAddress.line1, fetchQuote, getQuoteKey]);
+
+  useEffect(() => {
+    return () => {
+      quoteAbortControllerRef.current?.abort();
+    };
+  }, []);
 
   // Stage 1 Validation
   const validateStage1 = () => {

@@ -113,6 +113,31 @@ export function getLocalShippingCalculation(
   };
 }
 
+let cachedShippingRates: { data: ShippingRate[]; fetchedAt: number } | null = null;
+const SHIPPING_RATES_CACHE_TTL_MS = 5 * 60 * 1000;
+
+async function getActiveShippingRates(): Promise<ShippingRate[]> {
+  const now = Date.now();
+  if (cachedShippingRates && now - cachedShippingRates.fetchedAt < SHIPPING_RATES_CACHE_TTL_MS) {
+    return cachedShippingRates.data;
+  }
+  try {
+    const supabase = createAdminSupabaseClient();
+    const { data, error } = await supabase
+      .from("shipping_rates")
+      .select("id, name, state, district, pincode_prefix, min_order_amount, shipping_amount, is_active")
+      .eq("is_active", true);
+
+    if (error || !data) {
+      return cachedShippingRates ? cachedShippingRates.data : [];
+    }
+    cachedShippingRates = { data: data as ShippingRate[], fetchedAt: now };
+    return cachedShippingRates.data;
+  } catch {
+    return cachedShippingRates ? cachedShippingRates.data : [];
+  }
+}
+
 /**
  * Calculates shipping fee based on state, district/city, pincode, and subtotal.
  * Authoritative business rules:
@@ -178,13 +203,9 @@ export async function calculateShipping(
     };
   }
 
-  // Tier 4: Query DB for any custom active rates, otherwise standard ₹80 for Rest of India
+  // Tier 4: Query active rates (using 5-min cache), otherwise standard ₹80 for Rest of India
   try {
-    const supabase = createAdminSupabaseClient();
-    const { data } = await supabase
-      .from("shipping_rates")
-      .select("id, name, state, district, pincode_prefix, min_order_amount, shipping_amount, is_active")
-      .eq("is_active", true);
+    const data = await getActiveShippingRates();
 
     if (data && data.length > 0) {
       // Exclude legacy/stale 60 rate
